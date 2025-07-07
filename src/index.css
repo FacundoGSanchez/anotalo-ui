@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&family=Monoton:wght@200;300;400;500;600;700;800&display=swap");
+* {
+  margin: 0; /* Elimina márgenes por defecto de todos los elementos */
+  padding: 0; /* Elimina relleno por defecto */
+  border: none; /* Quita cualquier borde por defecto */
+  outline: none; /* Quita el contorno que aparece al enfocar (por ejemplo, en formularios) */
+  list-style: none; /* Quita los estilos de listas (viñetas o números) */
+  box-sizing: border-box; /* Incluye el padding y borde dentro del ancho/alto total del elemento */
+  font-family: "Poppins", sans-serif; /* Define la fuente principal como Poppins y una genérica sans-serif como alternativa */
+}
+.sidebar {
+  color: #fff;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 10px;
+}
+
+.logo-icon {
+  width: 40px; /* Ancho: 40 píxeles */
+  height: 40px; /* Alto: 40 píxeles */
+  display: flex; /* Mostrar como un contenedor flexible */
+  align-items: center; /* Alinear el contenido verticalmente al centro */
+  justify-content: center; /* Justificar el contenido horizontalmente al centro */
+  font-size: 1.5rem; /* Tamaño de fuente: 1.5 veces el tamaño base */
+  border-radius: 50%; /* Bordes redondeados al 50% (forma circular) */
+  background: rgba(28, 17, 41, 0.89);
+}
+
+.menu-bar {
+  height: 88vh;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-size: 1rem;
+  position: relative;
+}
+
+.toggle-theme-btn {
+  position: absolute;
+  bottom: 30px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  justify-content: center;
+}
+
+.toggle {
+  margin-left: 15px;
+}
