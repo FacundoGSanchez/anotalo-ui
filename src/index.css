@@ -54,3 +54,27 @@
 .toggle {
   margin-left: 15px;
 }
+.client-list-container {
+  padding: 24px;
+}
+
+.client-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.client-list-title {
+  margin: 0;
+}
+
+.client-list-button {
+  width: 120px;
+}
+
+.action-icon-button {
+  padding: 0;
+  height: auto;
+  width: auto;
+}

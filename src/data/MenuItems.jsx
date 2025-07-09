@@ -24,9 +24,9 @@ const menuItems = [
         label: <Link to="/clients">Listado</Link>,
       },
       {
-        key: "/clients/new",
+        key: "/clientsDetail",
         icon: <UserAddOutlined />,
-        label: <Link to="/clients/new">Nuevo</Link>,
+        label: <Link to="/clientsDetail">Nuevo</Link>,
       },
     ],
   },

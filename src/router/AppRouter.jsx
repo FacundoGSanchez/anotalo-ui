@@ -3,7 +3,7 @@ import MainLayout from "../layout/MainLayout";
 
 import Home from "../pages/Home";
 import ClientList from "../pages/ClientList";
-import ClientAdd from "../pages/ClientAdd";
+import ClientDetail from "../pages/ClientDetail";
 import POS from "../pages/POS";
 
 const AppRouter = () => {
@@ -12,7 +12,8 @@ const AppRouter = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/clients" element={<ClientList />} />
-        <Route path="/clients/new" element={<ClientAdd />} />
+        <Route path="/clientsDetail" element={<ClientDetail />} />
+        <Route path="/clientsDetail/:id" element={<ClientDetail />} />
         <Route path="/pos" element={<POS />} />
       </Route>
     </Routes>

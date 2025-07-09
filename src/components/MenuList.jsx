@@ -1,9 +1,19 @@
 import { Menu } from "antd";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import menuItems from "../data/MenuItems.jsx";
 
-const MenuList = ({ darkTheme }) => {
+const MenuList = ({ darkTheme, isMobile, setCollapsed }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleClick = ({ key }) => {
+    navigate(key);
+
+    // 👉 Si es mobile, colapsar (ocultar completamente)
+    if (isMobile) {
+      setCollapsed(true);
+    }
+  };
 
   return (
     <Menu
@@ -11,6 +21,7 @@ const MenuList = ({ darkTheme }) => {
       mode="inline"
       theme={darkTheme ? "dark" : "light"}
       selectedKeys={[location.pathname]}
+      onClick={handleClick}
     />
   );
 };
