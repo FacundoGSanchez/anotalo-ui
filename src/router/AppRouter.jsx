@@ -2,9 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 
 import Home from "../pages/Home";
-import ClientList from "../pages/ClientList";
-import ClientDetail from "../pages/ClientDetail";
-import POS from "../pages/POS";
+import ClientList from "../pages/Clients/ClientList";
+import ClientDetail from "../pages/Clients/ClientDetail";
+import POSLayout from "../pages/POS/POSLayout";
 
 const AppRouter = () => {
   return (
@@ -14,8 +14,9 @@ const AppRouter = () => {
         <Route path="/clients" element={<ClientList />} />
         <Route path="/clientsDetail" element={<ClientDetail />} />
         <Route path="/clientsDetail/:id" element={<ClientDetail />} />
-        <Route path="/pos" element={<POS />} />
       </Route>
+      {/* Punto de Venta  sin Layout*/}
+      <Route path="/pos" element={<POSLayout />} />  
     </Routes>
   );
 };

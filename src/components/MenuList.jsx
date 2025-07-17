@@ -7,12 +7,28 @@ const MenuList = ({ darkTheme, isMobile, setCollapsed }) => {
   const navigate = useNavigate();
 
   const handleClick = ({ key }) => {
-    navigate(key);
+    // Para evitar navegar con la key "pos" que no es ruta real
+    if (key === "pos") {
+      // Abrir en nueva pestaña
+      window.open("/pos", "_blank", "noopener,noreferrer");
+    } else {
+      navigate(key);
+    }
 
-    // 👉 Si es mobile, colapsar (ocultar completamente)
     if (isMobile) {
       setCollapsed(true);
     }
+  };
+
+  // Función para calcular qué key(s) seleccionar
+  const getSelectedKeys = () => {
+    const path = location.pathname;
+
+    if (path.startsWith("/clientsDetail")) return ["/clientsDetail"];
+    if (path.startsWith("/clients")) return ["/clients"];
+    if (path === "/") return ["/"];
+    // Nunca seleccionar "pos" porque se abre en pestaña nueva
+    return [];
   };
 
   return (
@@ -20,7 +36,7 @@ const MenuList = ({ darkTheme, isMobile, setCollapsed }) => {
       items={menuItems}
       mode="inline"
       theme={darkTheme ? "dark" : "light"}
-      selectedKeys={[location.pathname]}
+      selectedKeys={getSelectedKeys()}
       onClick={handleClick}
     />
   );
