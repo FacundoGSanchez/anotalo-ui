@@ -3,53 +3,46 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import MenuList from "../components/MenuList";
-import ThogleThemeButtons from "../components/ThogleThemeButtons";
-import Logo from "../components/Logo";
+// import Logo from "../components/logo"; // Dejé esta línea como estaba en tu código (comentada)
 
 const { Header, Sider, Content } = Layout;
 
 const MainLayout = () => {
-  const [darkTheme, setDarkTheme] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [mobileCollapsed, setMobileCollapsed] = useState(false);
-  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
-
-  const toggleTheme = () => setDarkTheme(!darkTheme);
+  const [collapsed, setCollapsed] = useState(false);
 
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
   const handleToggle = () => {
-    if (isMobile) {
-      setMobileCollapsed((prev) => !prev);
-    } else {
-      setDesktopCollapsed((prev) => !prev);
-    }
+    setCollapsed((prev) => !prev);
   };
+
+  const handleBreakpoint = (broken) => {
+    setIsMobile(broken);
+    setCollapsed(broken);
+  };
+
+  const currentCollapsed = collapsed;
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
         collapsible
-        collapsed={isMobile ? mobileCollapsed : desktopCollapsed}
+        collapsed={currentCollapsed}
         collapsedWidth={isMobile ? 0 : 80}
         breakpoint="md"
         trigger={null}
         className="sidebar"
-        theme={darkTheme ? "dark" : "light"}
-        onBreakpoint={(broken) => {
-          setIsMobile(broken);
-          setMobileCollapsed(broken); // ocultar automáticamente en mobile
-        }}
+        theme="dark"
+        onBreakpoint={handleBreakpoint}
       >
-        <Logo />
         <MenuList
-          darkTheme={darkTheme}
+          darkTheme={true}
           isMobile={isMobile}
-          setCollapsed={setMobileCollapsed}
+          setCollapsed={setCollapsed}
         />
-        <ThogleThemeButtons darkTheme={darkTheme} toggleTheme={toggleTheme} />
       </Sider>
 
       <Layout>
@@ -66,18 +59,12 @@ const MainLayout = () => {
             onClick={handleToggle}
             type="text"
             icon={
-              (isMobile ? mobileCollapsed : desktopCollapsed) ? (
-                <MenuUnfoldOutlined />
-              ) : (
-                <MenuFoldOutlined />
-              )
+              currentCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />
             }
           />
         </Header>
 
-        <Content
-          style={{ margin: "5px", padding: 10, background: colorBgContainer }}
-        >
+        <Content style={{ padding: 10, background: colorBgContainer }}>
           <Outlet />
         </Content>
       </Layout>
