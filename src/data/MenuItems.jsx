@@ -2,8 +2,8 @@ import {
   HomeOutlined,
   TeamOutlined,
   ShopOutlined,
-  UserAddOutlined,
   BarsOutlined,
+  DropboxOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
@@ -14,32 +14,26 @@ const menuItems = [
     label: <Link to="/">Inicio</Link>,
   },
   {
-    key: "clients", // key único para el grupo Clientes (no es ruta)
-    icon: <TeamOutlined />,
-    label: "Clientes",
+    key: "nominas", // key único para el grupo Clientes (no es ruta)
+    icon: <BarsOutlined />,
+    label: "Nominas",
     children: [
       {
         key: "/clients", // ruta real para listado
-        icon: <BarsOutlined />,
-        label: <Link to="/clients">Listado</Link>,
+        icon: <TeamOutlined />,
+        label: <Link to="/clients">Clientes</Link>,
       },
       {
-        key: "/clientsDetail", // ruta real para nuevo cliente
-        icon: <UserAddOutlined />,
-        label: <Link to="/clientsDetail">Nuevo</Link>,
+        key: "/providers", // ruta real para listado
+        icon: <DropboxOutlined />,
+        label: <Link to="/providers">Proveeodres</Link>,
       },
     ],
   },
   {
-    key: "pos", 
+    key: "pos",
     icon: <ShopOutlined />,
-    label: (
-      <span
-        style={{ cursor: "pointer" }}
-      >
-        Venta
-      </span>
-    ),
+    label: <span style={{ cursor: "pointer" }}>Venta</span>,
   },
 ];
 

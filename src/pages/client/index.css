@@ -1,0 +1,46 @@
+.client-list-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+.client-form {
+  max-width: 75%;
+  /* margin: 0 auto; */
+}
+
+/* ====== Labels e inputs ====== */
+.client-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.client-form .ant-input {
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+/* ====== Errores ====== */
+.client-form .ant-form-item-has-error .ant-input {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
+}
+
+/* ====== Título ====== */
+.header-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2d3d;
+  margin-bottom: 20px;
+}
+
+/* ====== Contenedor de botones ====== */
+.form-buttons {
+  display: flex;
+  justify-content: flex-end; /* alineado a la derecha */
+  margin-top: 24px;
+}
+
+/* Espaciado entre botones */
+.form-buttons button + button {
+  margin-left: 8px;
+}

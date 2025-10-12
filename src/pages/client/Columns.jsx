@@ -21,12 +21,6 @@ const getClientColumns = ({ onEdit, onDelete }) => [
     render: (text) => <span data-label="Teléfono">{text}</span>,
   },
   {
-    title: "IVA",
-    dataIndex: "iva",
-    key: "iva",
-    render: (text) => <span data-label="IVA">{text}</span>,
-  },
-  {
     title: "Acciones",
     key: "acciones",
     render: (_, record) => (
