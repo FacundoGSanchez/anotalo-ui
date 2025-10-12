@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import MenuList from "../components/MenuList";
 import ThogleThemeButtons from "../components/ThogleThemeButtons";
-import Logo from "../components/logo";
+import Logo from "../components/Logo";
 
 const { Header, Sider, Content } = Layout;
 
