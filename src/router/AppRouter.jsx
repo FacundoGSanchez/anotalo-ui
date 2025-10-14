@@ -24,7 +24,6 @@ const AppRouter = () => {
         <Route path="/provider" element={<ProviderDetail />} />
         <Route path="/provider/:id" element={<ProviderDetail />} /> */}
       </Route>
-      {/* Punto de Venta  sin Layout*/}
       <Route path="/pos" element={<POSLayout />} />
     </Routes>
   );

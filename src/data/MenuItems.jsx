@@ -23,11 +23,11 @@ const menuItems = [
         icon: <TeamOutlined />,
         label: <Link to="/clients">Clientes</Link>,
       },
-      {
-        key: "/providers", // ruta real para listado
-        icon: <DropboxOutlined />,
-        label: <Link to="/providers">Proveeodres</Link>,
-      },
+      // {
+      //   key: "/providers", // ruta real para listado
+      //   icon: <DropboxOutlined />,
+      //   label: <Link to="/providers">Proveeodres</Link>,
+      // },
     ],
   },
   {
