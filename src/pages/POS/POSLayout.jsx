@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Input, Button, Modal, Table, DatePicker, Typography, Row, Col, Space } from "antd";
+import {
+  Input,
+  Button,
+  Modal,
+  Table,
+  DatePicker,
+  Typography,
+  Row,
+  Col,
+  Space,
+} from "antd";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
@@ -15,10 +25,10 @@ const POSLayout = () => {
   const [productsPOS, setProductsPOS] = useState([]);
   const [date] = useState(dayjs());
 
-useEffect(() => {
-  setClient("Consumidor Final");
-  document.title = "Punto de Venta";
-}, []);
+  useEffect(() => {
+    setClient("Consumidor Final");
+    document.title = "Punto de Venta";
+  }, []);
 
   // Modal client selection
   const handleSelectClient = (client) => {
@@ -29,31 +39,31 @@ useEffect(() => {
 
   const handleBarcodeEnter = () => {
     const code = barcode.trim();
-  
+
     // Buscar el producto en la lista maestra
-    const foundProduct = mockProducts.find(p => p.barcode === code);
-  
+    const foundProduct = mockProducts.find((p) => p.barcode === code);
+
     if (!foundProduct) {
       console.warn("Producto no encontrado:", code);
       setBarcode("");
       return;
     }
-  
-    setProductsPOS(prevProducts => {
-      const index = prevProducts.findIndex(p => p.barcode === code);
-  
+
+    setProductsPOS((prevProducts) => {
+      const index = prevProducts.findIndex((p) => p.barcode === code);
+
       if (index !== -1) {
         // Si ya existe, actualizar cantidad y total
         const updatedProducts = [...prevProducts];
         const existing = updatedProducts[index];
         const newQuantity = existing.quantity + 1;
-  
+
         updatedProducts[index] = {
           ...existing,
           quantity: newQuantity,
-          total: +(newQuantity * existing.price).toFixed(2)
+          total: +(newQuantity * existing.price).toFixed(2),
         };
-  
+
         return updatedProducts;
       } else {
         // Si no existe, agregarlo con cantidad 1 y total inicial
@@ -62,42 +72,60 @@ useEffect(() => {
           {
             ...foundProduct,
             quantity: 1,
-            total: +foundProduct.price.toFixed(2)
-          }
+            total: +foundProduct.price.toFixed(2),
+          },
         ];
       }
     });
-  
+
     setBarcode("");
   };
-  
+
   const total = productsPOS.reduce((acc, p) => acc + p.total, 0);
 
   return (
-    <div style={{ maxWidth: 900, margin: "30px auto", background: "#fff", padding: 24, borderRadius: 8, boxShadow: "0 2px 8px #f0f1f2" }}>
+    <div
+      style={{
+        maxWidth: 900,
+        margin: "30px auto",
+        background: "#fff",
+        padding: 24,
+        borderRadius: 8,
+        boxShadow: "0 2px 8px #f0f1f2",
+      }}
+    >
       <Title level={3}>Punto de Venta</Title>
       <Row gutter={16} align="middle" style={{ marginBottom: 24 }}>
         <Col flex="auto">
           <Text strong>Cliente:</Text>
-          <Space>          
+          <Space>
             <Input
               value={client}
               onChange={(e) => setClient(e.target.value)}
-              style={{ width: 220 , marginLeft: 10}}
+              style={{ width: 220, marginLeft: 10 }}
               readOnly
             />
-            <Button type="primary"  icon={<FaSearch />} onClick={() => setClientModalOpen(true)} />
+            <Button
+              type="primary"
+              icon={<FaSearch />}
+              onClick={() => setClientModalOpen(true)}
+            />
           </Space>
         </Col>
         <Col>
           <Text strong>Fecha de Emisión:</Text>
-          <DatePicker value={date} disabled style={{ marginLeft: 8 }} format="DD/MM/YYYY" />
+          <DatePicker
+            value={date}
+            disabled
+            style={{ marginLeft: 8 }}
+            format="DD/MM/YYYY"
+          />
         </Col>
       </Row>
 
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col span={12}>
-        <Input
+          <Input
             placeholder="Escanear código de barras"
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}

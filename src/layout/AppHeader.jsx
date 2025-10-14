@@ -5,6 +5,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import React from "react";
+// 1. Importar el hook de autenticación
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const { Header } = Layout;
 
@@ -15,10 +18,10 @@ const mockUser = {
   avatarUrl: "https://placehold.co/150x150/007bff/ffffff?text=JD",
 };
 
-const userCardContent = (
+// 2. userCardContent ahora es una función que recibe la lógica de logout
+const UserCardContent = ({ onLogout }) => (
   <Card
     style={{ width: 250, border: "none" }}
-    // Advertencia corregida: styles.body reemplaza a bodyStyle
     styles={{ body: { padding: 10 } }}
   >
     <div
@@ -39,7 +42,13 @@ const userCardContent = (
           {mockUser.email}
         </p>
       </div>
-      <Button type="primary" danger style={{ marginTop: 10 }}>
+      {/* 3. El botón llama a la función onLogout recibida por props */}
+      <Button
+        type="primary"
+        danger
+        style={{ marginTop: 10 }}
+        onClick={onLogout}
+      >
         Cerrar Sesión
       </Button>
     </div>
@@ -47,6 +56,17 @@ const userCardContent = (
 );
 
 const AppHeader = ({ collapsed, handleToggle }) => {
+  // 4. Obtener logout del contexto y useNavigate
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // 5. Lógica de cierre de sesión
+    logout();
+    // Opcional: Redirigir explícitamente al login después de cerrar sesión
+    navigate("/login");
+  };
+
   const {
     token: { colorBorderSecondary },
   } = theme.useToken();
@@ -82,7 +102,8 @@ const AppHeader = ({ collapsed, handleToggle }) => {
         style={{ width: "20%", display: "flex", justifyContent: "flex-end" }}
       >
         <Popover
-          content={userCardContent}
+          // 6. Pasar el componente y la función de logout
+          content={<UserCardContent onLogout={handleLogout} />}
           title={null}
           trigger="hover"
           placement="bottomRight"
