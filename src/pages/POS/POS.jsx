@@ -111,7 +111,7 @@ const POS = () => {
     >
       <div style={containerElevationStyle}>
         <Title level={3} style={{ textAlign: "left", marginBottom: "24px" }}>
-          Registrar Artículos (Estructura Base)
+          Registrar Artículos
         </Title>
 
         <Row gutter={[24, 24]}>

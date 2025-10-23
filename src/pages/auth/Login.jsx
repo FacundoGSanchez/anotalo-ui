@@ -41,7 +41,7 @@ const Login = () => {
 
       {/* 2. Formulario y Contenido */}
       <Content className="anotalo-login-content">
-        <AnotaloLogo />
+        <AnotaloLogo width={"120px"} />
         <Title level={3} className="anotalo-login-header">
           INICIAR SESION
         </Title>

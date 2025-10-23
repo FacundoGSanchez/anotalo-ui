@@ -1,7 +1,7 @@
 import React from "react";
 import { Layout, Menu } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
-import AnotaloLogo from "../pages/auth/Logo"; // Asume que el logo está aquí
+import logo from "/images/Logo.png"; // Import directo desde public/images
 
 const { Header, Content } = Layout;
 
@@ -27,11 +27,20 @@ const POSLayout = () => {
         }}
       >
         {/* Logo o Título del POS */}
-        <div style={{ display: "flex", alignItems: "center" }}>
-          {/* Reemplaza 'AnotaloLogo' o usa un texto simple */}
-          <AnotaloLogo style={{ height: "30px", margin: 0 }} />
+
+        <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <img
+            src={logo}
+            alt="Anotalo Logo"
+            style={{ width: "30px", height: "auto" }}
+          />
           <span
-            style={{ fontSize: "18px", fontWeight: "bold", marginLeft: "10px" }}
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              marginLeft: "10px",
+              lineHeight: "1",
+            }}
           >
             Punto de Venta
           </span>
