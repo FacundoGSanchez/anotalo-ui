@@ -1,39 +1,32 @@
-import React, { createContext, useState, useContext } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-// 1. Crea el Contexto
-export const AuthContext = createContext({
-  isAuthenticated: false,
-  login: () => {},
-  logout: () => {},
-});
+const AuthContext = createContext();
 
-// 2. Crea el Proveedor del Contexto
 export const AuthProvider = ({ children }) => {
-  // Estado que manejará si el usuario está logueado o no
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Función para iniciar sesión (solo cambia el estado a true por ahora)
-  const login = () => {
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setIsAuthenticated(true);
+    setLoading(false);
+  }, []);
+
+  const login = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
     setIsAuthenticated(true);
   };
 
-  // Función para cerrar sesión (si la necesitarás en el futuro)
   const logout = () => {
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
   };
 
-  const contextValue = {
-    isAuthenticated,
-    login,
-    logout,
-  };
-
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-// Hook personalizado para usar el contexto fácilmente
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);

@@ -1,55 +1,70 @@
-// src/router/AppRouter.jsx
-import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import MainLayout from "../layout/MainLayout";
-import { useAuth } from "../context/AuthContext"; // ⬅️ Importar el hook
 
-// Importar todas las páginas
+// 🧩 Layouts
+import MainLayout from "../layout/MainLayout";
+import POSLayout from "../layout/POSLayout";
+
+// 🧠 Contexto de autenticación
+import { useAuth } from "../context/AuthContext";
+
+// 📄 Páginas
 import Home from "../pages/Home";
 import ClientList from "../pages/client/List";
 import ClientDetail from "../pages/client/Detail";
-import POSLayout from "../pages/POS/POSLayout";
 import Login from "../pages/auth/Login";
+import POS from "../pages/POS/POS";
 
 const AppRouter = () => {
-  // ⬅️ OBTENER EL ESTADO DEL CONTEXTO
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  // 🔒 Componente de protección de rutas
+  const ProtectedRoute = ({ children }) => {
+    if (loading) return <div>Cargando...</div>;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    return children;
+  };
+
+  // Mientras se carga el estado de autenticación
+  if (loading) return <div>Cargando...</div>;
 
   return (
     <Routes>
-      {/* 1. Ruta de Autenticación (Público) */}
+      {/* Ruta de login */}
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
       />
 
-      {/* 2. Rutas Privadas (Requieren Layout y Autenticación) */}
+      {/* Rutas principales con layout */}
       <Route
         element={
-          isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
         }
       >
-        <Route path="/" element={<Home />} />
-
-        {/* Rutas de Clientes */}
-        <Route path="/clients" element={<ClientList />} />
-        <Route path="/client" element={<ClientDetail />} />
-        <Route path="/client/:id" element={<ClientDetail />} />
-
-        {/* Rutas de POS */}
-        <Route path="/puntoventa" element={<POSLayout />} />
+        <Route index element={<Home />} />
+        <Route path="clients" element={<ClientList />} />
+        <Route path="client" element={<ClientDetail />} />
+        <Route path="client/:id" element={<ClientDetail />} />
       </Route>
 
-      {/* 3. Ruta Catch-All (404 o Redirección a Home/Login) */}
+      {/* Punto de venta (layout separado) */}
+      <Route
+        path="/pos"
+        element={
+          <ProtectedRoute>
+            <POSLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="registro" element={<POS />} />
+      </Route>
+
+      {/* Redirección por defecto */}
       <Route
         path="*"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
+        element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />}
       />
     </Routes>
   );

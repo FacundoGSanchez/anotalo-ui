@@ -15,7 +15,7 @@ const menuItems = [
   {
     key: "nominas",
     icon: <BarsOutlined />,
-    label: "Nominas",
+    label: "Nóminas",
     children: [
       {
         key: "/clients",
@@ -27,7 +27,12 @@ const menuItems = [
   {
     key: "pos",
     icon: <ShopOutlined />,
-    label: <Link to="/puntoventa">Punto Venta</Link>,
+    // 👇 Acá abrimos el punto de venta en una nueva pestaña
+    label: (
+      <a href="/pos/registro" target="_blank" rel="noopener noreferrer">
+        Punto de Venta
+      </a>
+    ),
   },
 ];
 

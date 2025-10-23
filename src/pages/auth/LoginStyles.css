@@ -1,0 +1,142 @@
+/* Colores de referencia: 
+   Fondo: #f8f8f8 (casi blanco)
+   Primario/Oscuro: #3f4a6d
+   Input Fondo: #f2f5f9
+*/
+
+.anotalo-login-screen {
+  /* Contenedor principal: pantalla completa */
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* Distribuye Logo, Contenido y Footer */
+  padding: 0;
+}
+
+/* --- LOGO Y TÍTULO --- */
+
+.anotalo-logo-container {
+  padding: 80px 0 30px 0;
+  text-align: center;
+  color: #3f4a6d;
+}
+
+.logo-placeholder {
+  /* Simulación o espacio para tu logo */
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 5px auto;
+  /* El logo de la imagen tiene un estilo lineal simple, 
+     puedes usar un SVG aquí o un placeholder si no tienes la imagen. */
+}
+
+.anotalo-logo-text {
+  margin-top: 5px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #3f4a6d;
+}
+
+/* --- CABECERA DE INICIO DE SESIÓN --- */
+
+.anotalo-login-content {
+  width: 90%;
+  max-width: 350px;
+  padding: 0 20px;
+  flex-grow: 1; /* Permite que el contenido tome espacio central */
+}
+
+.anotalo-login-header {
+  font-weight: 500 !important;
+  color: #3f4a6d !important;
+  text-align: center;
+  margin-bottom: 30px !important;
+  letter-spacing: 1px;
+  font-size: 24px !important;
+}
+
+/* --- FORMULARIO Y CAMPOS DE ENTRADA --- */
+
+/* Personalización del Input de Antd */
+.anotalo-input {
+  padding: 12px 15px !important;
+  border-radius: 5px !important;
+  background-color: #f2f5f9 !important;
+  border: 1px solid #dcdfe6 !important;
+  height: auto !important; /* Anula la altura fija de Antd */
+}
+.anotalo-input::placeholder {
+  color: #aeb4c0;
+  font-weight: 400;
+}
+/* Estilo para el icono dentro del input */
+.anticon {
+  color: #aeb4c0 !important;
+}
+
+/* --- ENLACE OLVIDASTE CONTRASEÑA --- */
+
+.anotalo-forgot-password-container {
+  width: 100%;
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.anotalo-forgot-password-link {
+  color: #3f4a6d !important;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* --- BOTÓN INGRESAR --- */
+
+.anotalo-login-button {
+  width: 100%;
+  height: auto;
+  padding: 10px 15px;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background-color: #3f4a6d !important;
+  border-color: #3f4a6d !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 5px !important;
+}
+
+/* --- SECCIÓN CREAR CUENTA INFERIOR (Footer) --- */
+
+.anotalo-create-account-footer {
+  width: 100%;
+  background: #3f4a6d; /* Color base oscuro */
+  text-align: center;
+  padding-top: 60px;
+  padding-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Simulación del corte diagonal */
+.anotalo-create-account-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px; /* Altura del "corte" */
+  background: #f8f8f8; /* Color de fondo del body/pantalla */
+  /* Crea la forma diagonal - Ajusta el skewY para el ángulo */
+  transform: skewY(-2deg) translateY(-80%);
+  transform-origin: top left;
+  z-index: 1;
+}
+
+.anotalo-create-account-button {
+  font-size: 16px;
+  font-weight: 500;
+  color: white !important;
+  padding: 0 !important;
+  position: relative;
+  z-index: 2;
+}

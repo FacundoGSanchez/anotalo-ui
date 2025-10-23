@@ -12,10 +12,10 @@ import { useNavigate } from "react-router-dom";
 const { Header } = Layout;
 
 const mockUser = {
-  name: "Jane Doe",
-  role: "Administradora",
-  email: "jane.doe@organizacion.com",
-  avatarUrl: "https://placehold.co/150x150/007bff/ffffff?text=JD",
+  name: "Usuario",
+  role: "Administrador",
+  email: "test@organizacion.com",
+  avatarUrl: `${import.meta.env.BASE_URL}images/AvatarUser.webp`,
 };
 
 // 2. userCardContent ahora es una función que recibe la lógica de logout
@@ -45,8 +45,7 @@ const UserCardContent = ({ onLogout }) => (
       {/* 3. El botón llama a la función onLogout recibida por props */}
       <Button
         type="primary"
-        danger
-        style={{ marginTop: 10 }}
+        style={{ marginTop: 10, backgroundColor: "#3f4a6d" }}
         onClick={onLogout}
       >
         Cerrar Sesión

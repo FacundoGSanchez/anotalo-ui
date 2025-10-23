@@ -1,6 +1,5 @@
-// src/pages/auth/Login.jsx
 import React, { useState } from "react";
-import { Input, Button, Form, Card, Typography, Avatar, Layout } from "antd";
+import { Input, Button, Form, Typography, Layout } from "antd";
 import {
   UserOutlined,
   LockOutlined,
@@ -8,129 +7,108 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // ⬅️ Importar el hook
+import { useAuth } from "../../context/AuthContext";
+import "./LoginStyles.css";
+import AnotaloLogo from "./Logo";
 
-const { Content } = Layout;
-const { Title } = Typography;
-const LOGO_PATH = "/images/Logo.png";
+const { Title, Link } = Typography;
+const { Footer, Content } = Layout;
+
+const MOCK_USER = "admin";
+const MOCK_PASS = "ladante2025";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // ⬅️ Obtener la función de login del contexto
+  const { login } = useAuth();
 
   const onFinish = (values) => {
     setLoading(true);
-    const MOCK_USER = "admin";
-    const MOCK_PASS = "ladante2025";
-
     setTimeout(() => {
       setLoading(false);
       if (values.username === MOCK_USER && values.password === MOCK_PASS) {
-        // 1. Llamar a la función del Contexto
         login();
-        // 2. Navegar a la página de inicio
         navigate("/");
       } else {
-        alert("Credenciales incorrectas. Usa: admin / admin");
+        alert("Credenciales incorrectas. Usa: admin / ladante2025");
       }
     }, 1000);
   };
 
   return (
-    <Layout
-      style={{
-        // minHeight: "100vh", (Se recomienda usarlo aquí, lo dejé comentado como lo tenías)
-        backgroundColor: "#FFF",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Content style={{ display: "flex", justifyContent: "center" }}>
-        <Card
-          style={{
-            width: 380,
-            maxWidth: "90%",
-            padding: 24,
-            borderRadius: 8,
-            textAlign: "center",
-            marginTop: "25px",
-            boxShadow:
-              "0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)",
+    <Layout className="anotalo-login-screen">
+      {/* 1. Logo */}
+      <AnotaloLogo />
+
+      {/* 2. Formulario y Contenido */}
+      <Content className="anotalo-login-content">
+        <Title level={2} className="anotalo-login-header">
+          INICIAR SESION
+        </Title>
+
+        <Form
+          name="login_form"
+          onFinish={onFinish}
+          className="antd-login-form"
+          initialValues={{
+            username: MOCK_USER, // Asigna el valor mock al campo 'username'
+            password: MOCK_PASS, // Asigna el valor mock al campo 'password'
           }}
         >
-          {/* ... (Contenido de Avatar y Título omitido para brevedad) ... */}
-          <div
-            style={{
-              marginBottom: 24,
-              display: "flex",
-              justifyContent: "center",
-            }}
+          {/* Campo Usuario */}
+          <Form.Item
+            name="username"
+            rules={[{ required: true, message: "¡Ingresa tu usuario!" }]}
           >
-            <Avatar
-              size={86}
-              src={LOGO_PATH}
-              style={{ backgroundColor: "#fff", border: "1px solid #ddd" }}
-              icon={<UserOutlined />}
+            <Input
+              placeholder="Usuario"
+              className="anotalo-input"
+              size="large"
             />
+          </Form.Item>
+
+          {/* Campo Contraseña */}
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: "¡Ingresa tu contraseña!" }]}
+          >
+            <Input.Password
+              placeholder="Contraseña"
+              className="anotalo-input"
+              size="large"
+              iconRender={(visible) =>
+                visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+
+          {/* Enlace de Olvidaste Contraseña */}
+          <div className="anotalo-forgot-password-container">
+            <Link href="#" className="anotalo-forgot-password-link">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
-          <Title level={4} style={{ marginBottom: 32 }}>
-            Iniciar Sesion
-          </Title>
-
-          <Form
-            name="login_form"
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-          >
-            <Form.Item
-              name="username"
-              rules={[
-                { required: true, message: "Por favor, introduce tu usuario!" },
-              ]}
+          {/* Botón Ingresar */}
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="anotalo-login-button"
+              loading={loading}
             >
-              <Input
-                prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="Usuario"
-                size="large"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="password"
-              rules={[
-                {
-                  required: true,
-                  message: "Por favor, introduce tu contraseña!",
-                },
-              ]}
-            >
-              <Input.Password
-                prefix={<LockOutlined className="site-form-item-icon" />}
-                placeholder="Contraseña"
-                size="large"
-                iconRender={(visible) =>
-                  visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
-                }
-              />
-            </Form.Item>
-
-            <Form.Item style={{ marginTop: 24 }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                block
-                size="large"
-                loading={loading}
-              >
-                Acceder
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
+              Ingresar
+            </Button>
+          </Form.Item>
+        </Form>
       </Content>
+
+      {/* 3. Sección inferior de Crear Cuenta */}
+      <Footer className="anotalo-create-account-footer">
+        <Button type="link" className="anotalo-create-account-button">
+          Crear Cuenta
+        </Button>
+      </Footer>
     </Layout>
   );
 };
