@@ -11,6 +11,8 @@ import { useAuth } from "../context/AuthContext";
 import Home from "../pages/Home";
 import ClientList from "../pages/client/List";
 import ClientDetail from "../pages/client/Detail";
+import SupplierList from "../pages/suppliers/List";
+import SupplierDetail from "../pages/suppliers/Detail";
 import Login from "../pages/auth/Login";
 import POS from "../pages/POS/POS";
 
@@ -47,6 +49,9 @@ const AppRouter = () => {
         <Route path="clients" element={<ClientList />} />
         <Route path="client" element={<ClientDetail />} />
         <Route path="client/:id" element={<ClientDetail />} />
+        <Route path="suppliers" element={<SupplierList />} />
+        <Route path="supplier" element={<SupplierDetail />} />
+        <Route path="supplier/:id" element={<SupplierDetail />} />
       </Route>
 
       {/* Punto de venta (layout separado) */}

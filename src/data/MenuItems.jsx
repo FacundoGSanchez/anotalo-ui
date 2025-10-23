@@ -22,6 +22,21 @@ const menuItems = [
         icon: <TeamOutlined />,
         label: <Link to="/clients">Clientes</Link>,
       },
+      {
+        key: "/proveedores",
+        icon: <TeamOutlined />,
+        label: <Link to="/suppliers">Proveedores</Link>,
+      },
+      {
+        key: "/productos",
+        icon: <TeamOutlined />,
+        label: <Link to="/products">Productos</Link>,
+      },
+      {
+        key: "/servicios",
+        icon: <TeamOutlined />,
+        label: <Link to="/services">Servicios</Link>,
+      },
     ],
   },
   {
