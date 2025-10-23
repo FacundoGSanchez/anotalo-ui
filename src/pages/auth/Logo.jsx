@@ -1,10 +1,16 @@
-// El logo (puedes reemplazar el div con un componente Image de Antd o img tag)
+// src/components/AnotaloLogo.jsx
+import React from "react";
+import logo from "/images/Logo.png"; // Import directo desde public/images
+
 const AnotaloLogo = () => (
   <div className="anotalo-logo-container">
-    <div className="logo-placeholder">
-      {/* Puedes usar una imagen aquí <img src="/images/Logo.png" alt="Anotalo Logo" /> */}
+    <div>
+      <img
+        src={logo}
+        alt="Anotalo Logo"
+        style={{ width: "120px", height: "auto" }}
+      />
     </div>
-    <p className="anotalo-logo-text">ANOTALO</p>
   </div>
 );
 

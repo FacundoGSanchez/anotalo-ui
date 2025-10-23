@@ -19,17 +19,9 @@
 
 .anotalo-logo-container {
   padding: 80px 0 30px 0;
-  text-align: center;
+  display: flex;
+  justify-content: center;
   color: #3f4a6d;
-}
-
-.logo-placeholder {
-  /* Simulación o espacio para tu logo */
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 5px auto;
-  /* El logo de la imagen tiene un estilo lineal simple, 
-     puedes usar un SVG aquí o un placeholder si no tienes la imagen. */
 }
 
 .anotalo-logo-text {
@@ -42,10 +34,12 @@
 /* --- CABECERA DE INICIO DE SESIÓN --- */
 
 .anotalo-login-content {
-  width: 90%;
+  width: 100%;
   max-width: 350px;
-  padding: 0 20px;
-  flex-grow: 1; /* Permite que el contenido tome espacio central */
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Permite que el contenido tome espacio central */
 }
 
 .anotalo-login-header {

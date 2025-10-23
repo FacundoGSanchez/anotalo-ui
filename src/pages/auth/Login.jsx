@@ -38,11 +38,11 @@ const Login = () => {
   return (
     <Layout className="anotalo-login-screen">
       {/* 1. Logo */}
-      <AnotaloLogo />
 
       {/* 2. Formulario y Contenido */}
       <Content className="anotalo-login-content">
-        <Title level={2} className="anotalo-login-header">
+        <AnotaloLogo />
+        <Title level={3} className="anotalo-login-header">
           INICIAR SESION
         </Title>
 
