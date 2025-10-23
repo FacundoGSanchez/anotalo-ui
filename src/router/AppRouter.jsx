@@ -13,6 +13,8 @@ import ClientList from "../pages/client/List";
 import ClientDetail from "../pages/client/Detail";
 import SupplierList from "../pages/suppliers/List";
 import SupplierDetail from "../pages/suppliers/Detail";
+import ItemList from "../pages/items/List.jsx";
+import ItemDetail from "../pages/items/Detail.jsx";
 import Login from "../pages/auth/Login";
 import POS from "../pages/POS/POS";
 
@@ -52,6 +54,9 @@ const AppRouter = () => {
         <Route path="suppliers" element={<SupplierList />} />
         <Route path="supplier" element={<SupplierDetail />} />
         <Route path="supplier/:id" element={<SupplierDetail />} />
+        <Route path="items" element={<ItemList />} />
+        <Route path="item" element={<ItemDetail />} />
+        <Route path="item/:id" element={<ItemDetail />} />
       </Route>
 
       {/* Punto de venta (layout separado) */}
