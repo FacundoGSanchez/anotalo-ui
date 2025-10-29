@@ -1,21 +1,17 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Table, Button, Modal } from "antd";
+import { Table, Button, Modal, Input, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
-// 💡 Cambiada la importación de columnas
 import getSupplierColumns from "./Columns";
-// 💡 Cambiada la importación de data inicial
 import { initialListSupplier } from "./Data";
 
 const SupplierList = () => {
   const navigate = useNavigate();
   const [dataSource, setDataSource] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
-  // 🔹 Inicializar localStorage con data inicial si no existe
-  useEffect(() => {
-    // 💡 Cambiado de 'clients' a 'suppliers'
+  const loadData = useCallback(() => {
     const suppliersLS = localStorage.getItem("suppliers");
     if (!suppliersLS) {
-      // 💡 Cambiado de 'iniitalListClient' a 'initialListSupplier'
       localStorage.setItem("suppliers", JSON.stringify(initialListSupplier));
       setDataSource(initialListSupplier);
     } else {
@@ -23,21 +19,19 @@ const SupplierList = () => {
     }
   }, []);
 
-  // 🔹 Cada vez que cambia localStorage, actualizar listado
   useEffect(() => {
+    loadData();
     const handleStorageChange = () => {
-      // 💡 Cambiado de 'clients' a 'suppliers'
       const suppliers = JSON.parse(localStorage.getItem("suppliers") || "[]");
       setDataSource(suppliers);
     };
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [loadData]);
 
   const handleEdit = useCallback(
     (record) => {
-      // 💡 Cambiada la ruta de navegación
       navigate(`/supplier/${record.id}`);
     },
     [navigate]
@@ -46,7 +40,6 @@ const SupplierList = () => {
   const handleDelete = useCallback(
     (record) => {
       Modal.confirm({
-        // 💡 Cambiado de 'Cliente' a 'Proveedor'
         title: `¿Estás seguro que querés borrar el proveedor "${record.denominacion}"?`,
         content: <p>Esta acción no se puede deshacer.</p>,
         okText: "Borrar",
@@ -55,7 +48,6 @@ const SupplierList = () => {
         onOk() {
           const updated = dataSource.filter((item) => item.id !== record.id);
           setDataSource(updated);
-          // 💡 Cambiado de 'clients' a 'suppliers'
           localStorage.setItem("suppliers", JSON.stringify(updated));
         },
       });
@@ -63,9 +55,21 @@ const SupplierList = () => {
     [dataSource]
   );
 
+  const filteredData = useMemo(() => {
+    if (!searchText) {
+      return dataSource;
+    }
+    const lowercasedSearch = searchText.toLowerCase();
+
+    return dataSource.filter(
+      (supplier) =>
+        supplier.denominacion.toLowerCase().includes(lowercasedSearch) ||
+        supplier.cuit.toLowerCase().includes(lowercasedSearch)
+    );
+  }, [dataSource, searchText]);
+
   const columns = useMemo(
     () =>
-      // 💡 Cambiado de 'getClientColumns' a 'getSupplierColumns'
       getSupplierColumns({
         onEdit: handleEdit,
         onDelete: handleDelete,
@@ -75,22 +79,47 @@ const SupplierList = () => {
 
   return (
     <div className="supplier-list-container">
-      <div className="supplier-list-header">
-        {/* 💡 Cambiado de 'Clientes' a 'Proveedores' */}
-        <h1 className="supplier-list-title">Listado de Proveedores</h1>
-        <Button
-          type="primary"
-          className="supplier-list-button"
-          // 💡 Cambiada la ruta de navegación
-          onClick={() => navigate("/supplier")}
-        >
-          Nuevo
-        </Button>
-      </div>
+      {/* Fila 1: Título */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col span={24}>
+          <h1 className="supplier-list-title" style={{ margin: 0 }}>
+            Listado de Proveedores
+          </h1>
+        </Col>
+      </Row>
+
+      {/* Fila 2: Buscador y Botón (usando breakpoints simplificados) */}
+      <Row gutter={[16, 16]} align="middle" style={{ marginBottom: 16 }}>
+        {/* Buscador (Izquierda) */}
+        <Col xs={24} sm={24} lg={18}>
+          <Input.Search
+            placeholder="Buscar por denominación"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            allowClear
+            size="large"
+          />
+        </Col>
+
+        {/* Botón (Derecha) */}
+        <Col xs={24} sm={24} lg={6} style={{ textAlign: "right" }}>
+          <Button
+            type="primary"
+            className="supplier-list-button"
+            onClick={() => navigate("/supplier")}
+            style={{ width: "100%", maxWidth: 180 }}
+            size="large"
+          >
+            Nuevo Proveedor
+          </Button>
+        </Col>
+      </Row>
+
+      {/* Tabla de Proveedores */}
       <Table
-        dataSource={dataSource}
+        dataSource={filteredData}
         columns={columns}
-        pagination={false}
+        pagination={{ pageSize: 20 }}
         rowKey="id"
       />
     </div>

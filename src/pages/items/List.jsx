@@ -1,17 +1,18 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Table, Button, Modal, message } from "antd";
+import { Table, Button, Modal, message, Input, Row, Col } from "antd";
 import { useNavigate } from "react-router-dom";
-import getItemColumns from "./Columns"; // 💡 Nueva importación
-import { initialListItem } from "./Data"; // 💡 Nueva importación
+import getItemColumns from "./Columns";
+import { initialListItem } from "./Data";
 
 const ItemList = () => {
   const navigate = useNavigate();
   const [dataSource, setDataSource] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
-  // 💡 Referencia al localStorage ahora es 'items'
-  useEffect(() => {
+  const loadData = useCallback(() => {
     const itemsLS = localStorage.getItem("items");
-    if (!itemsLS) {
+
+    if (!itemsLS || JSON.parse(itemsLS).length === 0) {
       localStorage.setItem("items", JSON.stringify(initialListItem));
       setDataSource(initialListItem);
     } else {
@@ -20,18 +21,13 @@ const ItemList = () => {
   }, []);
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      const items = JSON.parse(localStorage.getItem("items") || "[]");
-      setDataSource(items);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+    loadData();
+    window.addEventListener("storage", loadData);
+    return () => window.removeEventListener("storage", loadData);
+  }, [loadData]);
 
   const handleEdit = useCallback(
     (record) => {
-      // 💡 Ruta de navegación adaptada a '/item/:id'
       navigate(`/item/${record.id}`);
     },
     [navigate]
@@ -48,7 +44,7 @@ const ItemList = () => {
         onOk() {
           const updated = dataSource.filter((item) => item.id !== record.id);
           setDataSource(updated);
-          localStorage.setItem("items", JSON.stringify(updated)); // 💡 Referencia 'items'
+          localStorage.setItem("items", JSON.stringify(updated));
           message.success(`Item "${record.denominacion}" eliminado.`);
         },
       });
@@ -56,9 +52,22 @@ const ItemList = () => {
     [dataSource]
   );
 
+  const filteredData = useMemo(() => {
+    if (!searchText) {
+      return dataSource;
+    }
+    const lowercasedSearch = searchText.toLowerCase();
+
+    return dataSource.filter(
+      (item) =>
+        item.denominacion.toLowerCase().includes(lowercasedSearch) ||
+        (item.codigo_barras &&
+          String(item.codigo_barras).toLowerCase().includes(lowercasedSearch))
+    );
+  }, [dataSource, searchText]);
+
   const columns = useMemo(
     () =>
-      // 💡 Llamada a la nueva función de columnas
       getItemColumns({
         onEdit: handleEdit,
         onDelete: handleDelete,
@@ -68,28 +77,45 @@ const ItemList = () => {
 
   return (
     <div className="item-list-container">
-      {" "}
-      {/* 💡 Nueva clase CSS */}
-      <div className="item-list-header">
-        {" "}
-        {/* 💡 Nueva clase CSS */}
-        <h1 className="item-list-title">
-          Catálogo de Productos y Servicios
-        </h1>{" "}
-        {/* 💡 Título adaptado */}
-        <Button
-          type="primary"
-          className="item-list-button"
-          onClick={() => navigate("/item")} // 💡 Ruta de navegación adaptada a '/item'
-        >
-          Nuevo Item
-        </Button>
-      </div>
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col span={24}>
+          <h1 className="item-list-title" style={{ margin: 0 }}>
+            Listado de Productos y Servicios
+          </h1>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} align="middle" style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={24} lg={18}>
+          <Input.Search
+            placeholder="Buscar por descripción o código de barras"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            allowClear
+            size="large"
+          />
+        </Col>
+
+        <Col xs={24} sm={24} lg={6} style={{ textAlign: "right" }}>
+          <Button
+            type="primary"
+            className="item-list-button"
+            onClick={() => navigate("/item")}
+            style={{ width: "100%", maxWidth: 180 }}
+            size="large"
+          >
+            Nuevo Item
+          </Button>
+        </Col>
+      </Row>
+
       <Table
-        dataSource={dataSource}
+        dataSource={filteredData}
         columns={columns}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 25 }}
         rowKey="id"
+        className="compact-item-table"
+        scroll={{ x: "max-content" }}
       />
     </div>
   );

@@ -1,8 +1,10 @@
 import {
   HomeOutlined,
-  TeamOutlined,
+  FormOutlined, // Nuevo ícono para Nóminas/Gestión
+  UsergroupAddOutlined, // Nuevo ícono para Clientes
+  DeliveredProcedureOutlined, // Nuevo ícono para Proveedores (Logística/Entrega)
+  TagsOutlined, // Nuevo ícono para Ítems/Productos (Catálogo)
   ShopOutlined,
-  BarsOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
@@ -13,31 +15,31 @@ const menuItems = [
     label: <Link to="/">Inicio</Link>,
   },
   {
-    key: "nominas",
-    icon: <BarsOutlined />,
-    label: "Nóminas",
+    key: "gestion", // Renombrado a 'gestion' si es un concepto más amplio
+    icon: <FormOutlined />,
+    label: "Gestión", // Renombrado de 'Nóminas' a 'Gestión' o el nombre que prefieras
     children: [
       {
         key: "/clients",
-        icon: <TeamOutlined />,
+        icon: <UsergroupAddOutlined />, // Ícono más específico para Clientes
         label: <Link to="/clients">Clientes</Link>,
       },
       {
-        key: "/proveedores",
-        icon: <TeamOutlined />,
+        key: "/suppliers", // Corregida la key para que coincida con la ruta de Link
+        icon: <DeliveredProcedureOutlined />, // Ícono para Proveedores
         label: <Link to="/suppliers">Proveedores</Link>,
       },
       {
-        key: "/productos",
-        icon: <TeamOutlined />,
-        label: <Link to="/items">Productos</Link>,
+        key: "/items", // Corregida la key para que coincida con la ruta de Link
+        icon: <TagsOutlined />, // Ícono para Catálogo/Ítems
+        // 💡 Label adaptado a 'Ítems' (Productos y Servicios)
+        label: <Link to="/items">Ítems</Link>,
       },
     ],
   },
   {
     key: "pos",
     icon: <ShopOutlined />,
-    // 👇 Acá abrimos el punto de venta en una nueva pestaña
     label: (
       <a href="/pos/registro" target="_blank" rel="noopener noreferrer">
         Punto de Venta

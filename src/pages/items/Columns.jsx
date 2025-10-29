@@ -12,9 +12,43 @@ const getItemColumns = ({ onEdit, onDelete }) => [
     title: "Denominación",
     dataIndex: "denominacion",
     key: "denominacion",
-    render: (text) => <span data-label="Denominación">{text}</span>,
+    // 💡 Render modificado para incluir la denominación y el código de barras
+    render: (text, record) => (
+      <div data-label="Denominación">
+        {/* 1. Denominación (Texto principal) */}
+        <span style={{ display: "block" }}>{text}</span>
+
+        {/* 2. Leyenda del Código de Barras (Solo si existe y es un producto) */}
+        {record.codigo_barras && record.tipo_item === "PRODUCTO" && (
+          <span
+            style={{
+              display: "block",
+              fontSize: "0.75em", // Letra más chica
+              fontStyle: "italic", // En cursiva
+              color: "#888", // Un color más discreto
+              marginTop: "2px",
+            }}
+          >
+            Cód. Barras: {record.codigo_barras}
+          </span>
+        )}
+      </div>
+    ),
   },
-  // 💡 Nueva Columna: Tipo de Item
+  // ❌ Columna de Código de Barras eliminada
+  /*
+  {
+    title: "Cód. Barras",
+    dataIndex: "codigo_barras",
+    key: "codigo_barras",
+    render: (text) => (
+      <span data-label="Cód. Barras">
+        {text ? text : "N/A"}
+      </span>
+    ),
+  },
+  */
+  // Columna: Tipo de Item
   {
     title: "Tipo",
     dataIndex: "tipo_item",
@@ -25,14 +59,14 @@ const getItemColumns = ({ onEdit, onDelete }) => [
       return <Tag color={color}>{display}</Tag>;
     },
   },
-  // 💡 Nueva Columna Condicional: Stock
+  // Columna: Precio de Venta
   {
-    title: "Stock",
-    dataIndex: "stock_actual",
-    key: "stock_actual",
-    render: (text, record) => (
-      <span data-label="Stock">
-        {record.tipo_item === "PRODUCTO" ? text : "N/A"}
+    title: "Precio Venta",
+    dataIndex: "precio",
+    key: "precio",
+    render: (text) => (
+      <span data-label="Precio Venta">
+        {text ? `$ ${parseFloat(text).toFixed(2)}` : "$ 0.00"}
       </span>
     ),
   },

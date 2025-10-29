@@ -47,3 +47,16 @@
 .form-buttons button + button {
   margin-left: 8px;
 }
+
+/* Reducción del padding en las celdas de la tabla (para mayor densidad visual) */
+.compact-item-table .ant-table-thead > tr > th,
+.compact-item-table .ant-table-tbody > tr > td {
+  /* Achicar el padding vertical para filas más pequeñas */
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+/* Opcional: Si necesitas que el encabezado también sea más pequeño, usa */
+.compact-item-table .ant-table-thead > tr > th {
+  font-size: 0.9em; /* Ejemplo para hacer el texto del encabezado más pequeño */
+}
