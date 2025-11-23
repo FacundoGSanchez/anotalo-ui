@@ -14,12 +14,13 @@ const ItemDetail = () => {
   const [loading, setLoading] = useState(false);
   const denominacionRef = useRef(null);
 
-  // El estado inicial es null, indicando que no hay selección.
   const [itemType, setItemType] = useState(null);
 
   useEffect(() => {
-    if (denominacionRef.current) denominacionRef.current.focus();
-  }, []);
+    if (!isEdit && itemType && denominacionRef.current)
+      denominacionRef.current.focus();
+    if (isEdit && denominacionRef.current) denominacionRef.current.focus();
+  }, [itemType, isEdit]);
 
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem("items") || "[]");
@@ -82,29 +83,33 @@ const ItemDetail = () => {
         onFinish={onFinish}
         className="item-form"
       >
-        {isEdit && (
-          <Form.Item label="ID" name="id" initialValue={id}>
-            <Input disabled />
-          </Form.Item>
-        )}
+        <Row gutter={16}>
+          {isEdit && (
+            <Col span={12}>
+              <Form.Item label="Nro" name="id" initialValue={id}>
+                <Input disabled />
+              </Form.Item>
+            </Col>
+          )}
 
-        {/* Campo Tipo de Ítem (CLAVE) */}
-        <Form.Item
-          label="Tipo de Ítem"
-          name="tipo_item"
-          rules={[{ required: true, message: "Seleccione el tipo" }]}
-        >
-          <Select
-            placeholder="Seleccione Producto o Servicio"
-            onChange={(value) => setItemType(value)}
-            disabled={isEdit}
-          >
-            <Option value="PRODUCTO">PRODUCTO (Controla Stock)</Option>
-            <Option value="SERVICIO">SERVICIO (No controla Stock)</Option>
-          </Select>
-        </Form.Item>
+          <Col span={isEdit ? 12 : 24}>
+            <Form.Item
+              label="Tipo de Ítem"
+              name="tipo_item"
+              rules={[{ required: true, message: "Seleccione el tipo" }]}
+            >
+              <Select
+                placeholder="Seleccione Producto o Servicio"
+                onChange={(value) => setItemType(value)}
+                disabled={isEdit}
+              >
+                <Option value="PRODUCTO">PRODUCTO (Controla Stock)</Option>
+                <Option value="SERVICIO">SERVICIO (No controla Stock)</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
 
-        {/* 💡 Nuevo bloque: Los campos restantes solo se muestran si ya se eligió un tipo */}
         {itemType && (
           <>
             <Form.Item
@@ -118,15 +123,19 @@ const ItemDetail = () => {
               />
             </Form.Item>
 
-            {itemType === "PRODUCTO" && (
-              <Form.Item
-                label="Código de Barras"
-                name="codigo_barras"
-                tooltip="Opcional. Se utiliza para la búsqueda rápida en el punto de venta."
-              >
-                <Input placeholder="Ej: 7790012345026" />
-              </Form.Item>
-            )}
+            <Row gutter={16}>
+              {itemType === "PRODUCTO" && (
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Código de Barras"
+                    name="codigo_barras"
+                    tooltip="Opcional. Se utiliza para la búsqueda rápida en el punto de venta."
+                  >
+                    <Input placeholder="Ej: 7790012345026" />
+                  </Form.Item>
+                </Col>
+              )}
+            </Row>
 
             <Row gutter={16}>
               <Col xs={24} md={itemType === "PRODUCTO" ? 12 : 24}>
@@ -174,7 +183,7 @@ const ItemDetail = () => {
             htmlType="submit"
             loading={loading}
             style={{ marginLeft: 8 }}
-            disabled={!itemType} // Deshabilita el botón Guardar hasta que se elija un tipo
+            disabled={!itemType}
           >
             {isEdit ? "Guardar Cambios" : "Registrar Ítem"}
           </Button>

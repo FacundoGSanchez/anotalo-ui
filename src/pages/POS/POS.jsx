@@ -3,61 +3,10 @@ import { Row, Col, Input, List, Typography, Modal } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import ArticuloItem from "./compoents/ArticuloItem";
 import ResumenCarrito from "./compoents/ResumenCarrito";
+import { mockProducts, productColumns } from "../../data/mockData";
+import SelectSingleModal from "../../components/SelectSingleModal";
 
 const { Title } = Typography;
-
-// ===============================================
-// MOCKS ESTATICOS PARA EL RENDER
-// ===============================================
-
-// Datos de ejemplo para mostrar la lista
-const MOCK_CARRITO_ESTATICO = [
-  {
-    key: "1",
-    detalle: "Pantalon Algodon Verano | Talle 12",
-    codigo: "X732049",
-    precio: 1540.0,
-    dif: 50.0,
-    cant: 2,
-    subtotal: 3180.0,
-  },
-  {
-    key: "2",
-    detalle: "Buzo Algodon Azul | Talle 12",
-    codigo: "X881023",
-    precio: 1540.0,
-    dif: -100.0,
-    cant: 1,
-    subtotal: 1440.0,
-  },
-];
-
-// Datos de ejemplo para la búsqueda (simulada)
-const MOCK_MAESTRO_ESTATICO = [
-  ...MOCK_CARRITO_ESTATICO,
-  {
-    key: "3",
-    detalle: "Remera Algodon | Talle 10",
-    codigo: "X945678",
-    precio: 1540.0,
-    dif: 0.0,
-    cant: 1,
-    subtotal: 1540.0,
-  },
-];
-
-// Datos estáticos para el resumen
-const MOCK_RESUMEN_ESTATICO = {
-  itemsCount: 3,
-  subtotal: "4.620,00", // (3180 + 1440)
-  descuentos: "500,00",
-  recargo: "100,00",
-  total: "4.220,00", // (4620 + 100 - 500)
-};
-
-// ===============================================
-// ESTILOS Y UTILIDADES
-// ===============================================
 
 const containerElevationStyle = {
   boxShadow:
@@ -67,36 +16,17 @@ const containerElevationStyle = {
   backgroundColor: "#fff",
 };
 
-// Función de formato simplificada para el modal estático
-const formatPrice = (num) => num.toFixed(2).replace(".", ",");
-
-// ===============================================
-// COMPONENTE PRINCIPAL
-// ===============================================
-
 const POS = () => {
-  // 🧹 Se inicializan estados con valores estáticos/vacíos
-  const [carrito] = useState(MOCK_CARRITO_ESTATICO);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [productosFiltrados] = useState(MOCK_MAESTRO_ESTATICO); // Usado solo para el modal estático
+  const [listCarrito, setListCarrito] = useState([]);
+  const [valuesResumentCarrito, setValuesResumentCarrito] = useState([]);
+  const [openProductModal, setOpenProductModal] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
-  // Función simulada para mostrar el modal de búsqueda (sin lógica de filtrado)
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    // Simula abrir el modal si hay texto, para mostrar el mock de productos
-    if (value.length >= 3) {
-      setIsModalVisible(true);
-    } else {
-      setIsModalVisible(false);
-    }
+  const handleSearchProduct = (value) => {
+    setSearchValue(value);
+    setOpenProductModal(true);
   };
 
-  // Funciones placeholder para evitar errores de referencia en el render
-  const handleSearchProduct = () => {
-    console.log("Buscar Producto");
-  };
   const handleDeleteItem = () => {
     console.log("Borrar Producto ");
   };
@@ -122,9 +52,6 @@ const POS = () => {
                 <Input
                   placeholder="Buscar Artículo (código de barras o descripción)"
                   size="large"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  // Se deja onPressEnter apuntando al placeholder
                   onPressEnter={(e) => handleSearchProduct(e.target.value)}
                   suffix={
                     <SearchOutlined style={{ color: "rgba(0,0,0,.45)" }} />
@@ -164,7 +91,7 @@ const POS = () => {
 
             {/* Cuerpo de la Lista */}
             <List
-              dataSource={carrito}
+              dataSource={listCarrito}
               locale={{ emptyText: "El carrito está vacío." }}
               renderItem={(item) => (
                 <List.Item style={{ padding: 0 }}>
@@ -186,39 +113,21 @@ const POS = () => {
           {/* Resumen de Carrito */}
           <Col xs={24} lg={8}>
             {/* Se pasa el mock estático */}
-            <ResumenCarrito data={MOCK_RESUMEN_ESTATICO} />
+            <ResumenCarrito data={valuesResumentCarrito} />
           </Col>
         </Row>
       </div>
 
-      {/* MODAL DE BÚSQUEDA MANUAL */}
-      <Modal
-        title="Seleccionar Artículo (Simulado)"
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
-      >
-        <List
-          dataSource={productosFiltrados}
-          renderItem={(item) => (
-            <List.Item
-              key={item.key}
-              actions={[
-                <a onClick={() => handleSelectProductFromModal(item)}>
-                  Agregar (Simulado)
-                </a>,
-              ]}
-            >
-              <List.Item.Meta
-                title={item.detalle}
-                description={`Código: ${item.codigo} | Precio: $${formatPrice(
-                  item.precio
-                )}`}
-              />
-            </List.Item>
-          )}
-        />
-      </Modal>
+      {/* Modal de Buscador  */}
+      <SelectSingleModal
+        open={openProductModal}
+        onClose={() => setOpenProductModal(false)}
+        title="Seleccionar Artículo"
+        width={700}
+        data={mockProducts} // 🔥 tu lista de productos
+        columns={productColumns} // 🔥 columnas de la tabla
+        onSelect={() => {}}
+      />
     </div>
   );
 };
