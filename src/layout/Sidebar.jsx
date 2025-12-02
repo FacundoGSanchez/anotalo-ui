@@ -1,28 +1,29 @@
-import MenuList from "../components/MenuList";
 import { Layout } from "antd";
+import MenuList from "../components/MenuList";
 
 const { Sider } = Layout;
 const LOGO_PATH = "/images/Logo.png";
 
-const Sidebar = ({ collapsed, handleBreakpoint, isMobile, setCollapsed }) => {
-  const logoImageSize = 32;
-
+const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
   return (
     <Sider
       collapsible
       collapsed={collapsed}
-      collapsedWidth={isMobile ? 0 : 80}
+      collapsedWidth={0} // <--- Ocultar completamente
+      width={220} // <--- Ancho normal del sidebar
       breakpoint="md"
       trigger={null}
-      className="sidebar"
       theme="dark"
-      onBreakpoint={handleBreakpoint}
+      className={`sidebar ${collapsed && isMobile ? "sidebar-hidden" : ""}`}
+      onBreakpoint={(broken) => {
+        if (broken) setCollapsed(true); // En mobile, ocultar automáticamente
+      }}
     >
+      {/* LOGO */}
       <div
         className="logo"
         style={{
           height: 64,
-          margin: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: collapsed ? "center" : "flex-start",
@@ -35,10 +36,10 @@ const Sidebar = ({ collapsed, handleBreakpoint, isMobile, setCollapsed }) => {
             height: 40,
             borderRadius: "50%",
             overflow: "hidden",
+            backgroundColor: "#FFF",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#FFFF",
             marginRight: collapsed ? 0 : 10,
           }}
         >
@@ -46,8 +47,8 @@ const Sidebar = ({ collapsed, handleBreakpoint, isMobile, setCollapsed }) => {
             src={LOGO_PATH}
             alt="Logo Anótalo"
             style={{
-              width: logoImageSize,
-              height: logoImageSize,
+              width: 32,
+              height: 32,
             }}
           />
         </div>
@@ -55,11 +56,11 @@ const Sidebar = ({ collapsed, handleBreakpoint, isMobile, setCollapsed }) => {
         {!collapsed && (
           <h1
             style={{
-              color: "white",
-              fontSize: "1.2rem",
+              color: "#fff",
+              fontSize: "1.1rem",
               margin: 0,
-              overflow: "hidden",
               whiteSpace: "nowrap",
+              overflow: "hidden",
             }}
           >
             Anótalo
@@ -67,6 +68,7 @@ const Sidebar = ({ collapsed, handleBreakpoint, isMobile, setCollapsed }) => {
         )}
       </div>
 
+      {/* MENÚ */}
       <MenuList
         darkTheme={true}
         isMobile={isMobile}

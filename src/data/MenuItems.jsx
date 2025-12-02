@@ -17,7 +17,7 @@ const menuItems = [
   {
     key: "gestion", // Renombrado a 'gestion' si es un concepto más amplio
     icon: <FormOutlined />,
-    label: "Gestión", // Renombrado de 'Nóminas' a 'Gestión' o el nombre que prefieras
+    label: "Nominas", // Renombrado de 'Nóminas' a 'Gestión' o el nombre que prefieras
     children: [
       {
         key: "/clients",

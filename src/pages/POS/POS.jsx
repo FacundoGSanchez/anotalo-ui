@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { Row, Col, Input, List, Typography, Modal } from "antd";
+import React, { useState, useMemo, useCallback } from "react";
+import { Row, Col, Input, List, Typography } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+
 import ArticuloItem from "./compoents/ArticuloItem";
 import ResumenCarrito from "./compoents/ResumenCarrito";
+
 import { mockProducts, productColumns } from "../../data/mockData";
-import SelectSingleModal from "../../components/SelectSingleModal";
+import SelectSingleModal from "../../components/SelectSingleModal/SelectSingleModal";
 
 const { Title } = Typography;
 
@@ -22,14 +24,46 @@ const POS = () => {
   const [openProductModal, setOpenProductModal] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
+  /* ---------------------------------------------
+      ABRIR MODAL AL PRESIONAR ENTER EN EL INPUT
+  ---------------------------------------------- */
   const handleSearchProduct = (value) => {
     setSearchValue(value);
-    setOpenProductModal(true);
+    setTimeout(() => {
+      setOpenProductModal(true);
+    }, 50);
   };
 
-  const handleDeleteItem = () => {
-    console.log("Borrar Producto ");
+  /* ---------------------------------------------
+      AGREGAR ARTÍCULO SELECCIONADO AL CARRITO
+  ---------------------------------------------- */
+  const handleSelectProduct = (articulo) => {
+    setListCarrito((prev) => [
+      ...prev,
+      {
+        key: articulo.id,
+        detalle: articulo.detalle,
+        precio: articulo.precio,
+        cantidad: 1,
+        subtotal: articulo.precio,
+        ...articulo,
+      },
+    ]);
+
+    // acá podés recalcular resumen si corresponde
   };
+
+  /* ---------------------------------------------
+      ELIMINAR ITEM DEL CARRITO
+  ---------------------------------------------- */
+  const handleDeleteItem = useCallback((key) => {
+    setListCarrito((prev) => prev.filter((item) => item.key !== key));
+  }, []);
+
+  /* ---------------------------------------------
+      OPTIMIZAR LISTA DEL CARRITO
+  ---------------------------------------------- */
+  const carritoMemo = useMemo(() => listCarrito, [listCarrito]);
 
   return (
     <div
@@ -46,7 +80,7 @@ const POS = () => {
 
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
-            {/* Buscador de Código/Descripción */}
+            {/* Buscador */}
             <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
               <Col xs={24}>
                 <Input
@@ -56,11 +90,12 @@ const POS = () => {
                   suffix={
                     <SearchOutlined style={{ color: "rgba(0,0,0,.45)" }} />
                   }
+                  autoFocus
                 />
               </Col>
             </Row>
 
-            {/* Titulos de la Lista */}
+            {/* Encabezado de columnas */}
             <Row
               gutter={[8, 8]}
               style={{
@@ -86,19 +121,17 @@ const POS = () => {
               <Col xs={6} md={3} style={{ textAlign: "right" }}>
                 Subtotal
               </Col>
-              <Col xs={24} md={2} style={{ textAlign: "center" }}></Col>
+              <Col xs={24} md={2}></Col>
             </Row>
 
-            {/* Cuerpo de la Lista */}
+            {/* Lista optimizada */}
             <List
-              dataSource={listCarrito}
+              temLayout="horizontal"
+              dataSource={carritoMemo}
               locale={{ emptyText: "El carrito está vacío." }}
               renderItem={(item) => (
                 <List.Item style={{ padding: 0 }}>
-                  <ArticuloItem
-                    {...item}
-                    handleDelete={() => handleDeleteItem(item.key)}
-                  />
+                  <ArticuloItem {...item} handleDelete={handleDeleteItem} />
                 </List.Item>
               )}
               bordered={false}
@@ -110,23 +143,23 @@ const POS = () => {
             />
           </Col>
 
-          {/* Resumen de Carrito */}
+          {/* Resumen lateral */}
           <Col xs={24} lg={8}>
-            {/* Se pasa el mock estático */}
             <ResumenCarrito data={valuesResumentCarrito} />
           </Col>
         </Row>
       </div>
 
-      {/* Modal de Buscador  */}
+      {/* ---------------------------------------------
+          MODAL GENÉRICO PARA SELECCIÓN DE ARTÍCULOS
+      ---------------------------------------------- */}
       <SelectSingleModal
         open={openProductModal}
         onClose={() => setOpenProductModal(false)}
-        title="Seleccionar Artículo"
-        width={700}
-        data={mockProducts} // 🔥 tu lista de productos
-        columns={productColumns} // 🔥 columnas de la tabla
-        onSelect={() => {}}
+        data={mockProducts}
+        columns={productColumns}
+        mobileFields={["detalle", "codigoProducto"]}
+        onSelect={handleSelectProduct}
       />
     </div>
   );

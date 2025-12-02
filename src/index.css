@@ -54,3 +54,7 @@
 .toggle {
   margin-left: 15px;
 }
+
+.sidebar.sidebar-hidden {
+  display: none !important;
+}

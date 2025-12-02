@@ -171,15 +171,16 @@ export const mockProducts = [
 // 🔥 Columnas dinámicas
 export const productColumns = [
   {
+    title: "Códigoasdasdasd",
+    dataIndex: "codigo",
+    width: 100,
+    hidden: true,
+  },
+  {
     title: "Detalle",
     dataIndex: "detalle",
     width: 220,
     ellipsis: true,
-  },
-  {
-    title: "Código",
-    dataIndex: "codigo",
-    width: 100,
   },
   {
     title: "Precio",
