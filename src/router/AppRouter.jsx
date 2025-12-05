@@ -16,7 +16,7 @@ import SupplierDetail from "../pages/suppliers/Detail";
 import ItemList from "../pages/items/List.jsx";
 import ItemDetail from "../pages/items/Detail.jsx";
 import Login from "../pages/auth/Login";
-import POS from "../pages/POS/POS";
+import POS from "../pages/POS/_index.jsx";
 
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();

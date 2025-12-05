@@ -1,12 +1,12 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Row, Col, Input, List, Typography } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
-import ArticuloItem from "./compoents/ArticuloItem";
-import ResumenCarrito from "./compoents/ResumenCarrito";
+import ArticuloItem from "./ArticuloItem";
+import ResumenCarrito from "./ResumenCarrito";
 
 import { mockProducts, productColumns } from "../../data/mockData";
-import SelectSingleModal from "../../components/SelectSingleModal/SelectSingleModal";
+import SelectSingleModal from "../../components/SelectSingleModal";
 
 const { Title } = Typography;
 
@@ -20,28 +20,67 @@ const containerElevationStyle = {
 
 const POS = () => {
   const [listCarrito, setListCarrito] = useState([]);
-  const [valuesResumentCarrito, setValuesResumentCarrito] = useState([]);
+  const [valuesResumentCarrito, setValuesResumentCarrito] = useState({
+    itemsCount: 0,
+    subtotal: 0,
+    descuentos: 0,
+    recargo: 0,
+    total: 0,
+  });
   const [openProductModal, setOpenProductModal] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  /* ---------------------------------------------
-      ABRIR MODAL AL PRESIONAR ENTER EN EL INPUT
-  ---------------------------------------------- */
+  // ---------------------------
+  // Cargar carrito desde LocalStorage
+  // ---------------------------
+  useEffect(() => {
+    const saved = localStorage.getItem("carrito");
+    if (saved) {
+      setListCarrito(JSON.parse(saved));
+    }
+  }, []);
+
+  // ---------------------------
+  // Guardar carrito + calcular resumen
+  // ---------------------------
+  useEffect(() => {
+    localStorage.setItem("carrito", JSON.stringify(listCarrito));
+
+    const itemsCount = listCarrito.length;
+    const subtotal = listCarrito.reduce(
+      (acc, item) => acc + item.precio * item.cantidad,
+      0
+    );
+
+    const descuentos = 0;
+    const recargo = 0;
+    const total = subtotal - descuentos + recargo;
+
+    setValuesResumentCarrito({
+      itemsCount,
+      subtotal,
+      descuentos,
+      recargo,
+      total,
+    });
+  }, [listCarrito]);
+
+  // ---------------------------
+  // Abrir modal al presionar ENTER
+  // ---------------------------
   const handleSearchProduct = (value) => {
     setSearchValue(value);
-    setTimeout(() => {
-      setOpenProductModal(true);
-    }, 50);
+    setTimeout(() => setOpenProductModal(true), 50);
   };
 
-  /* ---------------------------------------------
-      AGREGAR ARTÍCULO SELECCIONADO AL CARRITO
-  ---------------------------------------------- */
+  // ---------------------------
+  // Seleccionar producto
+  // ---------------------------
   const handleSelectProduct = (articulo) => {
     setListCarrito((prev) => [
       ...prev,
       {
-        key: articulo.id,
+        id: articulo.id,
         detalle: articulo.detalle,
         precio: articulo.precio,
         cantidad: 1,
@@ -49,22 +88,19 @@ const POS = () => {
         ...articulo,
       },
     ]);
-
-    // acá podés recalcular resumen si corresponde
   };
 
-  /* ---------------------------------------------
-      ELIMINAR ITEM DEL CARRITO
-  ---------------------------------------------- */
-  const handleDeleteItem = useCallback((key) => {
-    setListCarrito((prev) => prev.filter((item) => item.key !== key));
-  }, []);
+  // ---------------------------
+  // Eliminar producto del carrito
+  // ---------------------------
+  const handleDeleteItem = useCallback(
+    (id) => setListCarrito((prev) => prev.filter((item) => item.id !== id)),
+    []
+  );
 
-  /* ---------------------------------------------
-      OPTIMIZAR LISTA DEL CARRITO
-  ---------------------------------------------- */
   const carritoMemo = useMemo(() => listCarrito, [listCarrito]);
 
+  // ---------------------------
   return (
     <div
       style={{
@@ -74,13 +110,15 @@ const POS = () => {
       }}
     >
       <div style={containerElevationStyle}>
-        <Title level={3} style={{ textAlign: "left", marginBottom: "24px" }}>
+        <Title level={3} style={{ marginBottom: "24px" }}>
           Registrar Artículos
         </Title>
 
         <Row gutter={[24, 24]}>
+          {/* --------------------
+              COLUMNA IZQUIERDA
+          -------------------- */}
           <Col xs={24} lg={16}>
-            {/* Buscador */}
             <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
               <Col xs={24}>
                 <Input
@@ -95,7 +133,6 @@ const POS = () => {
               </Col>
             </Row>
 
-            {/* Encabezado de columnas */}
             <Row
               gutter={[8, 8]}
               style={{
@@ -106,35 +143,33 @@ const POS = () => {
                 marginBottom: "8px",
               }}
             >
-              <Col xs={24} md={8}>
-                Detalle
-              </Col>
-              <Col xs={6} md={4} style={{ textAlign: "right" }}>
+              <Col md={8}>Detalle</Col>
+              <Col md={4} style={{ textAlign: "right" }}>
                 Precio
               </Col>
-              <Col xs={6} md={4} style={{ textAlign: "right" }}>
+              <Col md={4} style={{ textAlign: "right" }}>
                 Dif
               </Col>
-              <Col xs={6} md={3} style={{ textAlign: "center" }}>
+              <Col md={3} style={{ textAlign: "center" }}>
                 Cant
               </Col>
-              <Col xs={6} md={3} style={{ textAlign: "right" }}>
+              <Col md={3} style={{ textAlign: "right" }}>
                 Subtotal
               </Col>
-              <Col xs={24} md={2}></Col>
+              <Col md={2}></Col>
             </Row>
 
-            {/* Lista optimizada */}
             <List
-              temLayout="horizontal"
               dataSource={carritoMemo}
               locale={{ emptyText: "El carrito está vacío." }}
               renderItem={(item) => (
                 <List.Item style={{ padding: 0 }}>
-                  <ArticuloItem {...item} handleDelete={handleDeleteItem} />
+                  <ArticuloItem
+                    {...item}
+                    onDelete={() => handleDeleteItem(item.id)}
+                  />
                 </List.Item>
               )}
-              bordered={false}
               style={{
                 minHeight: "300px",
                 maxHeight: "500px",
@@ -143,22 +178,21 @@ const POS = () => {
             />
           </Col>
 
-          {/* Resumen lateral */}
+          {/* --------------------
+              COLUMNA DERECHA
+          -------------------- */}
           <Col xs={24} lg={8}>
             <ResumenCarrito data={valuesResumentCarrito} />
           </Col>
         </Row>
       </div>
 
-      {/* ---------------------------------------------
-          MODAL GENÉRICO PARA SELECCIÓN DE ARTÍCULOS
-      ---------------------------------------------- */}
+      {/* MODAL DE ARTÍCULOS */}
       <SelectSingleModal
         open={openProductModal}
         onClose={() => setOpenProductModal(false)}
         data={mockProducts}
         columns={productColumns}
-        mobileFields={["detalle", "codigoProducto"]}
         onSelect={handleSelectProduct}
       />
     </div>
