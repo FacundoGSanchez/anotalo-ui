@@ -1,6 +1,6 @@
-import React from "react";
-import { Row, Col, Button, Typography } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Row, Col, Button, Typography, InputNumber } from "antd";
+import { DeleteOutlined, MoreOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -9,54 +9,104 @@ const ArticuloItem = ({
   detalle,
   codigo,
   precio,
-  dif,
-  cant,
+  cantidad,
   subtotal,
-  onDelete, // ← ahora MATCHEA con POS
-}) => (
-  <Row
-    gutter={[8, 8]}
-    align="middle"
-    style={{
-      padding: "12px 0",
-      borderBottom: "1px solid #f0f0f0",
-      width: "100%",
-    }}
-  >
-    <Col xs={24} md={8}>
-      <Text strong>{detalle}</Text>
-      <br />
-      <Text type="secondary" style={{ fontSize: "0.75rem" }}>
-        Código: {codigo}
-      </Text>
-    </Col>
+  difPeso = 0,
+  onDelete,
+  onUpdate,
+}) => {
+  const [difP] = useState(difPeso);
+  const [cant, setCant] = useState(cantidad);
 
-    <Col xs={6} md={4} style={{ textAlign: "right" }}>
-      <Text>${precio}</Text>
-    </Col>
+  const calcularSubtotal = (vDifPeso, vCant) =>
+    Number(((precio + vDifPeso) * vCant).toFixed(2));
 
-    <Col xs={6} md={4} style={{ textAlign: "right" }}>
-      <Text type="danger">-${dif}</Text>
-    </Col>
+  const handleCantidad = (v) => {
+    const val = Number(v) || 1;
+    setCant(val);
+  };
 
-    <Col xs={6} md={3} style={{ textAlign: "center" }}>
-      <Text>{cant}</Text>
-    </Col>
+  const handleBlur = () => {
+    const newSubtotal = calcularSubtotal(difP, cant);
+    onUpdate(id, {
+      difPeso: difP,
+      cantidad: cant,
+      subtotal: newSubtotal,
+    });
+  };
 
-    <Col xs={6} md={3} style={{ textAlign: "right" }}>
-      <Text strong>${subtotal}</Text>
-    </Col>
+  const colorDif = difP < 0 ? "#00aa55" : difP > 0 ? "#0077cc" : "#000000";
 
-    <Col xs={24} md={2} style={{ textAlign: "center" }}>
-      <Button
-        icon={<DeleteOutlined />}
-        type="text"
-        danger
-        size="small"
-        onClick={() => onDelete(id)} // 🔥 ahora sí funciona
-      />
-    </Col>
-  </Row>
-);
+  return (
+    <Row
+      gutter={[8, 8]}
+      align="middle"
+      style={{
+        padding: "10px 0",
+        borderBottom: "1px solid #efefef",
+        width: "100%",
+        textAlign: "center",
+      }}
+    >
+      <Col xs={24} md={8} style={{ textAlign: "left" }}>
+        <Text strong>{detalle}</Text>
+        <br />
+        <Text type="secondary" style={{ fontSize: "0.75rem" }}>
+          Código: {codigo}
+        </Text>
+      </Col>
+
+      <Col xs={6} md={4} style={{ textAlign: "right" }}>
+        <Text>${precio}</Text>
+      </Col>
+
+      <Col xs={6} md={4}>
+        <Text strong style={{ color: colorDif }}>
+          ${difP}
+        </Text>
+      </Col>
+
+      <Col xs={6} md={2}>
+        <InputNumber
+          min={1}
+          value={cant}
+          onChange={handleCantidad}
+          onBlur={handleBlur}
+          style={{ width: "100%", textAlign: "right" }}
+        />
+      </Col>
+
+      <Col xs={6} md={4} style={{ textAlign: "right" }}>
+        <Text strong>${subtotal}</Text>
+      </Col>
+
+      <Col
+        xs={24}
+        md={1}
+        style={{
+          display: "flex",
+          justifyContent: "space-between", // espaciado uniforme
+          alignItems: "center", // centrado vertical
+          gap: "6px", // separación opcional extra
+        }}
+      >
+        <Button
+          icon={<DeleteOutlined />}
+          type="text"
+          danger
+          size="small"
+          onClick={() => onDelete(id)}
+        />
+
+        <Button
+          icon={<MoreOutlined />}
+          type="text"
+          size="small"
+          onClick={() => onEdit(id)}
+        />
+      </Col>
+    </Row>
+  );
+};
 
 export default ArticuloItem;

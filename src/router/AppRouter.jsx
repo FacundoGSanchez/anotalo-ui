@@ -57,10 +57,11 @@ const AppRouter = () => {
         <Route path="items" element={<ItemList />} />
         <Route path="item" element={<ItemDetail />} />
         <Route path="item/:id" element={<ItemDetail />} />
+        <Route path="pos" element={<POS />} />
       </Route>
 
       {/* Punto de venta (layout separado) */}
-      <Route
+      {/* <Route
         path="/pos"
         element={
           <ProtectedRoute>
@@ -69,7 +70,7 @@ const AppRouter = () => {
         }
       >
         <Route path="registro" element={<POS />} />
-      </Route>
+      </Route> */}
 
       {/* Redirección por defecto */}
       <Route

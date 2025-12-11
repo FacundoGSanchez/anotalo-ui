@@ -1,9 +1,9 @@
 import {
   HomeOutlined,
-  FormOutlined, // Nuevo ícono para Nóminas/Gestión
-  UsergroupAddOutlined, // Nuevo ícono para Clientes
-  DeliveredProcedureOutlined, // Nuevo ícono para Proveedores (Logística/Entrega)
-  TagsOutlined, // Nuevo ícono para Ítems/Productos (Catálogo)
+  FormOutlined,
+  UsergroupAddOutlined,
+  DeliveredProcedureOutlined,
+  TagsOutlined,
   ShopOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -13,38 +13,39 @@ const menuItems = [
     key: "/",
     icon: <HomeOutlined />,
     label: <Link to="/">Inicio</Link>,
+    meta: { collapseOnClick: false },
   },
   {
-    key: "gestion", // Renombrado a 'gestion' si es un concepto más amplio
+    key: "gestion",
     icon: <FormOutlined />,
-    label: "Nominas", // Renombrado de 'Nóminas' a 'Gestión' o el nombre que prefieras
+    label: "Nóminas",
+    meta: { collapseOnClick: false },
     children: [
       {
         key: "/clients",
-        icon: <UsergroupAddOutlined />, // Ícono más específico para Clientes
+        icon: <UsergroupAddOutlined />,
         label: <Link to="/clients">Clientes</Link>,
+        meta: { collapseOnClick: false },
       },
       {
-        key: "/suppliers", // Corregida la key para que coincida con la ruta de Link
-        icon: <DeliveredProcedureOutlined />, // Ícono para Proveedores
+        key: "/suppliers",
+        icon: <DeliveredProcedureOutlined />,
         label: <Link to="/suppliers">Proveedores</Link>,
+        meta: { collapseOnClick: false },
       },
       {
-        key: "/items", // Corregida la key para que coincida con la ruta de Link
-        icon: <TagsOutlined />, // Ícono para Catálogo/Ítems
-        // 💡 Label adaptado a 'Ítems' (Productos y Servicios)
+        key: "/items",
+        icon: <TagsOutlined />,
         label: <Link to="/items">Ítems</Link>,
+        meta: { collapseOnClick: false },
       },
     ],
   },
   {
-    key: "pos",
+    key: "/pos",
     icon: <ShopOutlined />,
-    label: (
-      <a href="/pos/registro" target="_blank" rel="noopener noreferrer">
-        Punto de Venta
-      </a>
-    ),
+    label: <Link to="/pos">Punto de Venta</Link>,
+    meta: { collapseOnClick: true }, // ⬅️ SOLO este colapsa
   },
 ];
 

@@ -3,10 +3,11 @@ import { Row, Col, Input, List, Typography } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
 import ArticuloItem from "./ArticuloItem";
-import ResumenCarrito from "./ResumenCarrito";
+import ResumenCarrito from "./ArticuloResumenCarrito";
 
 import { mockProducts, productColumns } from "../../data/mockData";
 import SelectSingleModal from "../../components/SelectSingleModal";
+import ArticuloHeader from "./ArticuloHeader";
 
 const { Title } = Typography;
 
@@ -30,9 +31,6 @@ const POS = () => {
   const [openProductModal, setOpenProductModal] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  // ---------------------------
-  // Cargar carrito desde LocalStorage
-  // ---------------------------
   useEffect(() => {
     const saved = localStorage.getItem("carrito");
     if (saved) {
@@ -84,6 +82,8 @@ const POS = () => {
         detalle: articulo.detalle,
         precio: articulo.precio,
         cantidad: 1,
+        difPeso: 0,
+        difPorcentaje: 0,
         subtotal: articulo.precio,
         ...articulo,
       },
@@ -98,6 +98,14 @@ const POS = () => {
     []
   );
 
+  const handleUpdateItem = (id, updatedValues) => {
+    setListCarrito((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, ...updatedValues } : item
+      )
+    );
+  };
+
   const carritoMemo = useMemo(() => listCarrito, [listCarrito]);
 
   // ---------------------------
@@ -111,14 +119,11 @@ const POS = () => {
     >
       <div style={containerElevationStyle}>
         <Title level={3} style={{ marginBottom: "24px" }}>
-          Registrar Artículos
+          Punto de Venta
         </Title>
 
         <Row gutter={[24, 24]}>
-          {/* --------------------
-              COLUMNA IZQUIERDA
-          -------------------- */}
-          <Col xs={24} lg={16}>
+          <Col xs={24} lg={18}>
             <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
               <Col xs={24}>
                 <Input
@@ -133,32 +138,8 @@ const POS = () => {
               </Col>
             </Row>
 
-            <Row
-              gutter={[8, 8]}
-              style={{
-                fontWeight: "bold",
-                backgroundColor: "#f5f5f5",
-                padding: "8px 0",
-                borderBottom: "1px solid #e8e8e8",
-                marginBottom: "8px",
-              }}
-            >
-              <Col md={8}>Detalle</Col>
-              <Col md={4} style={{ textAlign: "right" }}>
-                Precio
-              </Col>
-              <Col md={4} style={{ textAlign: "right" }}>
-                Dif
-              </Col>
-              <Col md={3} style={{ textAlign: "center" }}>
-                Cant
-              </Col>
-              <Col md={3} style={{ textAlign: "right" }}>
-                Subtotal
-              </Col>
-              <Col md={2}></Col>
-            </Row>
-
+            {/* Listado Carrito */}
+            <ArticuloHeader />
             <List
               dataSource={carritoMemo}
               locale={{ emptyText: "El carrito está vacío." }}
@@ -167,6 +148,7 @@ const POS = () => {
                   <ArticuloItem
                     {...item}
                     onDelete={() => handleDeleteItem(item.id)}
+                    onUpdate={handleUpdateItem}
                   />
                 </List.Item>
               )}
@@ -178,10 +160,8 @@ const POS = () => {
             />
           </Col>
 
-          {/* --------------------
-              COLUMNA DERECHA
-          -------------------- */}
-          <Col xs={24} lg={8}>
+          {/* Resumen Carrito */}
+          <Col xs={24} lg={6}>
             <ResumenCarrito data={valuesResumentCarrito} />
           </Col>
         </Row>
