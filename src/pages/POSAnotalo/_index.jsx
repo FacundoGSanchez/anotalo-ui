@@ -1,7 +1,7 @@
 import React from "react";
 
-const _index = () => {
-  return <div>_index</div>;
+const POSAnotalo = () => {
+  return <div>POS Mobile</div>;
 };
 
-export default _index;
+export default POSAnotalo;

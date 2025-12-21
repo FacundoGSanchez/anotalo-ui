@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Row, Col, Button, Typography, InputNumber } from "antd";
 import { DeleteOutlined, MoreOutlined } from "@ant-design/icons";
+import formatFloat from "../../components/formatFloat";
+import "./pos.css";
 
 const { Text } = Typography;
 
@@ -38,58 +40,46 @@ const ArticuloItem = ({
   const colorDif = difP < 0 ? "#00aa55" : difP > 0 ? "#0077cc" : "#000000";
 
   return (
-    <Row
-      gutter={[8, 8]}
-      align="middle"
-      style={{
-        padding: "10px 0",
-        borderBottom: "1px solid #efefef",
-        width: "100%",
-        textAlign: "center",
-      }}
-    >
-      <Col xs={24} md={8} style={{ textAlign: "left" }}>
+    <Row gutter={[8, 8]} align="middle" className="item_row">
+      {/* Detalle + Código */}
+      <Col xs={24} md={8} className="item_col-left">
         <Text strong>{detalle}</Text>
         <br />
-        <Text type="secondary" style={{ fontSize: "0.75rem" }}>
+        <Text type="secondary" className="item_codigo">
           Código: {codigo}
         </Text>
       </Col>
 
-      <Col xs={6} md={4} style={{ textAlign: "right" }}>
-        <Text>${precio}</Text>
+      {/* Precio */}
+      <Col xs={6} md={4} className="item_col-right">
+        <Text>${formatFloat(precio)}</Text>
       </Col>
 
-      <Col xs={6} md={4}>
+      {/* Dif. Peso */}
+      <Col xs={6} md={4} className="item_col-center">
         <Text strong style={{ color: colorDif }}>
-          ${difP}
+          ${formatFloat(difP)}
         </Text>
       </Col>
 
+      {/* Cantidad */}
       <Col xs={6} md={2}>
         <InputNumber
           min={1}
           value={cant}
           onChange={handleCantidad}
           onBlur={handleBlur}
-          style={{ width: "100%", textAlign: "right" }}
+          className="item_input-cant"
         />
       </Col>
 
-      <Col xs={6} md={4} style={{ textAlign: "right" }}>
-        <Text strong>${subtotal}</Text>
+      {/* Subtotal */}
+      <Col xs={6} md={4} className="item_col-right">
+        <Text strong>${formatFloat(subtotal)}</Text>
       </Col>
 
-      <Col
-        xs={24}
-        md={1}
-        style={{
-          display: "flex",
-          justifyContent: "space-between", // espaciado uniforme
-          alignItems: "center", // centrado vertical
-          gap: "6px", // separación opcional extra
-        }}
-      >
+      {/* Botones */}
+      <Col xs={24} md={1} className="item_actions">
         <Button
           icon={<DeleteOutlined />}
           type="text"
@@ -102,7 +92,7 @@ const ArticuloItem = ({
           icon={<MoreOutlined />}
           type="text"
           size="small"
-          onClick={() => onEdit(id)}
+          onClick={() => console.log("edit", id)}
         />
       </Col>
     </Row>

@@ -1,0 +1,166 @@
+/* Tarjeta general */
+.resumen_card {
+  background-color: #f9f9f9;
+  border: none !important;
+  border-radius: 5px !important;
+  padding: 5px;
+}
+
+/* Título */
+.resumen_row-title {
+  margin-bottom: 16px;
+}
+
+.resumen_title {
+  margin: 0;
+  color: #888;
+  font-weight: 500;
+  letter-spacing: 1px; /* espacio entre caracteres */
+}
+
+/* Filas */
+.resumen_row {
+  margin-bottom: 8px;
+}
+
+/* Columna derecha (valores) */
+.resumen_value-col {
+  text-align: right;
+}
+
+/* Texto general */
+.resumen_label {
+  font-size: 14px;
+}
+
+.resumen_value {
+  font-size: 14px;
+  letter-spacing: 1px; /* separación de caracteres */
+}
+
+/* Valor en rojo */
+.resumen_value-danger {
+  color: #ff4d4f;
+}
+
+/* Total */
+.resumen_total-row {
+  border-top: 1px solid #e8e8e8;
+  padding-top: 12px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.resumen_total-title {
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* Botón pagar */
+.resumen_btn {
+  width: 100%;
+  background-color: #40467b !important;
+  border-color: #40467b !important;
+}
+
+/* =========================================
+   ARTICULO ITEM (prefijo: item_)
+   ========================================= */
+
+.item_row {
+  padding: 10px 0;
+  border-bottom: 1px solid #efefef;
+  width: 100%;
+  text-align: center;
+}
+
+.item_col-left {
+  text-align: left;
+}
+
+.item_codigo {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.item_col-right {
+  text-align: right;
+}
+
+/* Centrar el número */
+.item_input-cant input {
+  text-align: center !important;
+}
+
+/* Botonera (delete + more) */
+.item_actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ====== HEADER DEL LISTADO DE ARTÍCULOS ====== */
+
+.header_row {
+  font-weight: bold;
+  background-color: #f5f5f5;
+  padding: 8px 0;
+  border-bottom: 1px solid #e8e8e8;
+  text-align: center;
+  border-radius: 2px; /* ✔ borde redondeado */
+}
+
+/* alineaciones de columnas */
+.header_col-left {
+  text-align: left;
+}
+
+.header_col-right {
+  text-align: right;
+}
+
+.header_col-center {
+  text-align: center;
+}
+
+/* Página */
+.pos-page {
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+/* Contenedor principal */
+.pos-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Título */
+.pos-title {
+  margin-bottom: 24px;
+}
+
+/* Buscador */
+.pos-search-row {
+  margin-bottom: 20px;
+}
+
+.pos-search-icon {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* Listado */
+.pos-list {
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.pos-list-item {
+  padding: 0 !important;
+}

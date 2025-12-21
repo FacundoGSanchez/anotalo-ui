@@ -1,51 +1,78 @@
 import {
   HomeOutlined,
+  ShopOutlined,
   FormOutlined,
   UsergroupAddOutlined,
   DeliveredProcedureOutlined,
   TagsOutlined,
-  ShopOutlined,
+  ProjectOutlined,
+  UnorderedListOutlined,
+  TableOutlined,
+  UserSwitchOutlined,
 } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 
 const menuItems = [
   {
     key: "/",
     icon: <HomeOutlined />,
-    label: <Link to="/">Inicio</Link>,
+    label: "Inicio",
     meta: { collapseOnClick: false },
+  },
+  {
+    key: "/pos",
+    icon: <ShopOutlined />,
+    label: "Punto de Venta",
+    meta: {
+      collapseOnClick: true,
+      route: {
+        mobile: "/pos/anotalo",
+        desktop: "/pos",
+      },
+    },
   },
   {
     key: "gestion",
     icon: <FormOutlined />,
     label: "Nóminas",
-    meta: { collapseOnClick: false },
     children: [
       {
         key: "/clients",
         icon: <UsergroupAddOutlined />,
-        label: <Link to="/clients">Clientes</Link>,
-        meta: { collapseOnClick: false },
+        label: "Clientes",
       },
       {
         key: "/suppliers",
         icon: <DeliveredProcedureOutlined />,
-        label: <Link to="/suppliers">Proveedores</Link>,
-        meta: { collapseOnClick: false },
+        label: "Proveedores",
       },
       {
         key: "/items",
         icon: <TagsOutlined />,
-        label: <Link to="/items">Ítems</Link>,
-        meta: { collapseOnClick: false },
+        label: "Ítems",
       },
     ],
   },
   {
-    key: "/pos",
-    icon: <ShopOutlined />,
-    label: <Link to="/pos">Punto de Venta</Link>,
-    meta: { collapseOnClick: true }, // ⬅️ SOLO este colapsa
+    key: "movimientos",
+    icon: <ProjectOutlined />,
+    label: "Actividad",
+    children: [
+      {
+        key: "/movimientos",
+        icon: <UnorderedListOutlined />,
+        label: "Movimientos",
+      },
+      {
+        key: "/stock",
+        icon: <TableOutlined />,
+        label: "Stock",
+      },
+      {
+        key: "/saldocuentas",
+        icon: <UserSwitchOutlined />,
+        label: "Saldo Cuentas",
+      },
+    ],
   },
 ];
 

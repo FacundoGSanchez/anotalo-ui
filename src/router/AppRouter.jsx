@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // 🧩 Layouts
 import MainLayout from "../layout/MainLayout";
-import POSLayout from "../layout/POSLayout";
 
 // 🧠 Contexto de autenticación
 import { useAuth } from "../context/AuthContext";
@@ -17,6 +16,7 @@ import ItemList from "../pages/items/List.jsx";
 import ItemDetail from "../pages/items/Detail.jsx";
 import Login from "../pages/auth/Login";
 import POS from "../pages/POS/_index.jsx";
+import POSAnotalo from "../pages/POSAnotalo/_index.jsx";
 
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -58,19 +58,8 @@ const AppRouter = () => {
         <Route path="item" element={<ItemDetail />} />
         <Route path="item/:id" element={<ItemDetail />} />
         <Route path="pos" element={<POS />} />
+        <Route path="pos/anotalo" element={<POSAnotalo />} />
       </Route>
-
-      {/* Punto de venta (layout separado) */}
-      {/* <Route
-        path="/pos"
-        element={
-          <ProtectedRoute>
-            <POSLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="registro" element={<POS />} />
-      </Route> */}
 
       {/* Redirección por defecto */}
       <Route

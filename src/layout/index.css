@@ -1,0 +1,23 @@
+/* base global (si no lo tenés ya) */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* layout principal */
+.main-layout {
+  min-height: 100vh;
+}
+
+/* wrapper derecho (header + content) */
+.main-layout__content {
+  min-height: 100vh;
+}
+
+/* contenido de la página */
+.main-layout__page {
+  padding: 10px;
+  padding-left: 25px;
+  overflow: auto;
+}

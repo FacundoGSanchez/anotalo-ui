@@ -1,13 +1,13 @@
 import { Layout, theme } from "antd";
-import { useState, useMemo, useContext } from "react";
+import { useState, useMemo } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Sidebar/Sidebar";
 import AppHeader from "./AppHeader";
+import "./index.css";
 
 const { Content } = Layout;
 
 const MainLayout = () => {
-  const { isMobile } = false;
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -18,26 +18,18 @@ const MainLayout = () => {
     setCollapsed((prev) => !prev);
   };
 
-  const handleBreakpoint = (broken) => {
-    setCollapsed(broken);
-  };
-
   const currentCollapsed = useMemo(() => collapsed, [collapsed]);
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Sidebar
-        setCollapsed={setCollapsed}
-        handleBreakpoint={handleBreakpoint}
-        isMobile={isMobile}
-        collapsed={currentCollapsed}
-      />
+    <Layout className="main-layout">
+      <Sidebar collapsed={currentCollapsed} setCollapsed={setCollapsed} />
 
-      <Layout>
+      <Layout className="main-layout__content">
         <AppHeader collapsed={currentCollapsed} handleToggle={handleToggle} />
 
         <Content
-          style={{ padding: 10, paddingLeft: 25, background: colorBgContainer }}
+          className="main-layout__page"
+          style={{ background: colorBgContainer }}
         >
           <Outlet />
         </Content>

@@ -4,20 +4,13 @@ import { SearchOutlined } from "@ant-design/icons";
 
 import ArticuloItem from "./ArticuloItem";
 import ResumenCarrito from "./ArticuloResumenCarrito";
-
-import { mockProducts, productColumns } from "../../data/mockData";
-import SelectSingleModal from "../../components/SelectSingleModal";
 import ArticuloHeader from "./ArticuloHeader";
+import SelectSingleModal from "../../components/SelectSingleModal";
+import { mockProducts, productColumns } from "../../data/mockData";
+
+import "./pos.css";
 
 const { Title } = Typography;
-
-const containerElevationStyle = {
-  boxShadow:
-    "0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
-  borderRadius: "8px",
-  padding: "20px",
-  backgroundColor: "#fff",
-};
 
 const POS = () => {
   const [listCarrito, setListCarrito] = useState([]);
@@ -29,18 +22,12 @@ const POS = () => {
     total: 0,
   });
   const [openProductModal, setOpenProductModal] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem("carrito");
-    if (saved) {
-      setListCarrito(JSON.parse(saved));
-    }
+    if (saved) setListCarrito(JSON.parse(saved));
   }, []);
 
-  // ---------------------------
-  // Guardar carrito + calcular resumen
-  // ---------------------------
   useEffect(() => {
     localStorage.setItem("carrito", JSON.stringify(listCarrito));
 
@@ -50,49 +37,32 @@ const POS = () => {
       0
     );
 
-    const descuentos = 0;
-    const recargo = 0;
-    const total = subtotal - descuentos + recargo;
-
     setValuesResumentCarrito({
       itemsCount,
       subtotal,
-      descuentos,
-      recargo,
-      total,
+      descuentos: 0,
+      recargo: 0,
+      total: subtotal,
     });
   }, [listCarrito]);
 
-  // ---------------------------
-  // Abrir modal al presionar ENTER
-  // ---------------------------
   const handleSearchProduct = (value) => {
-    setSearchValue(value);
     setTimeout(() => setOpenProductModal(true), 50);
   };
 
-  // ---------------------------
-  // Seleccionar producto
-  // ---------------------------
   const handleSelectProduct = (articulo) => {
     setListCarrito((prev) => [
       ...prev,
       {
-        id: articulo.id,
-        detalle: articulo.detalle,
-        precio: articulo.precio,
+        ...articulo,
         cantidad: 1,
         difPeso: 0,
         difPorcentaje: 0,
         subtotal: articulo.precio,
-        ...articulo,
       },
     ]);
   };
 
-  // ---------------------------
-  // Eliminar producto del carrito
-  // ---------------------------
   const handleDeleteItem = useCallback(
     (id) => setListCarrito((prev) => prev.filter((item) => item.id !== id)),
     []
@@ -108,43 +78,34 @@ const POS = () => {
 
   const carritoMemo = useMemo(() => listCarrito, [listCarrito]);
 
-  // ---------------------------
   return (
-    <div
-      style={{
-        padding: "20px",
-        minHeight: "100vh",
-        backgroundColor: "#f0f2f5",
-      }}
-    >
-      <div style={containerElevationStyle}>
-        <Title level={3} style={{ marginBottom: "24px" }}>
+    <div className="pos-page">
+      <div className="pos-container">
+        <Title level={3} className="pos-title">
           Punto de Venta
         </Title>
 
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={18}>
-            <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
+            <Row gutter={[16, 16]} className="pos-search-row">
               <Col xs={24}>
                 <Input
                   placeholder="Buscar Artículo (código de barras o descripción)"
                   size="large"
                   onPressEnter={(e) => handleSearchProduct(e.target.value)}
-                  suffix={
-                    <SearchOutlined style={{ color: "rgba(0,0,0,.45)" }} />
-                  }
+                  suffix={<SearchOutlined className="pos-search-icon" />}
                   autoFocus
                 />
               </Col>
             </Row>
 
-            {/* Listado Carrito */}
             <ArticuloHeader />
+
             <List
               dataSource={carritoMemo}
               locale={{ emptyText: "El carrito está vacío." }}
               renderItem={(item) => (
-                <List.Item style={{ padding: 0 }}>
+                <List.Item className="pos-list-item">
                   <ArticuloItem
                     {...item}
                     onDelete={() => handleDeleteItem(item.id)}
@@ -152,22 +113,16 @@ const POS = () => {
                   />
                 </List.Item>
               )}
-              style={{
-                minHeight: "300px",
-                maxHeight: "500px",
-                overflowY: "auto",
-              }}
+              className="pos-list"
             />
           </Col>
 
-          {/* Resumen Carrito */}
           <Col xs={24} lg={6}>
             <ResumenCarrito data={valuesResumentCarrito} />
           </Col>
         </Row>
       </div>
 
-      {/* MODAL DE ARTÍCULOS */}
       <SelectSingleModal
         open={openProductModal}
         onClose={() => setOpenProductModal(false)}
