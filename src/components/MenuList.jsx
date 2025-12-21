@@ -20,7 +20,7 @@ const MenuList = ({ darkTheme, setCollapsed }) => {
   const { isMobile } = useDevice();
 
   const handleClick = ({ key }) => {
-    const item = findMenuItem(menuItems, key);
+    const item = findMenuItem(MenuItems, key);
 
     const route = item?.meta?.route?.[isMobile ? "mobile" : "desktop"] || key;
 
