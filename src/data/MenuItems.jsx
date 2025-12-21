@@ -11,7 +11,7 @@ import {
   UserSwitchOutlined,
 } from "@ant-design/icons";
 
-const menuItems = [
+const MenuItems = [
   {
     key: "/",
     icon: <HomeOutlined />,
@@ -76,4 +76,4 @@ const menuItems = [
   },
 ];
 
-export default menuItems;
+export default MenuItems;

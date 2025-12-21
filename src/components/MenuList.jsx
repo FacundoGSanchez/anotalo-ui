@@ -1,6 +1,6 @@
 import { Menu } from "antd";
 import { useNavigate } from "react-router-dom";
-import menuItems from "../data/menuItems";
+import MenuItems from "../data/MenuItems";
 import { useDevice } from "../context/DeviceContext";
 
 // buscar item recursivamente
@@ -33,7 +33,7 @@ const MenuList = ({ darkTheme, setCollapsed }) => {
 
   return (
     <Menu
-      items={menuItems}
+      items={MenuItems}
       mode="inline"
       theme={darkTheme ? "dark" : "light"}
       onClick={handleClick}
