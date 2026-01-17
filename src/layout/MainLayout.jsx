@@ -2,7 +2,7 @@ import { Layout, theme } from "antd";
 import { useState, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar/Sidebar";
-import AppHeader from "./AppHeader";
+import AppHeader from "./Header/AppHeader";
 import "./index.css";
 
 const { Content } = Layout;

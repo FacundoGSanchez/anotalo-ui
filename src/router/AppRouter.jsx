@@ -1,12 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-
-// 🧩 Layouts
 import MainLayout from "../layout/MainLayout";
-
-// 🧠 Contexto de autenticación
 import { useAuth } from "../context/AuthContext";
-
-// 📄 Páginas
 import Home from "../pages/Home";
 import ClientList from "../pages/client/List";
 import ClientDetail from "../pages/client/Detail";
@@ -16,7 +10,7 @@ import ItemList from "../pages/items/List.jsx";
 import ItemDetail from "../pages/items/Detail.jsx";
 import Login from "../pages/auth/Login";
 import POS from "../pages/POS/_index.jsx";
-import POSAnotalo from "../pages/POSAnotalo/_index.jsx";
+import POSAnotalo from "../pages/POSMobile/_index.jsx";
 
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();

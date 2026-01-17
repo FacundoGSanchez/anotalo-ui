@@ -1,0 +1,42 @@
+.card-user__avatar {
+  cursor: pointer;
+  background-color: #87d068;
+}
+
+/* CARD */
+.user-card {
+  width: 250px;
+  border: none;
+}
+
+.user-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-card__info {
+  text-align: center;
+}
+
+.user-card__name {
+  margin: 0;
+  font-weight: bold;
+}
+
+.user-card__role {
+  margin: 0;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.user-card__email {
+  margin-top: 4px;
+  font-size: 0.8rem;
+}
+
+.user-card__logout {
+  margin-top: 10px;
+  background-color: #3f4a6d;
+}

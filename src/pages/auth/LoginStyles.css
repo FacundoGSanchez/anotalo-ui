@@ -1,9 +1,3 @@
-/* Colores de referencia: 
-   Fondo: #f8f8f8 (casi blanco)
-   Primario/Oscuro: #3f4a6d
-   Input Fondo: #f2f5f9
-*/
-
 .anotalo-login-screen {
   /* Contenedor principal: pantalla completa */
   min-height: 100vh;
@@ -75,7 +69,7 @@
 .anotalo-forgot-password-container {
   width: 100%;
   text-align: right;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .anotalo-forgot-password-link {
@@ -105,8 +99,8 @@
   width: 100%;
   background: #3f4a6d; /* Color base oscuro */
   text-align: center;
-  padding-top: 60px;
-  padding-bottom: 30px;
+  padding-top: 30px;
+  padding-bottom: 60px;
   position: relative;
   overflow: hidden;
 }
@@ -118,7 +112,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100px; /* Altura del "corte" */
+  height: 60px; /* Altura del "corte" */
   background: #f8f8f8; /* Color de fondo del body/pantalla */
   /* Crea la forma diagonal - Ajusta el skewY para el ángulo */
   transform: skewY(-2deg) translateY(-80%);

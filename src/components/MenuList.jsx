@@ -22,6 +22,8 @@ const MenuList = ({ darkTheme, setCollapsed }) => {
   const handleClick = ({ key }) => {
     const item = findMenuItem(MenuItems, key);
 
+    if (item?.disabled) return;
+
     const route = item?.meta?.route?.[isMobile ? "mobile" : "desktop"] || key;
 
     navigate(route);

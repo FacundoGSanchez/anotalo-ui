@@ -84,7 +84,11 @@ const Login = () => {
 
           {/* Enlace de Olvidaste Contraseña */}
           <div className="anotalo-forgot-password-container">
-            <Link href="#" className="anotalo-forgot-password-link">
+            <Link
+              href="#"
+              className="anotalo-forgot-password-link"
+              disabled="true"
+            >
               ¿Olvidaste tu contraseña?
             </Link>
           </div>
@@ -105,7 +109,11 @@ const Login = () => {
 
       {/* 3. Sección inferior de Crear Cuenta */}
       <Footer className="anotalo-create-account-footer">
-        <Button type="link" className="anotalo-create-account-button">
+        <Button
+          type="link"
+          className="anotalo-create-account-button"
+          disabled="true"
+        >
           Crear Cuenta
         </Button>
       </Footer>

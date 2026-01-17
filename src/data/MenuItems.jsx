@@ -25,7 +25,7 @@ const MenuItems = [
     meta: {
       collapseOnClick: true,
       route: {
-        mobile: "/pos/anotalo",
+        //mobile: "/pos/anotalo",
         desktop: "/pos",
       },
     },
@@ -61,16 +61,19 @@ const MenuItems = [
         key: "/movimientos",
         icon: <UnorderedListOutlined />,
         label: "Movimientos",
+        disabled: true,
       },
       {
         key: "/stock",
         icon: <TableOutlined />,
         label: "Stock",
+        disabled: true,
       },
       {
         key: "/saldocuentas",
         icon: <UserSwitchOutlined />,
         label: "Saldo Cuentas",
+        disabled: true,
       },
     ],
   },

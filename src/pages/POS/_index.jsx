@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { Row, Col, Input, List, Typography } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
@@ -8,12 +14,17 @@ import ArticuloHeader from "./ArticuloHeader";
 import SelectSingleModal from "../../components/SelectSingleModal";
 import { mockProducts, productColumns } from "../../data/mockData";
 
+import { POSService } from "../../services/pos/_index";
+
 import "./pos.css";
 
 const { Title } = Typography;
 
 const POS = () => {
+  const searchInputRef = useRef(null);
+
   const [listCarrito, setListCarrito] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [valuesResumentCarrito, setValuesResumentCarrito] = useState({
     itemsCount: 0,
     subtotal: 0,
@@ -23,57 +34,47 @@ const POS = () => {
   });
   const [openProductModal, setOpenProductModal] = useState(false);
 
+  // 🔹 Carga inicial (igual que antes)
   useEffect(() => {
-    const saved = localStorage.getItem("carrito");
-    if (saved) setListCarrito(JSON.parse(saved));
+    const saved = POSService.loadCarrito();
+    setListCarrito(saved);
   }, []);
 
+  // 🔹 Recalcular resumen (igual que antes)
   useEffect(() => {
-    localStorage.setItem("carrito", JSON.stringify(listCarrito));
-
-    const itemsCount = listCarrito.length;
-    const subtotal = listCarrito.reduce(
-      (acc, item) => acc + item.precio * item.cantidad,
-      0
-    );
-
-    setValuesResumentCarrito({
-      itemsCount,
-      subtotal,
-      descuentos: 0,
-      recargo: 0,
-      total: subtotal,
-    });
+    setValuesResumentCarrito(POSService.getResumen(listCarrito));
   }, [listCarrito]);
 
-  const handleSearchProduct = (value) => {
-    setTimeout(() => setOpenProductModal(true), 50);
+  const resetSearch = () => {
+    setSearchText("");
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 50);
+  };
+
+  const handleSearchProduct = () => {
+    setTimeout(() => {
+      setOpenProductModal(true);
+    }, 50);
   };
 
   const handleSelectProduct = (articulo) => {
-    setListCarrito((prev) => [
-      ...prev,
-      {
-        ...articulo,
-        cantidad: 1,
-        difPeso: 0,
-        difPorcentaje: 0,
-        subtotal: articulo.precio,
-      },
-    ]);
+    setListCarrito((prev) => POSService.addItem(prev, articulo));
+    resetSearch(); // 🔥 limpiar POS
   };
 
   const handleDeleteItem = useCallback(
-    (id) => setListCarrito((prev) => prev.filter((item) => item.id !== id)),
+    (id) => setListCarrito((prev) => POSService.removeItem(prev, id)),
     []
   );
 
   const handleUpdateItem = (id, updatedValues) => {
-    setListCarrito((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, ...updatedValues } : item
-      )
-    );
+    setListCarrito((prev) => POSService.updateItem(prev, id, updatedValues));
+  };
+
+  const handleCloseModal = () => {
+    setOpenProductModal(false);
+    resetSearch(); // 🔥 limpiar POS
   };
 
   const carritoMemo = useMemo(() => listCarrito, [listCarrito]);
@@ -90,9 +91,12 @@ const POS = () => {
             <Row gutter={[16, 16]} className="pos-search-row">
               <Col xs={24}>
                 <Input
+                  ref={searchInputRef}
                   placeholder="Buscar Artículo (código de barras o descripción)"
                   size="large"
-                  onPressEnter={(e) => handleSearchProduct(e.target.value)}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onPressEnter={handleSearchProduct}
                   suffix={<SearchOutlined className="pos-search-icon" />}
                   autoFocus
                 />
@@ -125,10 +129,11 @@ const POS = () => {
 
       <SelectSingleModal
         open={openProductModal}
-        onClose={() => setOpenProductModal(false)}
+        onClose={handleCloseModal}
         data={mockProducts}
         columns={productColumns}
         onSelect={handleSelectProduct}
+        initialSearch={searchText}
       />
     </div>
   );

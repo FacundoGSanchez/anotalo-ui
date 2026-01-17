@@ -63,7 +63,7 @@ const ArticuloItem = ({
       </Col>
 
       {/* Cantidad */}
-      <Col xs={6} md={2}>
+      <Col xs={6} md={3}>
         <InputNumber
           min={1}
           value={cant}
