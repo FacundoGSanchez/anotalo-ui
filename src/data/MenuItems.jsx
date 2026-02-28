@@ -4,10 +4,8 @@ import {
   FormOutlined,
   UsergroupAddOutlined,
   DeliveredProcedureOutlined,
-  TagsOutlined,
   ProjectOutlined,
   UnorderedListOutlined,
-  TableOutlined,
   UserSwitchOutlined,
 } from "@ant-design/icons";
 
@@ -21,12 +19,12 @@ const MenuItems = [
   {
     key: "/pos",
     icon: <ShopOutlined />,
-    label: "Punto de Venta",
+    label: "Pos Anotalo",
     meta: {
       collapseOnClick: true,
       route: {
-        //mobile: "/pos/anotalo",
-        desktop: "/pos",
+        mobile: "/pos/anotalo",
+        desktop: "/pos/anotalo",
       },
     },
   },
@@ -36,24 +34,23 @@ const MenuItems = [
     label: "Nóminas",
     children: [
       {
-        key: "/clients",
+        // ✅ KEY ÚNICA: Coincide con la ruta dinámica de Clientes
+        key: "/entidades/clientes",
         icon: <UsergroupAddOutlined />,
         label: "Clientes",
+        disabled: false, // Activado
       },
       {
-        key: "/suppliers",
+        // ✅ KEY ÚNICA: Coincide con la ruta dinámica de Proveedores
+        key: "/entidades/proveedores",
         icon: <DeliveredProcedureOutlined />,
         label: "Proveedores",
-      },
-      {
-        key: "/items",
-        icon: <TagsOutlined />,
-        label: "Ítems",
+        disabled: false, // Activado
       },
     ],
   },
   {
-    key: "movimientos",
+    key: "actividad", // Cambié la key de movimientos para evitar conflictos si el path es igual
     icon: <ProjectOutlined />,
     label: "Actividad",
     children: [
@@ -61,13 +58,7 @@ const MenuItems = [
         key: "/movimientos",
         icon: <UnorderedListOutlined />,
         label: "Movimientos",
-        disabled: true,
-      },
-      {
-        key: "/stock",
-        icon: <TableOutlined />,
-        label: "Stock",
-        disabled: true,
+        disabled: false,
       },
       {
         key: "/saldocuentas",

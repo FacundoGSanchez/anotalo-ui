@@ -3,8 +3,17 @@ import { createContext, useContext, useEffect, useState } from "react";
 export const DeviceContext = createContext();
 
 export const DeviceProvider = ({ children }) => {
-  const [isMobile, setIsMobile] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(true);
+  const checkIsMobile = () => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 768;
+    }
+    return false; // Valor por defecto para SSR si aplica
+  };
+
+  // 2. INICIALIZAMOS EL ESTADO CON EL VALOR REAL AL CARGAR
+  // En lugar de (false), usamos el resultado de la función.
+  const [isMobile, setIsMobile] = useState(checkIsMobile());
+  const [isDesktop, setIsDesktop] = useState(!checkIsMobile());
 
   useEffect(() => {
     const handleResize = () => {
@@ -13,7 +22,8 @@ export const DeviceProvider = ({ children }) => {
       setIsDesktop(!mobile);
     };
 
-    handleResize();
+    // Ya no es necesario llamar a handleResize() aquí porque
+    // el estado inicial ya es correcto.
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);

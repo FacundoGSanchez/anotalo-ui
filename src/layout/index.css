@@ -17,7 +17,7 @@ body,
 
 /* contenido de la página */
 .main-layout__page {
-  padding: 10px;
-  padding-left: 25px;
+  padding: 5px;
+  padding-left: 5px;
   overflow: auto;
 }

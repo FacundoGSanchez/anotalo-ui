@@ -6,7 +6,8 @@
   outline: none; /* Quita el contorno que aparece al enfocar (por ejemplo, en formularios) */
   list-style: none; /* Quita los estilos de listas (viñetas o números) */
   box-sizing: border-box; /* Incluye el padding y borde dentro del ancho/alto total del elemento */
-  font-family: "Poppins", sans-serif; /* Define la fuente principal como Poppins y una genérica sans-serif como alternativa */
+  font-family:
+    "Poppins", sans-serif; /* Define la fuente principal como Poppins y una genérica sans-serif como alternativa */
 }
 .sidebar {
   color: #fff;
@@ -57,4 +58,37 @@
 
 .sidebar.sidebar-hidden {
   display: none !important;
+}
+
+/* En tu archivo de estilos globales o App.css */
+
+.ant-layout-sider {
+  background: #001529 !important; /* El azul oscuro de tu imagen */
+}
+
+/* El item activo como "píldora" (según imagen 1) */
+.ant-menu-item-selected {
+  background-color: #1890ff !important;
+  border-radius: 8px !important;
+  margin: 4px 8px !important;
+  width: calc(100% - 16px) !important;
+}
+
+/* Submenús con fondo más oscuro para contraste */
+.ant-menu-sub {
+  background: #000c17 !important;
+}
+
+/* index.css */
+
+/* Oculta físicamente el sidebar si el navegador tiene menos de 768px */
+@media (max-width: 767px) {
+  .ant-layout-sider,
+  .sidebar {
+    display: none !important;
+    visibility: hidden;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+  }
 }
