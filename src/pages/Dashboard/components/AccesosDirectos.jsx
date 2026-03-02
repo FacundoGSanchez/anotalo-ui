@@ -1,88 +1,78 @@
 import React from "react";
-import { Card, Row, Col, Typography } from "antd";
-import {
-  MdOutlineAddShoppingCart,
-  MdOutlineLocalShipping,
-  MdOutlineAccountBalanceWallet,
-} from "react-icons/md";
+import { Card, Typography } from "antd";
+import { OPCIONES_TIPO, POS_COLORS } from "../../../constants/posConstants";
 
 const { Text } = Typography;
 
 const AccesoBtn = ({ icon, label, color, onClick }) => (
   <div
     onClick={onClick}
-    className="acceso-btn-container" // Usaremos una clase para el efecto active
     style={{
       textAlign: "center",
       cursor: "pointer",
-      padding: "8px 0",
-      transition: "all 0.2s ease",
+      minWidth: "75px",
+      flexShrink: 0,
     }}
   >
     <div
       style={{
-        fontSize: "28px",
+        fontSize: "26px",
         color: color,
-        background: `${color}15`,
-        width: "60px",
-        height: "60px",
-        borderRadius: "50%",
+        background: `${color}12`,
+        maxWidth: "56px",
+        height: "56px",
+        borderRadius: "18px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         margin: "0 auto 8px auto",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+        boxShadow: `0 4px 10px ${color}15`,
       }}
     >
       {icon}
     </div>
-    <Text strong style={{ fontSize: "13px", display: "block" }}>
-      {label}
+    <Text
+      strong
+      style={{ fontSize: "11px", display: "block", color: "#595959" }}
+    >
+      {label.toUpperCase()}
     </Text>
   </div>
 );
 
-const AccesosDirectos = ({ onSelectTipo }) => (
-  <Card
-    title={
-      <Text strong style={{ fontSize: "16px" }}>
-        Accesos Rápidos
-      </Text>
-    }
-    style={{
-      borderRadius: "16px",
-      marginBottom: "16px",
-      border: "none",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-    }}
-  >
-    <Row gutter={[8, 0]}>
-      <Col span={8}>
-        <AccesoBtn
-          icon={<MdOutlineAddShoppingCart />}
-          label="Venta"
-          color="#1890ff"
-          onClick={() => onSelectTipo("Venta")}
-        />
-      </Col>
-      <Col span={8}>
-        <AccesoBtn
-          icon={<MdOutlineLocalShipping />}
-          label="Pago"
-          color="#fa8c16"
-          onClick={() => onSelectTipo("Pago")}
-        />
-      </Col>
-      <Col span={8}>
-        <AccesoBtn
-          icon={<MdOutlineAccountBalanceWallet />}
-          label="Retiro"
-          color="#546e7a"
-          onClick={() => onSelectTipo("Retiro")}
-        />
-      </Col>
-    </Row>
-  </Card>
-);
+const AccesosDirectos = ({ onSelectTipo }) => {
+  return (
+    <Card
+      title={<Text strong>Accesos Rápidos</Text>}
+      style={{
+        borderRadius: "20px",
+        marginBottom: "16px",
+        boxShadow: "0 4px 15px rgba(0,0,0,0.04)",
+      }}
+      styles={{ body: { padding: "12px 10px" } }}
+    >
+      <div
+        style={{
+          display: "flex",
+          overflowX: "auto",
+          gap: "6px",
+          paddingBottom: "8px",
+        }}
+        className="no-scrollbar"
+      >
+        <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+        {OPCIONES_TIPO.map((opt) => (
+          <AccesoBtn
+            key={opt.key}
+            icon={opt.icon}
+            label={opt.key}
+            color={POS_COLORS[opt.key]}
+            onClick={() => onSelectTipo(opt.key)}
+          />
+        ))}
+      </div>
+    </Card>
+  );
+};
 
 export default AccesosDirectos;

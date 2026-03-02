@@ -1,130 +1,129 @@
-import React, { useState, useEffect } from "react";
-import { Table, Tag, Card, Empty, Typography, Space } from "antd";
-import { MdChevronRight } from "react-icons/md";
+import React, { useState, useEffect, useMemo } from "react";
+import { Empty, Button, Spin } from "antd";
 import dayjs from "dayjs";
+import "dayjs/locale/es";
 
-// Componentes refactorizados
+// Constantes
+import {
+  MOVIMIENTO_TIPOS,
+  NOMBRES_FORMAS_PAGO,
+} from "../../constants/posConstants";
+
+// Sub-componentes
 import HeaderMovimientos from "./components/HeaderMovimientos";
 import ModalFiltros from "./components/ModalFiltros";
 import ModalDetalleMovimiento from "./components/ModalDetalleMovimiento";
-
-const { Text } = Typography;
+import MovimientoGrupo from "./components/MovimientoGrupo";
 
 const MovimientosPage = () => {
-  const [movimientosOriginales, setMovimientosOriginales] = useState([]);
-  const [movimientosFiltrados, setMovimientosFiltrados] = useState([]);
+  const [originales, setOriginales] = useState([]);
+  const [limit, setLimit] = useState(50); // Control de paginación local
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Estados de Filtro
-  const [fecha, setFecha] = useState(dayjs());
-  const [tipos, setTipos] = useState(["Venta", "Pago", "Retiro"]);
-  const [formas, setFormas] = useState([
-    "Efectivo",
-    "Debito",
-    "Credito",
-    "Transferencia",
-    "Cta Corriente",
-    "QR",
-  ]);
+  // Filtros
+  const [tipos, setTipos] = useState(Object.values(MOVIMIENTO_TIPOS));
+  const [formas, setFormas] = useState(NOMBRES_FORMAS_PAGO);
 
+  // UI States
   const [isFiltroOpen, setIsFiltroOpen] = useState(false);
   const [selectedMov, setSelectedMov] = useState(null);
   const [isDetalleOpen, setIsDetalleOpen] = useState(false);
 
-  const cargarDatos = () => {
-    const saved = JSON.parse(localStorage.getItem("movimientos_db")) || [];
-    setMovimientosOriginales(saved.sort((a, b) => b.id - a.id));
-  };
-
-  const limpiarFiltros = () => {
-    setFecha(dayjs());
-    setTipos(["Venta", "Pago", "Retiro"]);
-    setFormas([
-      "Efectivo",
-      "Debito",
-      "Credito",
-      "Transferencia",
-      "Cta Corriente",
-      "QR",
-    ]);
-  };
-
   useEffect(() => {
-    cargarDatos();
+    cargarDatosDesdeStorage();
   }, []);
 
-  useEffect(() => {
-    let res = movimientosOriginales.filter((m) =>
-      dayjs(m.fecha).isSame(fecha, "day"),
-    );
-    res = res.filter(
+  const cargarDatosDesdeStorage = () => {
+    const saved = JSON.parse(localStorage.getItem("movimientos_db")) || [];
+    // Ordenar por ID/Fecha descendente
+    setOriginales(saved.sort((a, b) => b.id - a.id));
+  };
+
+  // --- LÓGICA DE FILTRADO Y AGRUPACIÓN ---
+  const { agrupados, totalVisible } = useMemo(() => {
+    // 1. Filtrar
+    const filtrados = originales.filter(
       (m) => tipos.includes(m.tipo) && formas.includes(m.formaPago),
     );
-    setMovimientosFiltrados(res);
-  }, [tipos, formas, fecha, movimientosOriginales]);
 
-  const columns = [
-    {
-      title: "MOV",
-      render: (_, record) => (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <Space size={6} style={{ marginBottom: 2 }}>
-              <Tag color={record.tipo === "Venta" ? "blue" : "volcano"}>
-                {record.tipo.toUpperCase()}
-              </Tag>
-              <Text type="secondary" style={{ fontSize: "11px" }}>
-                {record.hora} • {record.formaPago}
-              </Text>
-            </Space>
-            <Text strong style={{ display: "block" }}>
-              {record.entidad?.nombre || "General"}
-            </Text>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Text
-              strong
-              style={{ color: record.tipo === "Venta" ? "#52c41a" : "#ff4d4f" }}
-            >
-              $ {record.importe.toLocaleString("es-AR")}
-            </Text>
-            <MdChevronRight size={18} color="#bfbfbf" />
-          </div>
-        </div>
-      ),
-    },
-  ];
+    // 2. Aplicar límite (Paginación)
+    const segmentados = filtrados.slice(0, limit);
+
+    // 3. Agrupar por fecha
+    const grupos = {};
+    segmentados.forEach((item) => {
+      let label = dayjs(item.fecha).locale("es").format("dddd DD [de] MMMM");
+      if (dayjs(item.fecha).isSame(dayjs(), "day")) label = "Hoy";
+      if (dayjs(item.fecha).isSame(dayjs().subtract(1, "day"), "day"))
+        label = "Ayer";
+
+      const labelFinal = label.charAt(0).toUpperCase() + label.slice(1);
+      if (!grupos[labelFinal]) grupos[labelFinal] = [];
+      grupos[labelFinal].push(item);
+    });
+
+    return { agrupados: grupos, totalVisible: filtrados.length };
+  }, [originales, tipos, formas, limit]);
+
+  const handleCargarMas = () => {
+    setLoadingMore(true);
+    // Simulamos un delay de red para cuando conectes la API
+    setTimeout(() => {
+      setLimit((prev) => prev + 50);
+      setLoadingMore(false);
+      // Aquí iría: fetchMoreFromAPI().then(...)
+    }, 600);
+  };
 
   return (
-    <div style={{ padding: "16px", background: "#f8f9fa", minHeight: "100vh" }}>
-      <HeaderMovimientos
-        fecha={fecha}
-        onOpenFiltros={() => setIsFiltroOpen(true)}
-      />
+    <div
+      style={{
+        padding: "16px",
+        background: "#f8f9fa",
+        minHeight: "100vh",
+        paddingBottom: "50px",
+      }}
+    >
+      <HeaderMovimientos onOpenFiltros={() => setIsFiltroOpen(true)} />
 
-      <Card
-        styles={{ body: { padding: 0 } }}
-        style={{ borderRadius: "12px", overflow: "hidden", border: "none" }}
-      >
-        <Table
-          dataSource={movimientosFiltrados}
-          columns={columns}
-          showHeader={false}
-          pagination={false}
-          onRow={(record) => ({
-            onClick: () => {
-              setSelectedMov(record);
-              setIsDetalleOpen(true);
-            },
-          })}
-          locale={{ emptyText: <Empty description="Sin movimientos" /> }}
-        />
-      </Card>
+      {Object.keys(agrupados).length === 0 ? (
+        <Empty style={{ marginTop: 80 }} description="Sin movimientos" />
+      ) : (
+        <>
+          {Object.entries(agrupados).map(([fecha, items]) => (
+            <MovimientoGrupo
+              key={fecha}
+              fecha={fecha}
+              items={items}
+              onSelect={(mov) => {
+                setSelectedMov(mov);
+                setIsDetalleOpen(true);
+              }}
+            />
+          ))}
+
+          {/* BOTÓN VER MÁS: Solo se muestra si hay más movimientos que el límite actual */}
+          {totalVisible > limit && (
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              <Button
+                onClick={handleCargarMas}
+                loading={loadingMore}
+                style={{
+                  borderRadius: "8px",
+                  height: "40px",
+                  width: "100%",
+                  maxWidth: "300px",
+                  fontWeight: 600,
+                  color: "#1890ff",
+                  border: "1px solid #1890ff",
+                }}
+              >
+                {loadingMore ? "Cargando..." : "Ver más movimientos"}
+              </Button>
+            </div>
+          )}
+        </>
+      )}
 
       <ModalFiltros
         open={isFiltroOpen}
@@ -133,16 +132,17 @@ const MovimientosPage = () => {
         setTipos={setTipos}
         formas={formas}
         setFormas={setFormas}
-        fecha={fecha}
-        setFecha={setFecha}
-        onReset={limpiarFiltros} // <-- Pasamos la función
+        onReset={() => {
+          setTipos(Object.values(MOVIMIENTO_TIPOS));
+          setFormas(NOMBRES_FORMAS_PAGO);
+        }}
       />
 
       <ModalDetalleMovimiento
         visible={isDetalleOpen}
         movimiento={selectedMov}
         onClose={() => setIsDetalleOpen(false)}
-        onUpdateList={cargarDatos}
+        onUpdateList={cargarDatosDesdeStorage}
       />
     </div>
   );

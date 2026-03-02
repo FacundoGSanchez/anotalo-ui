@@ -1,16 +1,10 @@
 import React from "react";
-import {
-  Modal,
-  Typography,
-  Tag,
-  Space,
-  Divider,
-  Button,
-  DatePicker,
-  Tooltip,
-} from "antd";
+import { Modal, Typography, Tag, Space, Divider, Button, Tooltip } from "antd";
 import { MdRestartAlt, MdOutlineLayersClear } from "react-icons/md";
-import dayjs from "dayjs";
+import {
+  MOVIMIENTO_TIPOS,
+  NOMBRES_FORMAS_PAGO,
+} from "../../../constants/posConstants";
 
 const { Text } = Typography;
 const { CheckableTag } = Tag;
@@ -22,20 +16,8 @@ const ModalFiltros = ({
   setTipos,
   formas,
   setFormas,
-  fecha,
-  setFecha,
   onReset,
 }) => {
-  const formasPagoOpciones = [
-    "Efectivo",
-    "Debito",
-    "Credito",
-    "Transferencia",
-    "Cta Corriente",
-    "QR",
-  ];
-  const tiposOpciones = ["Venta", "Pago", "Retiro"];
-
   const handleToggle = (list, setList, tag, checked) => {
     const next = checked ? [...list, tag] : list.filter((t) => t !== tag);
     setList(next);
@@ -51,7 +33,8 @@ const ModalFiltros = ({
       title="Filtros de Búsqueda"
       open={open}
       onCancel={onClose}
-      width={320} // Ancho optimizado para mobile
+      width={320}
+      centered
       footer={[
         <div
           key="footer"
@@ -62,7 +45,6 @@ const ModalFiltros = ({
           }}
         >
           <Space size={4}>
-            {/* BOTÓN REESTABLECER (ICONO) */}
             <Tooltip title="Reestablecer todo">
               <Button
                 type="text"
@@ -71,8 +53,6 @@ const ModalFiltros = ({
                 onClick={onReset}
               />
             </Tooltip>
-
-            {/* BOTÓN LIMPIAR (ICONO) */}
             <Tooltip title="Limpiar selección">
               <Button
                 type="text"
@@ -82,9 +62,7 @@ const ModalFiltros = ({
               />
             </Tooltip>
           </Space>
-
           <Button
-            key="ok"
             type="primary"
             onClick={onClose}
             style={{ borderRadius: "8px" }}
@@ -93,7 +71,6 @@ const ModalFiltros = ({
           </Button>
         </div>,
       ]}
-      centered
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         {/* SECCIÓN TIPOS */}
@@ -102,7 +79,7 @@ const ModalFiltros = ({
             Tipos
           </Text>
           <Space wrap size={[4, 8]}>
-            {tiposOpciones.map((tag) => (
+            {Object.values(MOVIMIENTO_TIPOS).map((tag) => (
               <CheckableTag
                 key={tag}
                 checked={tipos.includes(tag)}
@@ -127,7 +104,7 @@ const ModalFiltros = ({
             Formas de Pago
           </Text>
           <Space wrap size={[4, 8]}>
-            {formasPagoOpciones.map((tag) => (
+            {NOMBRES_FORMAS_PAGO.map((tag) => (
               <CheckableTag
                 key={tag}
                 checked={formas.includes(tag)}
@@ -138,31 +115,10 @@ const ModalFiltros = ({
                   margin: 0,
                 }}
               >
-                {tag === "Debito"
-                  ? "Débito"
-                  : tag === "Credito"
-                    ? "Crédito"
-                    : tag}
+                {tag}
               </CheckableTag>
             ))}
           </Space>
-        </div>
-
-        <Divider style={{ margin: 0 }} />
-
-        {/* SECCIÓN FECHA (Solo Input) */}
-        <div>
-          <Text strong style={{ display: "block", marginBottom: "8px" }}>
-            Fecha
-          </Text>
-          <DatePicker
-            style={{ width: "100%" }}
-            value={fecha}
-            format="DD/MM/YYYY"
-            inputReadOnly
-            allowClear={false}
-            onChange={(d) => d && setFecha(d)}
-          />
         </div>
       </div>
     </Modal>
