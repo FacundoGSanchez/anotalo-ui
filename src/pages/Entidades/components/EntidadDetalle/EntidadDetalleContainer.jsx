@@ -27,7 +27,6 @@ const EntidadDetalleContainer = () => {
         navigate(`/entidades/${tipo}`);
       }
     } else {
-      // 🚀 Por defecto ACTIVO al crear
       form.setFieldsValue({ activo: true });
     }
     setLoading(false);
@@ -81,6 +80,7 @@ const EntidadDetalleContainer = () => {
             form={form}
             isEdit={isEdit}
             colorTema={colorTema}
+            isCliente={isCliente}
             onFinish={onSave}
           />
         </Spin>

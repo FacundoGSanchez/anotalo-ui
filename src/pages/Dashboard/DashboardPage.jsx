@@ -49,7 +49,7 @@ const DashboardPage = () => {
   const handleIrARegistro = (tipo) => {
     navigate("/pos/anotalo", {
       state: {
-        tipoDirecto: tipo,
+        tipoDirecto: tipo, // Esto debe coincidir con el useEffect del hook
         skipFirstStep: true,
       },
     });

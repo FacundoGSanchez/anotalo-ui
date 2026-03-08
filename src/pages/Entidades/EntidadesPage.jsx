@@ -6,9 +6,6 @@ import EntidadDetalleContainer from "./components/EntidadDetalle/EntidadDetalleC
 const EntidadesPage = () => {
   const { tipo, action, id } = useParams();
 
-  // Debug: Si esto sale undefined al hacer clic en una fila, el problema es el AppRouter
-  console.log("Params en Orquestador:", { tipo, action, id });
-
   if (action === "nuevo" || action === "edit") {
     return <EntidadDetalleContainer />;
   }

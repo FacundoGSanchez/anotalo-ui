@@ -1,60 +1,16 @@
 import React from "react";
 import { Card, Row, Col, Typography } from "antd";
 import { MdPeople, MdStore, MdManageAccounts } from "react-icons/md";
-import { useNavigate } from "react-router-dom"; // Hook de navegación
+import { useNavigate } from "react-router-dom";
+import GestionItem from "./GestionItem";
 
 const { Text } = Typography;
-
-const GestionItem = ({ icon, label, onClick }) => (
-  <div
-    onClick={onClick}
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      cursor: "pointer",
-      padding: "12px 0", // Un poco más de aire para el touch
-      transition: "transform 0.1s ease",
-    }}
-    // Efecto simple de feedback al presionar
-    onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
-    onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-  >
-    <div
-      style={{
-        fontSize: "28px",
-        color: "#595959",
-        marginBottom: "6px",
-        background: "#f5f5f5",
-        width: "50px",
-        height: "50px",
-        borderRadius: "12px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {icon}
-    </div>
-    <Text style={{ fontSize: "12px", color: "#595959", fontWeight: "500" }}>
-      {label}
-    </Text>
-  </div>
-);
 
 const GestionGrid = () => {
   const navigate = useNavigate();
 
   const handleNavigate = (tipo) => {
-    if (tipo === "usuarios") {
-      // Si aún no tienes la página de usuarios, puedes mostrar un mensaje
-      // o navegar a una ruta que crearás luego
-      navigate("/usuarios");
-    } else {
-      // Navega a /entidades/clientes o /entidades/proveedores
-      navigate(`/entidades/${tipo}`);
-    }
+    navigate(`/entidades/${tipo}`);
   };
 
   return (
@@ -87,10 +43,12 @@ const GestionGrid = () => {
           />
         </Col>
         <Col span={8}>
+          {/* PASAMOS DISABLED DESDE AQUÍ */}
           <GestionItem
             icon={<MdManageAccounts />}
             label="Usuarios"
-            onClick={() => handleNavigate("usuarios")}
+            onClick={() => navigate("/usuarios")}
+            disabled={true}
           />
         </Col>
       </Row>

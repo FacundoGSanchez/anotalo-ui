@@ -14,34 +14,44 @@ export const usePosFlow = () => {
     entidad: null,
   });
 
+  // En tu hook usePosFlow
   useEffect(() => {
-    if (location.state?.skipFirstStep && location.state?.tipoInicial) {
-      setMovimiento((prev) => ({ ...prev, tipo: location.state.tipoInicial }));
+    // Asegúrate de usar tipoInicial (como envías en el Dashboard)
+    if (location.state?.skipFirstStep && location.state?.tipoDirecto) {
+      setMovimiento((prev) => ({
+        ...prev,
+        tipo: location.state.tipoDirecto,
+      }));
+      // Forzamos el paso al importe
       setCurrentStep(STEPS.IMPORTE);
-      window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
   const handleNext = (data) => {
-    // 1. Calculamos el estado que queremos tener
     const nuevoEstado = { ...movimiento, ...data };
+    setMovimiento(nuevoEstado);
 
-    // 2. Verificamos si es un flujo de caja (Ingreso/Retiro) en el paso del Importe
-    const esFlujoInterno =
-      nuevoEstado.tipo === MOVIMIENTO_TIPOS.RETIRO ||
-      nuevoEstado.tipo === MOVIMIENTO_TIPOS.INGRESO;
+    // Lógica: Si estoy en IMPORTE, decidir a dónde ir
+    if (currentStep === STEPS.IMPORTE) {
+      const esFlujoInterno =
+        nuevoEstado.tipo === MOVIMIENTO_TIPOS.RETIRO ||
+        nuevoEstado.tipo === MOVIMIENTO_TIPOS.INGRESO;
 
-    if (esFlujoInterno && currentStep === STEPS.IMPORTE) {
-      // Seteamos todo de un solo golpe para evitar problemas de asincronía
-      setMovimiento({
-        ...nuevoEstado,
-        formaPago: "Efectivo",
-        entidad: { id: 0, nombre: "Caja Interna" },
-      });
-      setCurrentStep(STEPS.CONFIRMAR);
+      if (esFlujoInterno) {
+        // Configuramos valores por defecto y saltamos a confirmar
+        setMovimiento((prev) => ({
+          ...prev,
+          ...data,
+          formaPago: "Efectivo",
+          entidad: { id: 0, nombre: "Caja Interna" },
+        }));
+        setCurrentStep(STEPS.CONFIRMAR);
+      } else {
+        // Flujo normal (Venta/Pago)
+        setCurrentStep(STEPS.FORMA_PAGO);
+      }
     } else {
-      // Flujo normal (Venta/Pago)
-      setMovimiento(nuevoEstado);
+      // Si estamos en cualquier otro paso, simplemente avanzar
       setCurrentStep((prev) => prev + 1);
     }
   };
