@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 import { Input, Button, Form, Typography, Layout } from "antd";
-import {
-  UserOutlined,
-  LockOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { MOCK_USER_DATA, useAuth } from "../../context/AuthContext";
 import "./components/style.css";
 import AnotaloLogo from "./components/Logo";
 
@@ -15,7 +10,7 @@ const { Title, Link } = Typography;
 const { Footer, Content } = Layout;
 
 const MOCK_USER = "admin";
-const MOCK_PASS = "ladante2025";
+const MOCK_PASS = "adminanotalo";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -27,10 +22,10 @@ const Login = () => {
     setTimeout(() => {
       setLoading(false);
       if (values.username === MOCK_USER && values.password === MOCK_PASS) {
-        login();
+        login(MOCK_USER_DATA);
         navigate("/");
       } else {
-        alert("Credenciales incorrectas. Usa: admin / ladante2025");
+        alert("Credenciales incorrectas.");
       }
     }, 1000);
   };
@@ -84,11 +79,7 @@ const Login = () => {
 
           {/* Enlace de Olvidaste Contraseña */}
           <div className="anotalo-forgot-password-container">
-            <Link
-              href="#"
-              className="anotalo-forgot-password-link"
-              disabled="true"
-            >
+            <Link href="#" className="anotalo-forgot-password-link" disabled>
               ¿Olvidaste tu contraseña?
             </Link>
           </div>
@@ -109,11 +100,7 @@ const Login = () => {
 
       {/* 3. Sección inferior de Crear Cuenta */}
       <Footer className="anotalo-create-account-footer">
-        <Button
-          type="link"
-          className="anotalo-create-account-button"
-          disabled="true"
-        >
+        <Button type="link" className="anotalo-create-account-button" disabled>
           Crear Cuenta
         </Button>
       </Footer>

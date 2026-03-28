@@ -5,6 +5,26 @@ import { DeviceProvider } from "./context/DeviceContext";
 import App from "./App";
 import "./index.css";
 
+// Registro del Service Worker para la PWA
+import { registerSW } from "virtual:pwa-register";
+
+// Configura la actualización automática del Service Worker
+const updateSW = registerSW({
+  onNeedRefresh() {
+    // Esto disparará un aviso nativo del navegador para recargar y aplicar cambios
+    if (
+      confirm(
+        "Hay una nueva versión de Anotalo disponible. ¿Deseas actualizar?",
+      )
+    ) {
+      updateSW(true);
+    }
+  },
+  onOfflineReady() {
+    console.log("Anotalo ya está lista para usarse sin conexión.");
+  },
+});
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter
     future={{
@@ -17,5 +37,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <App />
       </DeviceProvider>
     </AuthProvider>
-  </BrowserRouter>
+  </BrowserRouter>,
 );
