@@ -1,11 +1,13 @@
-import { Layout, Button, theme } from "antd";
+import { Layout, Button, theme, Tooltip } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   HomeOutlined,
+  CloudDownloadOutlined, // Icono sugerido para instalación
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDevice } from "../../context/DeviceContext";
+import { usePWAInstall } from "../../hooks/usePWAInstall"; // Importamos el hook
 import CardUser from "../CardUser/CardUser";
 import "./index.css";
 
@@ -14,8 +16,9 @@ const { Header } = Layout;
 const AppHeader = ({ collapsed, handleToggle }) => {
   const { isMobile } = useDevice();
   const navigate = useNavigate();
+  const { installPrompt, handleInstallClick } = usePWAInstall(); // Hook de PWA
   const {
-    token: { colorBorderSecondary },
+    token: { colorBorderSecondary, colorPrimary },
   } = theme.useToken();
 
   return (
@@ -29,17 +32,14 @@ const AppHeader = ({ collapsed, handleToggle }) => {
         alignItems: "center",
       }}
     >
-      {/* IZQUIERDA: Condicional según dispositivo */}
       <div className="app-header__left">
         {isMobile ? (
-          // EN MOBILE: Solo botón Home
           <Button
             type="text"
             icon={<HomeOutlined style={{ fontSize: "20px" }} />}
             onClick={() => navigate("/")}
           />
         ) : (
-          // EN DESKTOP: Botón Toggle Sidebar
           <Button
             onClick={handleToggle}
             type="text"
@@ -49,8 +49,26 @@ const AppHeader = ({ collapsed, handleToggle }) => {
         )}
       </div>
 
-      {/* DERECHA */}
-      <div className="app-header__right">
+      <div
+        className="app-header__right"
+        style={{ display: "flex", alignItems: "center", gap: "12px" }}
+      >
+        {/* BOTÓN DE INSTALACIÓN PWA */}
+        {installPrompt && (
+          <Tooltip title="Instalar App">
+            <Button
+              type={isMobile ? "primary" : "default"}
+              shape={isMobile ? "round" : "default"}
+              size={isMobile ? "small" : "middle"}
+              icon={<CloudDownloadOutlined />}
+              onClick={handleInstallClick}
+              style={isMobile ? { fontSize: "12px" } : {}}
+            >
+              {!isMobile && "Instalar App"}
+            </Button>
+          </Tooltip>
+        )}
+
         <CardUser />
       </div>
     </Header>
