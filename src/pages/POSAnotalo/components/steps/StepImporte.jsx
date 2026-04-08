@@ -140,7 +140,7 @@ const StepImporte = ({ tipo, onNext }) => {
         type="secondary"
         style={{ textAlign: "center", marginTop: "12px", fontSize: "12px" }}
       >
-        Ingresá el monto del {tipo.toLowerCase()} para continuar
+        Ingresá el monto total para continuar
       </Text>
     </div>
   );

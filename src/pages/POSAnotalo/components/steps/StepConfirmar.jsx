@@ -6,6 +6,7 @@ import {
   MOVIMIENTO_TIPOS,
   POS_COLORS,
 } from "../../../../constants/posConstants";
+import { movimientoService } from "../../../../services/movimientoService"; // <--- Importamos servicio
 
 const { Title, Text } = Typography;
 
@@ -13,59 +14,13 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
   const { user } = useAuth();
   const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
 
-  // --- LÓGICA DE LEYENDA DINÁMICA ---
-  const obtenerLeyendaInformativa = () => {
-    const esEfectivo = movimiento.formaPago === "Efectivo";
-    const esSalida =
-      movimiento.tipo === MOVIMIENTO_TIPOS.PAGO ||
-      movimiento.tipo === MOVIMIENTO_TIPOS.RETIRO;
+  const handleGuardar = () => {
+    const resultado = movimientoService.save(movimiento, user);
 
-    if (esEfectivo) {
-      return esSalida
-        ? "Esta salida de efectivo se descontará de la caja física."
-        : "Esta entrada de efectivo se sumará a la caja física.";
-    }
-
-    // Leyendas para medios digitales/bancarios
-    switch (movimiento.formaPago) {
-      case "Transferencia":
-      case "QR":
-        return `Se registrará como un movimiento en tu cuenta de ${movimiento.formaPago}.`;
-      case "Debito":
-      case "Credito":
-        return "El importe impactará a través de la terminal de tarjetas.";
-      case "Cta Corriente":
-        return "Este monto se cargará al saldo de la cuenta del cliente/proveedor.";
-      default:
-        return "Se registrará el movimiento bajo la forma de pago seleccionada.";
-    }
-  };
-
-  const ejecutarGuardado = () => {
-    try {
-      const historialPrevio =
-        JSON.parse(localStorage.getItem("movimientos_db")) || [];
-
-      const nuevoRegistro = {
-        ...movimiento,
-        id: Date.now(),
-        fecha: new Date().toISOString().split("T")[0],
-        hora: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        usuario: user?.nombre || "Admin",
-        formaPago: movimiento.formaPago || "Efectivo",
-        entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
-      };
-
-      const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
-      localStorage.setItem("movimientos_db", JSON.stringify(nuevoHistorial));
-
+    if (resultado.success) {
       message.success(`${movimiento.tipo} registrado correctamente`);
-      onConfirm();
-    } catch (error) {
-      console.error("Error en guardado:", error);
+      if (onConfirm) onConfirm();
+    } else {
       message.error("Error al procesar el registro");
     }
   };
@@ -78,7 +33,7 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
         animation: "fadeIn 0.3s ease",
       }}
     >
-      {/* HEADER RESUMEN */}
+      {/* HEADER */}
       <div
         style={{
           display: "flex",
@@ -106,7 +61,7 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
         </div>
       </div>
 
-      {/* FICHA TICKET */}
+      {/* TICKET */}
       <Card
         style={{
           borderRadius: "20px",
@@ -122,7 +77,6 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
               padding: "2px 14px",
               borderRadius: "8px",
               fontWeight: "700",
-              textTransform: "uppercase",
             }}
           >
             {movimiento.tipo}
@@ -131,81 +85,36 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
             level={1}
             style={{ margin: "12px 0 0 0", fontSize: "44px", color: "#262626" }}
           >
-            $ {movimiento.importe.toLocaleString("es-AR")}
+            $ {Number(movimiento.importe).toLocaleString("es-AR")}
           </Title>
         </div>
 
         <Divider style={{ margin: "16px 0" }} />
 
+        {/* INFO GRID */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
-                background: `${activeColor}10`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: "12px",
-              }}
-            >
-              <MdWallet size={20} style={{ color: activeColor }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <Text
-                type="secondary"
-                style={{ display: "block", fontSize: "11px" }}
-              >
-                MEDIO DE PAGO
-              </Text>
-              <Text strong style={{ fontSize: "15px" }}>
-                {movimiento.formaPago || "Efectivo"}
-              </Text>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
-                background: `${activeColor}10`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: "12px",
-              }}
-            >
-              <MdPerson size={20} style={{ color: activeColor }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <Text
-                type="secondary"
-                style={{ display: "block", fontSize: "11px" }}
-              >
-                {movimiento.tipo === MOVIMIENTO_TIPOS.VENTA
-                  ? "CLIENTE"
-                  : movimiento.tipo === MOVIMIENTO_TIPOS.PAGO
-                    ? "PROVEEDOR"
-                    : "DESTINO"}
-              </Text>
-              <Text strong style={{ fontSize: "15px" }}>
-                {movimiento.entidad?.nombre || "Caja Interna"}
-              </Text>
-            </div>
-          </div>
+          <InfoRow
+            icon={<MdWallet size={20} color={activeColor} />}
+            label="MEDIO DE PAGO"
+            value={movimiento.formaPago || "Efectivo"}
+            color={activeColor}
+          />
+          <InfoRow
+            icon={<MdPerson size={20} color={activeColor} />}
+            label={
+              movimiento.tipo === MOVIMIENTO_TIPOS.VENTA ? "CLIENTE" : "ENTIDAD"
+            }
+            value={movimiento.entidad?.nombre || "Caja Interna"}
+            color={activeColor}
+          />
         </div>
       </Card>
 
-      {/* BOTÓN FINAL */}
       <Button
         type="primary"
         block
         size="large"
-        onClick={ejecutarGuardado}
+        onClick={handleGuardar}
         style={{
           marginTop: "24px",
           height: "64px",
@@ -214,14 +123,13 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
           fontWeight: "bold",
           background: activeColor,
           borderColor: activeColor,
-          boxShadow: `0 8px 20px ${activeColor}40`,
         }}
       >
         <MdSave size={24} style={{ marginRight: 10 }} />
-        REGISTRAR {movimiento.tipo.toUpperCase()}
+        REGISTRAR {movimiento.tipo?.toUpperCase()}
       </Button>
 
-      {/* LEYENDA DINÁMICA SEGÚN FORMA DE PAGO */}
+      {/* LEYENDA DESDE SERVICIO */}
       <div
         style={{
           textAlign: "center",
@@ -230,19 +138,46 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
           alignItems: "center",
           justifyContent: "center",
           gap: "8px",
-          padding: "0 10px",
         }}
       >
-        <MdInfoOutline
-          size={18}
-          style={{ color: activeColor, flexShrink: 0 }}
-        />
-        <Text type="secondary" style={{ fontSize: "12px", lineHeight: "1.4" }}>
-          {obtenerLeyendaInformativa()}
+        <MdInfoOutline size={18} style={{ color: activeColor }} />
+        <Text type="secondary" style={{ fontSize: "12px" }}>
+          {movimientoService.getLeyendaInformativa(
+            movimiento,
+            MOVIMIENTO_TIPOS,
+          )}
         </Text>
       </div>
     </div>
   );
 };
+
+// Sub-componente interno para limpiar el JSX principal
+const InfoRow = ({ icon, label, value, color }) => (
+  <div style={{ display: "flex", alignItems: "center" }}>
+    <div
+      style={{
+        width: "36px",
+        height: "36px",
+        borderRadius: "10px",
+        background: `${color}10`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: "12px",
+      }}
+    >
+      {icon}
+    </div>
+    <div style={{ flex: 1 }}>
+      <Text type="secondary" style={{ display: "block", fontSize: "11px" }}>
+        {label}
+      </Text>
+      <Text strong style={{ fontSize: "15px" }}>
+        {value}
+      </Text>
+    </div>
+  </div>
+);
 
 export default StepConfirmar;
