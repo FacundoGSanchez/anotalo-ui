@@ -42,14 +42,14 @@ const GestionGrid = () => {
             onClick={() => handleNavigate("proveedores")}
           />
         </Col>
-        {/* <Col span={8}>
-           <GestionItem
+        <Col span={8}>
+          <GestionItem
             icon={<MdManageAccounts />}
             label="Usuarios"
             onClick={() => navigate("/usuarios")}
             disabled={true}
-          /> */}
-        {/* </Col> */}
+          />
+        </Col>
       </Row>
     </Card>
   );
