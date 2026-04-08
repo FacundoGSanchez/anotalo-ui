@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       includeAssets: ["images/favicon.ico", "images/apple-touch-icon.png"], // Ajustado a tu carpeta
       manifest: {
         name: "Anotalo",
