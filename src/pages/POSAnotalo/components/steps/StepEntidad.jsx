@@ -20,12 +20,14 @@ import {
 } from "react-icons/md";
 
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
+import { useArgentineDate } from "../../../../hooks/useArgentineDate";
 
 const { Text, Title } = Typography;
 
 const StepEntidad = ({ tipo, formaPago, onNext }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const { getNowISO } = useArgentineDate();
   const [entidades, setEntidades] = useState([]);
 
   const esVenta = tipo === MOVIMIENTO_TIPOS.VENTA;
@@ -53,7 +55,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
       nro: ultimoNro + 1,
       nombre: nombre.trim(),
       activo: true,
-      fechaAlta: new Date().toISOString(),
+      fechaAlta: getNowISO(),
     };
 
     const nuevaDB = [...db, nuevoItem];

@@ -7,15 +7,22 @@ import {
   POS_COLORS,
 } from "../../../../constants/posConstants";
 import { movimientoService } from "../../../../services/movimientoService"; // <--- Importamos servicio
+import { useArgentineDate } from "../../../../hooks/useArgentineDate";
 
 const { Title, Text } = Typography;
 
 const StepConfirmar = ({ movimiento, onConfirm }) => {
   const { user } = useAuth();
+  const { getNowISO } = useArgentineDate();
   const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
 
   const handleGuardar = () => {
-    const resultado = movimientoService.save(movimiento, user);
+    // Preparamos el objeto final con la fecha argentina
+    const movimientoFinal = {
+      ...movimiento,
+      fecha: getNowISO(),
+    };
+    const resultado = movimientoService.save(movimientoFinal, user);
 
     if (resultado.success) {
       message.success(`${movimiento.tipo} registrado correctamente`);
