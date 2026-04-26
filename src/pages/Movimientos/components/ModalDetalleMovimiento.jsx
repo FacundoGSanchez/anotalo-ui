@@ -10,6 +10,7 @@ import {
   Space,
   Typography,
 } from "antd";
+import dayjs from "dayjs";
 import { MdDeleteOutline, MdInfoOutline } from "react-icons/md";
 
 // Desestructuramos aquí para que <Text> sea el de Ant Design y no el nativo del DOM
@@ -82,12 +83,12 @@ const ModalDetalleMovimiento = ({
             borderRadius: "12px",
           }}
         >
-          <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
+          <Text type="secondary" style={{ fontSize: "14px", display: "block" }}>
             IMPORTE
           </Text>
           <Text
             strong
-            style={{ fontSize: "28px", color: isVenta ? "#52c41a" : "#ff4d4f" }}
+            style={{ fontSize: "38px", color: isVenta ? "#52c41a" : "#ff4d4f" }}
           >
             ${" "}
             {movimiento.importe.toLocaleString("es-AR", {
@@ -96,12 +97,16 @@ const ModalDetalleMovimiento = ({
           </Text>
         </div>
 
-        <Descriptions column={1} size="small" bordered>
-          <Descriptions.Item label="Registro">
-            {movimiento.fecha} - {movimiento.hora}
-          </Descriptions.Item>
-          <Descriptions.Item label="Forma Pago">
-            {movimiento.formaPago}
+        <Descriptions
+          column={1}
+          size="small"
+          bordered
+          labelStyle={{ fontSize: "14px" }}
+          contentStyle={{ fontSize: "14px" }}
+        >
+          <Descriptions.Item label="Operación">
+            {movimiento.formaPago} |{" "}
+            {dayjs(movimiento.fecha).format("DD/MM/YYYY HH:mm")} hs
           </Descriptions.Item>
           <Descriptions.Item label="Entidad">
             {movimiento.entidad?.nombre || "General"}

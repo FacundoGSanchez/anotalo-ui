@@ -40,34 +40,6 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
         animation: "fadeIn 0.3s ease",
       }}
     >
-      {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          background: "#f8f9fa",
-          borderRadius: "16px",
-          marginBottom: "20px",
-          overflow: "hidden",
-          border: "1px solid #f0f0f0",
-        }}
-      >
-        <div style={{ width: "8px", backgroundColor: activeColor }} />
-        <div style={{ padding: "16px" }}>
-          <Text
-            type="secondary"
-            style={{ fontSize: "11px", fontWeight: "700", display: "block" }}
-          >
-            FINALIZAR OPERACIÓN
-          </Text>
-          <Title
-            level={4}
-            style={{ margin: 0, fontSize: "18px", color: "#434343" }}
-          >
-            Resumen del {movimiento.tipo}
-          </Title>
-        </div>
-      </div>
-
       {/* TICKET */}
       <Card
         style={{
@@ -153,6 +125,19 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
             movimiento,
             MOVIMIENTO_TIPOS,
           )}
+        </Text>
+      </div>
+
+      <div style={{ textAlign: "center", marginTop: "12px" }}>
+        <Text
+          type="secondary"
+          style={{
+            fontSize: "11px",
+            fontWeight: "700",
+            letterSpacing: "0.5px",
+          }}
+        >
+          RESUMEN FINAL | CONFIRMAR REGISTRO
         </Text>
       </div>
     </div>

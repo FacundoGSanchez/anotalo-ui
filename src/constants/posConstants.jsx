@@ -42,13 +42,13 @@ export const OPCIONES_TIPO = [
   },
   {
     key: MOVIMIENTO_TIPOS.INGRESO,
-    label: "Ingreso (Caja)",
+    label: "Ingreso",
     icon: <MdOutlineAddCircleOutline />,
     desc: "Entrada interna de efectivo",
   },
   {
     key: MOVIMIENTO_TIPOS.RETIRO,
-    label: "Retiro (Caja)",
+    label: "Retiro",
     icon: <MdOutlineAccountBalanceWallet />,
     desc: "Salida interna de efectivo",
   },

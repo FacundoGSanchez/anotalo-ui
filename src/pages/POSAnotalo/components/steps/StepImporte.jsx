@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Typography } from "antd";
 import { MdChevronRight } from "react-icons/md";
 import { VISOR_CONFIG, POS_COLORS } from "../../../../constants/posConstants";
-import Calculadora from "./Calculadora";
+import Calculadora from "./components/Calculadora";
 
 const { Title, Text } = Typography;
 
@@ -138,9 +138,15 @@ const StepImporte = ({ tipo, onNext }) => {
 
       <Text
         type="secondary"
-        style={{ textAlign: "center", marginTop: "12px", fontSize: "12px" }}
+        style={{
+          textAlign: "center",
+          marginTop: "12px",
+          fontSize: "11px",
+          letterSpacing: "0.5px",
+          fontWeight: "700",
+        }}
       >
-        Ingresá el monto total para continuar
+        PASO 2 DE 4 | INGRESAR IMPORTE
       </Text>
     </div>
   );

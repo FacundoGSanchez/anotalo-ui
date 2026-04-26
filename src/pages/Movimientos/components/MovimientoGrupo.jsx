@@ -11,7 +11,7 @@ const MovimientoGrupo = ({ fecha, items, onSelect }) => {
       <Title
         level={5}
         style={{
-          fontSize: "13px",
+          fontSize: "16px",
           color: "#8c8c8c",
           marginBottom: "8px",
           marginLeft: "4px",
@@ -54,7 +54,7 @@ const MovimientoGrupo = ({ fecha, items, onSelect }) => {
                       color={POS_COLORS[mov.tipo]}
                       style={{
                         borderRadius: "4px",
-                        fontSize: "10px",
+                        fontSize: "13px",
                         border: "none",
                         fontWeight: 800,
                         marginRight: "8px",
@@ -62,41 +62,38 @@ const MovimientoGrupo = ({ fecha, items, onSelect }) => {
                     >
                       {mov.tipo.toUpperCase()}
                     </Tag>
-                    <Text strong style={{ fontSize: "12px", color: "#595959" }}>
+                    <Text strong style={{ fontSize: "15px", color: "#595959" }}>
                       {mov.entidad?.nombre || "Caja Interna"}
                     </Text>
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex" }}>
                     <Text
                       type="secondary"
-                      style={{ fontSize: "11px", fontWeight: "500" }}
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        lineHeight: "1.2",
+                      }}
                     >
-                      {mov.formaPago}
-                    </Text>
-                    <Text
-                      type="secondary"
-                      style={{ fontSize: "11px", lineHeight: "1.2" }}
-                    >
-                      {mov.hora} hs
+                      {mov.formaPago} | {mov.hora} hs
                     </Text>
                   </div>
                 </div>
 
                 {/* DERECHA: Importe e Icono */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ textAlign: "right", minWidth: "95px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ textAlign: "right", minWidth: "125px" }}>
                     <Text
                       strong
                       style={{
                         color: isEntrada ? "#52c41a" : "#ff4d4f",
-                        fontSize: "16px",
+                        fontSize: "22px",
                         letterSpacing: "-0.5px",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {isEntrada ? "+" : "-"} $
-                      {mov.importe.toLocaleString("es-AR")}
+                      ${mov.importe.toLocaleString("es-AR")}
                     </Text>
                   </div>
                   <MdChevronRight size={18} color="#bfbfbf" />
