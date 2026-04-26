@@ -66,21 +66,21 @@ const DashboardPage = () => {
   }, []);
 
   // Efecto de montaje y suscripción a eventos
- useEffect(() => {
-  cargarResumenDelDia();
+  useEffect(() => {
+    cargarResumenDelDia();
 
-  const handleUpdate = () => cargarResumenDelDia();
+    const handleUpdate = () => cargarResumenDelDia();
 
-  window.addEventListener("storage", handleUpdate); // Otras pestañas
-  window.addEventListener("local-db-update", handleUpdate); // Misma pestaña (desde el servicio)
-  window.addEventListener("focus", handleUpdate); // Al volver a la App en móvil
+    window.addEventListener("storage", handleUpdate); // Otras pestañas
+    window.addEventListener("local-db-update", handleUpdate); // Misma pestaña (desde el servicio)
+    window.addEventListener("focus", handleUpdate); // Al volver a la App en móvil
 
-  return () => {
-    window.removeEventListener("storage", handleUpdate);
-    window.removeEventListener("local-db-update", handleUpdate);
-    window.removeEventListener("focus", handleUpdate);
-  };
-}, [cargarResumenDelDia]);
+    return () => {
+      window.removeEventListener("storage", handleUpdate);
+      window.removeEventListener("local-db-update", handleUpdate);
+      window.removeEventListener("focus", handleUpdate);
+    };
+  }, [cargarResumenDelDia]);
 
   const handleIrARegistro = (tipo) => {
     navigate("/pos/anotalo", {
@@ -123,7 +123,7 @@ const DashboardPage = () => {
             paddingRight: 0,
           }}
         >
-          Ver histórico <MdArrowForward size={18} />
+          Consultar Todos <MdArrowForward size={16} />
         </Button>
       </div>
 

@@ -12,6 +12,14 @@ const StepFormaPago = ({ tipo, onNext }) => {
   // 1. Acceso seguro al color del tema (usando 'tipo' directamente)
   const activeColor = POS_COLORS[tipo] || POS_COLORS.DEFAULT;
 
+  // 2. Filtrado de opciones según el tipo de movimiento
+  // Quitamos Cta Corriente para los Pagos (egresos a proveedores)
+  const opcionesFiltradas = FORMAS_PAGO.filter((opt) => {
+    if (tipo === MOVIMIENTO_TIPOS.PAGO && opt.key === "Cta Corriente")
+      return false;
+    return true;
+  });
+
   return (
     <div
       style={{
@@ -23,7 +31,7 @@ const StepFormaPago = ({ tipo, onNext }) => {
       {/* LISTADO DE SELECCIÓN TÁCTIL */}
       <div style={{ flex: 1 }}>
         <Space direction="vertical" size={6} style={{ width: "100%" }}>
-          {FORMAS_PAGO.map((opt) => (
+          {opcionesFiltradas.map((opt) => (
             <Card
               key={opt.key}
               hoverable

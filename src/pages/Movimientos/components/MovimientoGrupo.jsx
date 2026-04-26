@@ -1,25 +1,51 @@
 import React from "react";
 import { Card, Typography, Space, Divider, Tag } from "antd";
-import { MdChevronRight } from "react-icons/md";
+import dayjs from "dayjs";
+import { MdChevronRight, MdEdit } from "react-icons/md";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
 
 const { Text, Title } = Typography;
 
-const MovimientoGrupo = ({ fecha, items, onSelect }) => {
+const MovimientoGrupo = ({
+  fecha,
+  items,
+  subtotal,
+  showSubtotal,
+  onSelect,
+}) => {
   return (
     <div style={{ marginBottom: "20px" }}>
-      <Title
-        level={5}
+      <div
         style={{
-          fontSize: "16px",
-          color: "#8c8c8c",
-          marginBottom: "8px",
-          marginLeft: "4px",
-          fontWeight: 600,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "12px",
+          padding: "8px 12px",
+          backgroundColor: "#f0f2f5",
+          borderRadius: "8px",
         }}
       >
-        {fecha}
-      </Title>
+        <Title
+          level={5}
+          style={{
+            fontSize: "14px",
+            color: "#595959",
+            margin: 0,
+            fontWeight: 600,
+          }}
+        >
+          {fecha}
+        </Title>
+        {showSubtotal && (
+          <Text style={{ color: "#8c8c8c", fontSize: "14px" }}>
+            Subtotal{" "}
+            <span style={{ marginLeft: "12px", fontWeight: 700 }}>
+              $ {subtotal.toLocaleString("es-AR")}
+            </span>
+          </Text>
+        )}
+      </div>
 
       <Card
         styles={{ body: { padding: "0 16px" } }}
@@ -53,30 +79,35 @@ const MovimientoGrupo = ({ fecha, items, onSelect }) => {
                     <Tag
                       color={POS_COLORS[mov.tipo]}
                       style={{
-                        borderRadius: "4px",
-                        fontSize: "13px",
+                        borderRadius: "6px",
+                        fontSize: "14px",
                         border: "none",
-                        fontWeight: 800,
+                        fontWeight: 900,
                         marginRight: "8px",
+                        width: "24px",
+                        height: "24px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0,
                       }}
                     >
-                      {mov.tipo.toUpperCase()}
+                      {mov.tipo.charAt(0).toUpperCase()}
                     </Tag>
-                    <Text strong style={{ fontSize: "15px", color: "#595959" }}>
+                    <Text strong style={{ fontSize: "14px", color: "#595959" }}>
                       {mov.entidad?.nombre || "Caja Interna"}
                     </Text>
                   </div>
 
-                  <div style={{ display: "flex" }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
                     <Text
                       type="secondary"
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        lineHeight: "1.2",
-                      }}
+                      style={{ fontSize: "12px", fontWeight: "500" }}
                     >
-                      {mov.formaPago} | {mov.hora} hs
+                      {mov.formaPago}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: "11px" }}>
+                      {dayjs(mov.fecha).format("HH:mm")} hs
                     </Text>
                   </div>
                 </div>
@@ -100,7 +131,12 @@ const MovimientoGrupo = ({ fecha, items, onSelect }) => {
                 </div>
               </div>
               {index < items.length - 1 && (
-                <Divider style={{ margin: 0, opacity: 0.4 }} />
+                <Divider
+                  style={{
+                    margin: 0,
+                    borderBlockStart: "1px solid rgba(0, 0, 0, 0.05)",
+                  }}
+                />
               )}
             </div>
           );

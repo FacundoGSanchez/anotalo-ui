@@ -41,9 +41,14 @@ const MovimientosPage = () => {
 
   // --- LÓGICA DE FILTRADO Y AGRUPACIÓN ---
   const { agrupados, totalVisible } = useMemo(() => {
-    // 1. Filtrar
+    // 1. Filtrar por Tipo, Forma de Pago y Límite de 7 días
+    const fechaLimite = dayjs().subtract(7, "day").startOf("day");
+
     const filtrados = originales.filter(
-      (m) => tipos.includes(m.tipo) && formas.includes(m.formaPago),
+      (m) =>
+        tipos.includes(m.tipo) &&
+        formas.includes(m.formaPago) &&
+        dayjs(m.fecha).isAfter(fechaLimite.subtract(1, "day")),
     );
 
     // 2. Aplicar límite (Paginación)
@@ -58,8 +63,11 @@ const MovimientosPage = () => {
         label = "Ayer";
 
       const labelFinal = label.charAt(0).toUpperCase() + label.slice(1);
-      if (!grupos[labelFinal]) grupos[labelFinal] = [];
-      grupos[labelFinal].push(item);
+      if (!grupos[labelFinal]) {
+        grupos[labelFinal] = { items: [], subtotal: 0 };
+      }
+      grupos[labelFinal].items.push(item);
+      grupos[labelFinal].subtotal += Number(item.importe) || 0;
     });
 
     return { agrupados: grupos, totalVisible: filtrados.length };
@@ -90,11 +98,13 @@ const MovimientosPage = () => {
         <Empty style={{ marginTop: 80 }} description="Sin movimientos" />
       ) : (
         <>
-          {Object.entries(agrupados).map(([fecha, items]) => (
+          {Object.entries(agrupados).map(([fecha, data]) => (
             <MovimientoGrupo
               key={fecha}
               fecha={fecha}
-              items={items}
+              items={data.items}
+              subtotal={data.subtotal}
+              showSubtotal={tipos.length === 1}
               onSelect={(mov) => {
                 setSelectedMov(mov);
                 setIsDetalleOpen(true);
