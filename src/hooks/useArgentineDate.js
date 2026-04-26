@@ -1,19 +1,18 @@
 export const useArgentineDate = () => {
-  /**
-   * Retorna la fecha actual específicamente en la zona horaria de Argentina.
-   * Esto evita que a partir de las 21:00hs se guarde con el día siguiente.
-   */
   const getNowISO = () => {
-    const ahora = new Date();
-
-    // Usamos toLocaleString con sv-SE (Suecia) porque genera naturalmente el formato YYYY-MM-DD HH:mm:ss
-    // pero forzamos la zona horaria de Buenos Aires.
-    const argString = ahora.toLocaleString("sv-SE", {
+    // Esta línea es "mágica": obtiene la fecha local de Argentina
+    // formateada como ISO pero sin convertirla a UTC.
+    const f = new Intl.DateTimeFormat("sv-SE", {
       timeZone: "America/Argentina/Buenos_Aires",
-    });
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }).format(new Date());
 
-    // Retornamos formato compatible ISO (YYYY-MM-DDTHH:mm:ss) sin el indicador Z (UTC)
-    return argString.replace(" ", "T");
+    return f.replace(" ", "T") + "-03:00";
   };
 
   const getTodayARG = () => {
