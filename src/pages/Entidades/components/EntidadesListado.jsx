@@ -6,8 +6,9 @@ import { entidadService } from "../../../services/entidadService";
 
 const { Title, Text } = Typography;
 
-const EntidadesListado = () => {
-  const { tipo } = useParams();
+const EntidadesListado = ({ tipo: tipoProp, onBack }) => {
+  const { tipo: tipoParam } = useParams();
+  const tipo = tipoProp || tipoParam;
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
   const [lista, setLista] = useState([]);
@@ -65,7 +66,7 @@ const EntidadesListado = () => {
           <Button
             icon={<MdArrowBack size={20} />}
             type="text"
-            onClick={() => navigate("/")}
+            onClick={() => (onBack ? onBack() : navigate("/"))}
           />
           <Title level={3} style={{ margin: 0, textTransform: "capitalize" }}>
             {tipo}

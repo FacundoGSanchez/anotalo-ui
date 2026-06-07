@@ -24,10 +24,12 @@ El dashboard es la pantalla principal post-login. Su objetivo es:
 ```
 ┌─────────────────────────────────────┐
 │  ┌─── Card: Resumen de Hoy ───────┐ │
-│  │  Resumen de Hoy  [Consultar]   │ │
 │  │  lunes, 07 de junio            │ │  ← Header + Indicadores
-│  │  [Ventas $0] [Pagos $0]        │ │     en la misma Card
-│  │  [Ingresos $0] [Retiros $0]    │ │     mostrando todos los tipos
+│  │                                │ │     en la misma Card
+│  │  [VENTAS  ] [PAGOS  ]          │ │     Grid 2x2 con números
+│  │  [ $5.000 ] [ $2.000]          │ │     grandes
+│  │  [INGRESOS] [RETIROS]          │ │
+│  │  [ $1.000 ] [   $0  ]          │ │
 │  └─────────────────────────────────┘ │
 ├─────────────────────────────────────┤
 │  ACCESOS RÁPIDOS                    │
@@ -71,16 +73,17 @@ lunes, 07 de junio
 ### 3.2 Indicadores del Día — `ResumenCards`
 
 ```
-[VENTAS           ] [PAGOS            ]
-[ $ 5.000         ] [ $ 2.000         ]
+[VENTAS  ] [PAGOS   ]
+[ $5.000 ] [ $2.000 ]
+[INGRESOS] [RETIROS ]
+[ $1.000 ] [   $0   ]
 ```
 
-- Cards compactas al **50% del tamaño original** (padding reducido, fuente más pequeña)
-- **Solo se muestran** los tipos de movimiento que tengan `importe > 0` en el día
-- Si no hay movimientos del día, la sección entera no se renderiza
+- Grid **2 columnas** para que todos los indicadores sean visibles sin scroll
+- Números grandes (26px) para mejor legibilidad
+- **Se muestran siempre los 4 tipos** aunque estén en $0
 - Mismo color por tipo que los accesos rápidos (Venta=azul, Pago=naranja, Ingreso=verde, Retiro=gris)
-- Scroll horizontal con `scroll-snap`
-- Ancho mínimo 100px por card
+- Cada card con borde izquierdo de 5px del color del tipo
 
 ### 3.3 Accesos Rápidos — `AccesosDirectos`
 

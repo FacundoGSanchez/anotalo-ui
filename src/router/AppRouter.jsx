@@ -38,8 +38,8 @@ const AppRouter = () => {
         <Route path="pos/anotalo" element={<POSAnotalo />} />
         <Route path="movimientos" element={<MovimientosPage />} />
 
-        {/* MODULO ENTIDADES: Todas las rutas apuntan al Orquestador */}
-        {/* El componente EntidadesPage usará los parámetros :action e :id para decidir qué mostrar */}
+        {/* MODULO ENTIDADES */}
+        <Route path="entidades" element={<EntidadesPage />} />
         <Route path="entidades/:tipo" element={<EntidadesPage />} />
         <Route path="entidades/:tipo/:action" element={<EntidadesPage />} />
         <Route path="entidades/:tipo/:action/:id" element={<EntidadesPage />} />

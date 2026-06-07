@@ -1,20 +1,25 @@
-import { Layout, theme } from "antd";
+import { Layout, theme, Typography } from "antd";
 import { useState, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar/Sidebar";
 import AppHeader from "./Header/AppHeader";
 import BottomNav from "./BottomNav/BottomNav";
+import CardUser from "./CardUser/CardUser";
 import { useDevice } from "../context/DeviceContext";
+import { useAuth } from "../context/AuthContext";
 import "./index.css";
 
+const { Text } = Typography;
 const { Content } = Layout;
 
 const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { isMobile } = useDevice();
+  const { session } = useAuth();
+  const orgName = session?.organizaciones?.[0]?.nombre || "ANOTALO";
 
   const {
-    token: { colorBgContainer },
+    token: { colorBgContainer, colorBorderSecondary },
   } = theme.useToken();
 
   const handleToggle = () => {
@@ -32,6 +37,29 @@ const MainLayout = () => {
       <Layout className="main-layout__content">
         {!isMobile && (
           <AppHeader collapsed={currentCollapsed} handleToggle={handleToggle} />
+        )}
+
+        {isMobile && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 16px",
+              borderBottom: `1px solid ${colorBorderSecondary}`,
+              background: colorBgContainer,
+            }}
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}images/Logo.png`}
+              alt="ANOTALO"
+              style={{ height: 28, width: "auto" }}
+            />
+            <Text strong style={{ fontSize: "15px", color: "#262626" }}>
+              {orgName}
+            </Text>
+            <CardUser />
+          </div>
         )}
 
         <Content

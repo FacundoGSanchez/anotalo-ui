@@ -9,7 +9,6 @@ import {
   MdPeople,
   MdMoreHoriz,
   MdLogout,
-  MdStorefront,
 } from "react-icons/md";
 import "./index.css";
 
@@ -36,7 +35,7 @@ const NAV_ITEMS = [
     key: "nominas",
     icon: <MdPeople />,
     label: "Nóminas",
-    route: "/entidades/clientes",
+    route: "/entidades",
   },
   {
     key: "mas",
@@ -73,13 +72,15 @@ const BottomNav = () => {
 
   const activeItem = NAV_ITEMS.find((item) => isActive(item.route));
 
+  const nominaActive = location.pathname.startsWith("/entidades");
+
   return (
     <>
       <nav className="bottom-nav">
         {NAV_ITEMS.map((item) => (
           <button
             key={item.key}
-            className={`bottom-nav__item ${activeItem?.key === item.key ? "bottom-nav__item--active" : ""}`}
+            className={`bottom-nav__item ${(item.key === "nominas" ? nominaActive : activeItem?.key === item.key) ? "bottom-nav__item--active" : ""}`}
             onClick={() => handleNav(item)}
           >
             <span className="bottom-nav__icon">{item.icon}</span>
@@ -110,23 +111,6 @@ const BottomNav = () => {
                 {user?.rol || "Sin rol"}
               </span>
             </div>
-          </div>
-
-          <Divider style={{ margin: "12px 0" }} />
-
-          <div className="bottom-nav-modal__actions">
-            <Button
-              type="text"
-              block
-              icon={<MdStorefront />}
-              onClick={() => {
-                setMenuOpen(false);
-                navigate("/entidades/proveedores");
-              }}
-              className="bottom-nav-modal__action"
-            >
-              Proveedores
-            </Button>
           </div>
 
           <Divider style={{ margin: "12px 0" }} />
