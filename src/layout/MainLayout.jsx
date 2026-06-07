@@ -3,14 +3,15 @@ import { useState, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar/Sidebar";
 import AppHeader from "./Header/AppHeader";
-import { useDevice } from "../context/DeviceContext"; // Asegúrate de que la ruta sea correcta
+import BottomNav from "./BottomNav/BottomNav";
+import { useDevice } from "../context/DeviceContext";
 import "./index.css";
 
 const { Content } = Layout;
 
 const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const { isMobile } = useDevice(); // Consumimos el estado del dispositivo
+  const { isMobile } = useDevice();
 
   const {
     token: { colorBgContainer },
@@ -24,13 +25,14 @@ const MainLayout = () => {
 
   return (
     <Layout className="main-layout" style={{ minHeight: "100vh" }}>
-      {/* 🛡️ BLOQUEO DE RENDERIZADO EN MOBILE */}
       {!isMobile && (
         <Sidebar collapsed={currentCollapsed} setCollapsed={setCollapsed} />
       )}
 
       <Layout className="main-layout__content">
-        <AppHeader collapsed={currentCollapsed} handleToggle={handleToggle} />
+        {!isMobile && (
+          <AppHeader collapsed={currentCollapsed} handleToggle={handleToggle} />
+        )}
 
         <Content
           className="main-layout__page"
@@ -39,6 +41,8 @@ const MainLayout = () => {
           <Outlet />
         </Content>
       </Layout>
+
+      {isMobile && <BottomNav />}
     </Layout>
   );
 };

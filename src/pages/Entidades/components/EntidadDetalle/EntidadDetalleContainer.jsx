@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Form, Card, message, Spin } from "antd";
+import { entidadService } from "../../../../services/entidadService";
 import EntidadHeader from "./components/EntidadHeader";
 import EntidadForm from "./components/EntidadForm";
 
@@ -16,10 +17,9 @@ const EntidadDetalleContainer = () => {
 
   useEffect(() => {
     setLoading(true);
-    const db = JSON.parse(localStorage.getItem(`db_${tipo}`)) || [];
 
     if (isEdit) {
-      const item = db.find((e) => String(e.id) === String(id));
+      const item = entidadService.getById(tipo, id);
       if (item) {
         form.setFieldsValue(item);
       } else {
@@ -32,32 +32,23 @@ const EntidadDetalleContainer = () => {
     setLoading(false);
   }, [id, tipo, isEdit, form, navigate]);
 
-  // En EntidadDetalleContainer.jsx
   const onSave = (values) => {
-    const db = JSON.parse(localStorage.getItem(`db_${tipo}`)) || [];
+    let result;
 
     if (isEdit) {
-      // 🔍 Buscamos y actualizamos. "values" ya trae activo: false si vino del botón eliminar
-      const nuevaLista = db.map((e) =>
-        String(e.id) === String(id) ? { ...e, ...values } : e,
-      );
-      localStorage.setItem(`db_${tipo}`, JSON.stringify(nuevaLista));
+      result = entidadService.update(tipo, id, values);
     } else {
-      const ultimoNro =
-        db.length > 0 ? Math.max(...db.map((e) => parseInt(e.nro) || 0)) : 0;
-      const nuevoItem = {
-        ...values,
-        id: Date.now(),
-        nro: ultimoNro + 1,
-        activo: true, // Siempre activo al crear
-      };
-      localStorage.setItem(`db_${tipo}`, JSON.stringify([...db, nuevoItem]));
+      result = entidadService.create(tipo, values);
     }
 
-    message.success(
-      values.activo === false ? "Entidad eliminada" : "Guardado correctamente",
-    );
-    navigate(`/entidades/${tipo}`);
+    if (result.success) {
+      message.success(
+        values.activo === false ? "Entidad eliminada" : "Guardado correctamente",
+      );
+      navigate(`/entidades/${tipo}`);
+    } else {
+      message.error("Error al guardar");
+    }
   };
 
   return (

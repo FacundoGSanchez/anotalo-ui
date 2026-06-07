@@ -1,14 +1,15 @@
-/**
- * Servicio para la gestión de movimientos de caja
- * Ubicación sugerida: src/services/movimientoService.js
- */
-
 const DB_KEY = "movimientos_db";
 
+const dispatchUpdate = () => {
+  window.dispatchEvent(new Event("storage"));
+  window.dispatchEvent(
+    new CustomEvent("local-db-update", {
+      detail: { type: "movimiento_actualizado" },
+    }),
+  );
+};
+
 export const movimientoService = {
-  /**
-   * Obtiene todos los movimientos almacenados en LocalStorage
-   */
   getAll: () => {
     try {
       const data = localStorage.getItem(DB_KEY);
@@ -19,22 +20,30 @@ export const movimientoService = {
     }
   },
 
-  /**
-   * Registra un nuevo movimiento y notifica a la aplicación para actualizar la UI
-   */
+  getByDate: (fecha) => {
+    const todos = movimientoService.getAll();
+    return todos.filter((m) => m.fecha === fecha);
+  },
+
   save: (movimiento, user) => {
     try {
       const historialPrevio = movimientoService.getAll();
 
+      const now = new Date();
+      const timeZone = "America/Argentina/Buenos_Aires";
+      const fecha = now.toLocaleDateString("en-CA", { timeZone });
+      const hora = now.toLocaleTimeString("es-AR", {
+        timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
       const nuevoRegistro = {
         ...movimiento,
         id: Date.now(),
-        // Fecha en formato ISO YYYY-MM-DD para compatibilidad con filtros de DayJS
-        fecha: new Date().toISOString().split("T")[0],
-        hora: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        fecha,
+        hora,
         usuario: user?.nombre || "Admin",
         formaPago: movimiento.formaPago || "Efectivo",
         entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
@@ -43,19 +52,7 @@ export const movimientoService = {
 
       const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
       localStorage.setItem(DB_KEY, JSON.stringify(nuevoHistorial));
-
-      // --- NOTIFICACIONES DE ACTUALIZACIÓN ---
-
-      // 1. Notificar a otras pestañas o instancias de la PWA (Evento Nativo)
-      window.dispatchEvent(new Event("storage"));
-
-      // 2. Notificar a la pestaña actual (Evento Personalizado)
-      // Esto es lo que permite que el Dashboard se actualice al instante sin recargar
-      window.dispatchEvent(
-        new CustomEvent("local-db-update", {
-          detail: { type: "movimiento_nuevo", date: nuevoRegistro.fecha },
-        }),
-      );
+      dispatchUpdate();
 
       return { success: true, data: nuevoRegistro };
     } catch (error) {
@@ -64,9 +61,37 @@ export const movimientoService = {
     }
   },
 
-  /**
-   * Retorna la leyenda informativa según el tipo de movimiento y forma de pago
-   */
+  update: (id, data) => {
+    try {
+      const todos = movimientoService.getAll();
+      const index = todos.findIndex((m) => m.id === id);
+      if (index === -1) return { success: false, error: "No encontrado" };
+
+      todos[index] = { ...todos[index], ...data };
+      localStorage.setItem(DB_KEY, JSON.stringify(todos));
+      dispatchUpdate();
+
+      return { success: true, data: todos[index] };
+    } catch (error) {
+      console.error("Error al actualizar movimiento:", error);
+      return { success: false, error };
+    }
+  },
+
+  deleteById: (id) => {
+    try {
+      const todos = movimientoService.getAll();
+      const filtered = todos.filter((m) => m.id !== id);
+      localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+      dispatchUpdate();
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error al eliminar movimiento:", error);
+      return { success: false, error };
+    }
+  },
+
   getLeyendaInformativa: (movimiento, tipos) => {
     const { tipo, formaPago } = movimiento;
     const esEfectivo = formaPago === "Efectivo";

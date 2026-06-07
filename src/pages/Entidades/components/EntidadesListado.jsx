@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Table, Button, Typography, Input, Space, Card } from "antd";
 import { MdArrowBack, MdAdd, MdSearch, MdChevronRight } from "react-icons/md";
+import { entidadService } from "../../../services/entidadService";
 
 const { Title, Text } = Typography;
 
@@ -12,9 +13,7 @@ const EntidadesListado = () => {
   const [lista, setLista] = useState([]);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem(`db_${tipo}`)) || [];
-    // 🔍 Filtramos para traer solo los que tienen activo === true
-    const activos = saved.filter((item) => item.activo === true);
+    const activos = entidadService.getActivos(tipo);
     setLista(activos.sort((a, b) => b.id - a.id));
   }, [tipo]);
 

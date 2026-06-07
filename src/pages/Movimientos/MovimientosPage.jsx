@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Empty, Button, Spin } from "antd";
+import { Empty, Button } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
-// Constantes
 import {
   MOVIMIENTO_TIPOS,
   NOMBRES_FORMAS_PAGO,
 } from "../../constants/posConstants";
+import { movimientoService } from "../../services/movimientoService";
 
-// Sub-componentes
 import HeaderMovimientos from "./components/HeaderMovimientos";
 import ModalFiltros from "./components/ModalFiltros";
 import ModalDetalleMovimiento from "./components/ModalDetalleMovimiento";
@@ -17,14 +16,12 @@ import MovimientoGrupo from "./components/MovimientoGrupo";
 
 const MovimientosPage = () => {
   const [originales, setOriginales] = useState([]);
-  const [limit, setLimit] = useState(50); // Control de paginación local
+  const [limit, setLimit] = useState(50);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Filtros
   const [tipos, setTipos] = useState(Object.values(MOVIMIENTO_TIPOS));
   const [formas, setFormas] = useState(NOMBRES_FORMAS_PAGO);
 
-  // UI States
   const [isFiltroOpen, setIsFiltroOpen] = useState(false);
   const [selectedMov, setSelectedMov] = useState(null);
   const [isDetalleOpen, setIsDetalleOpen] = useState(false);
@@ -34,8 +31,7 @@ const MovimientosPage = () => {
   }, []);
 
   const cargarDatosDesdeStorage = () => {
-    const saved = JSON.parse(localStorage.getItem("movimientos_db")) || [];
-    // Ordenar por ID/Fecha descendente
+    const saved = movimientoService.getAll();
     setOriginales(saved.sort((a, b) => b.id - a.id));
   };
 
@@ -89,7 +85,7 @@ const MovimientosPage = () => {
         padding: "16px",
         background: "#f8f9fa",
         minHeight: "100vh",
-        paddingBottom: "50px",
+        paddingBottom: "16px",
       }}
     >
       <HeaderMovimientos onOpenFiltros={() => setIsFiltroOpen(true)} />

@@ -1,0 +1,15 @@
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (1001, 'SpMovimientos_ObtenerTodos');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (1002, 'SpMovimientos_ObtenerPorId');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (1003, 'SpMovimientos_Crear');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (1004, 'SpMovimientos_Actualizar');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (1005, 'SpMovimientos_Eliminar');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (2001, 'SpEntidades_ObtenerTodos');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (2002, 'SpEntidades_ObtenerPorId');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (2003, 'SpEntidades_Crear');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (2004, 'SpEntidades_Actualizar');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (2005, 'SpEntidades_Eliminar');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (3001, 'SpUsuarios_ObtenerTodos');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (3002, 'SpUsuarios_ObtenerPorId');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (3003, 'SpUsuarios_Crear');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (3004, 'SpUsuarios_Actualizar');
+INSERT INTO `AnotaloDB`.`ProcessHandler` (`n_proceso`, `procedure_name`) VALUES (3005, 'SpUsuarios_Eliminar');

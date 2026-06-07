@@ -1,62 +1,35 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Typography, Button } from "antd";
-import { MdArrowForward } from "react-icons/md";
+import { useState, useEffect, useCallback } from "react";
+import { Typography, Card } from "antd";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
-import { MOVIMIENTO_TIPOS } from "../../constants/posConstants";
+import { movimientoService } from "../../services/movimientoService";
 import ResumenCards from "./components/ResumenCards";
 import AccesosDirectos from "./components/AccesosDirectos";
+import AccesoReportes from "./components/AccesoReportes";
 import GestionGrid from "./components/GestionGrid";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [totales, setTotales] = useState({
-    ventas: 0,
-    pagos: 0,
-    retiros: 0,
-    ingresos: 0,
-  });
+  const [totales, setTotales] = useState({});
 
-  /**
-   * FUNCIÓN REUTILIZABLE: Obtiene y procesa los datos del día
-   * La envolvemos en useCallback para evitar recreaciones innecesarias
-   */
   const cargarResumenDelDia = useCallback(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem("movimientos_db")) || [];
+      const saved = movimientoService.getAll();
       const hoy = dayjs().format("YYYY-MM-DD");
-
-      // 1. Filtrado único por fecha (más eficiente)
       const movimientosDeHoy = saved.filter((m) => m.fecha === hoy);
 
-      // 2. Reducción en un solo paso para evitar múltiples .filter().reduce()
       const calculo = movimientosDeHoy.reduce(
         (acc, mov) => {
           const importe = Number(mov.importe) || 0;
-
-          switch (mov.tipo) {
-            case MOVIMIENTO_TIPOS.VENTA:
-              acc.ventas += importe;
-              break;
-            case MOVIMIENTO_TIPOS.PAGO:
-              acc.pagos += importe;
-              break;
-            case MOVIMIENTO_TIPOS.RETIRO:
-              acc.retiros += importe;
-              break;
-            case MOVIMIENTO_TIPOS.INGRESO:
-              acc.ingresos += importe;
-              break;
-            default:
-              break;
-          }
+          const tipo = mov.tipo;
+          acc[tipo] = (acc[tipo] || 0) + importe;
           return acc;
         },
-        { ventas: 0, pagos: 0, retiros: 0, ingresos: 0 },
+        {},
       );
 
       setTotales(calculo);
@@ -65,16 +38,12 @@ const DashboardPage = () => {
     }
   }, []);
 
-  // Efecto de montaje y suscripción a eventos
   useEffect(() => {
     cargarResumenDelDia();
-
     const handleUpdate = () => cargarResumenDelDia();
-
-    window.addEventListener("storage", handleUpdate); // Otras pestañas
-    window.addEventListener("local-db-update", handleUpdate); // Misma pestaña (desde el servicio)
-    window.addEventListener("focus", handleUpdate); // Al volver a la App en móvil
-
+    window.addEventListener("storage", handleUpdate);
+    window.addEventListener("local-db-update", handleUpdate);
+    window.addEventListener("focus", handleUpdate);
     return () => {
       window.removeEventListener("storage", handleUpdate);
       window.removeEventListener("local-db-update", handleUpdate);
@@ -93,47 +62,27 @@ const DashboardPage = () => {
 
   return (
     <div style={{ padding: "20px", background: "#f8f9fa", minHeight: "100vh" }}>
-      {/* HEADER SECTION */}
-      <div
+      {/* RESUMEN + INDICADORES */}
+      <Card
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          borderRadius: "20px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.04)",
           marginBottom: "24px",
         }}
+        styles={{ body: { padding: "16px 16px 12px" } }}
       >
-        <div>
-          <Title level={4} style={{ margin: 0, fontWeight: "700" }}>
-            Resumen de Hoy
-          </Title>
-          <Text
-            type="secondary"
-            style={{ fontSize: "13px", textTransform: "capitalize" }}
-          >
-            {dayjs().locale("es").format("dddd, DD [de] MMMM")}
-          </Text>
-        </div>
-        <Button
-          type="link"
-          onClick={() => navigate("/movimientos")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            paddingRight: 0,
-          }}
+        <Text
+          type="secondary"
+          style={{ display: "block", fontSize: "12px", textTransform: "capitalize", marginBottom: "12px" }}
         >
-          Consultar Todos <MdArrowForward size={16} />
-        </Button>
-      </div>
+          {dayjs().locale("es").format("dddd, DD [de] MMMM")}
+        </Text>
 
-      {/* CARDS SECTION */}
-      <section style={{ marginBottom: "24px" }}>
         <ResumenCards totales={totales} />
-      </section>
+      </Card>
 
-      {/* ACTIONS SECTION */}
-      <section style={{ marginBottom: "32px" }}>
+      {/* ACCESOS RÁPIDOS */}
+      <section style={{ marginBottom: "24px" }}>
         <Text
           strong
           style={{
@@ -148,8 +97,35 @@ const DashboardPage = () => {
         <AccesosDirectos onSelectTipo={handleIrARegistro} />
       </section>
 
-      {/* GRID SECTION */}
+      {/* REPORTES */}
+      <section style={{ marginBottom: "24px" }}>
+        <Text
+          strong
+          style={{
+            display: "block",
+            marginBottom: "12px",
+            color: "#8c8c8c",
+            fontSize: "12px",
+          }}
+        >
+          REPORTES
+        </Text>
+        <AccesoReportes />
+      </section>
+
+      {/* GESTIÓN */}
       <section>
+        <Text
+          strong
+          style={{
+            display: "block",
+            marginBottom: "12px",
+            color: "#8c8c8c",
+            fontSize: "12px",
+          }}
+        >
+          GESTIÓN
+        </Text>
         <GestionGrid />
       </section>
     </div>

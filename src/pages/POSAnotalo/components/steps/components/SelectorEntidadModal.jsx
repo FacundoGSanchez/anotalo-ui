@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Input, Button, List, Typography } from "antd";
 import { MdSearch, MdClose, MdPerson, MdChevronRight } from "react-icons/md";
+import { entidadService } from "../../../../../services/entidadService";
 
 const { Text } = Typography;
 
@@ -19,12 +20,9 @@ const SelectorEntidadModal = ({
 
   useEffect(() => {
     if (open) {
-      const cargarDatos = () => {
-        const db = JSON.parse(localStorage.getItem(tablaDB)) || [];
-        setEntidades(db.filter((item) => item.activo !== false));
-      };
-      cargarDatos();
-      setBusqueda(""); // Resetear búsqueda al abrir
+      const tipoDB = tablaDB === "db_clientes" ? "clientes" : "proveedores";
+      setEntidades(entidadService.getActivos(tipoDB));
+      setBusqueda("");
     }
   }, [open, tablaDB]);
 

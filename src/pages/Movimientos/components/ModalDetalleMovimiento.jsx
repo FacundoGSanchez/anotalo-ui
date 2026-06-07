@@ -3,7 +3,6 @@ import {
   Modal,
   Button,
   Descriptions,
-  Divider,
   Tag,
   Popconfirm,
   message,
@@ -13,11 +12,10 @@ import {
 import dayjs from "dayjs";
 import { MdDeleteOutline, MdInfoOutline, MdEdit } from "react-icons/md";
 import { MOVIMIENTO_TIPOS } from "../../../constants/posConstants";
+import { movimientoService } from "../../../services/movimientoService";
 
-// Reutilizamos el selector para editar la entidad
 import SelectorEntidadModal from "../../POSAnotalo/components/steps/components/SelectorEntidadModal";
 
-// Desestructuramos aquí para que <Text> sea el de Ant Design y no el nativo del DOM
 const { Text } = Typography;
 
 const ModalDetalleMovimiento = ({
@@ -31,31 +29,26 @@ const ModalDetalleMovimiento = ({
   if (!movimiento) return null;
 
   const handleDelete = () => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("movimientos_db")) || [];
-      const filtered = saved.filter((m) => m.id !== movimiento.id);
-      localStorage.setItem("movimientos_db", JSON.stringify(filtered));
-      onUpdateList(filtered);
+    const result = movimientoService.deleteById(movimiento.id);
+    if (result.success) {
+      onUpdateList(movimientoService.getAll());
       message.success("Movimiento eliminado");
       onClose();
-    } catch (error) {
+    } else {
       message.error("Error al eliminar");
     }
   };
 
   const handleUpdateEntidad = (nuevaEntidad) => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("movimientos_db")) || [];
-      const index = saved.findIndex((m) => m.id === movimiento.id);
-      if (index !== -1) {
-        saved[index].entidad = nuevaEntidad;
-        localStorage.setItem("movimientos_db", JSON.stringify(saved));
-        onUpdateList(saved);
-        message.success("Entidad actualizada");
-        setIsSelectorOpen(false);
-        onClose(); // Cerramos el detalle para refrescar la vista global
-      }
-    } catch (error) {
+    const result = movimientoService.update(movimiento.id, {
+      entidad: nuevaEntidad,
+    });
+    if (result.success) {
+      onUpdateList(movimientoService.getAll());
+      message.success("Entidad actualizada");
+      setIsSelectorOpen(false);
+      onClose();
+    } else {
       message.error("Error al actualizar");
     }
   };
@@ -160,7 +153,8 @@ const ModalDetalleMovimiento = ({
               {movimiento.formaPago}
             </Descriptions.Item>
             <Descriptions.Item label="Fecha">
-              {dayjs(movimiento.fecha).format("DD/MM/YYYY HH:mm")} hs
+              {dayjs(movimiento.fecha).format("DD/MM/YYYY")} {movimiento.hora}{" "}
+              hs
             </Descriptions.Item>
             <Descriptions.Item label="Entidad">
               <div

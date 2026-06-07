@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Input, Button, Form, Typography, Layout } from "antd";
+import { Input, Button, Form, Typography, Layout, message } from "antd";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { MOCK_USER_DATA, useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import "./components/style.css";
 import AnotaloLogo from "./components/Logo";
 
@@ -17,23 +17,20 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await login(values.username, values.password);
+      navigate("/");
+    } catch (err) {
+      message.error(err.message || "Credenciales incorrectas.");
+    } finally {
       setLoading(false);
-      if (values.username === MOCK_USER && values.password === MOCK_PASS) {
-        login(MOCK_USER_DATA);
-        navigate("/");
-      } else {
-        alert("Credenciales incorrectas.");
-      }
-    }, 1000);
+    }
   };
 
   return (
     <Layout className="anotalo-login-screen">
-      {/* 1. Logo */}
-
       {/* 2. Formulario y Contenido */}
       <Content className="anotalo-login-content">
         <AnotaloLogo width={"120px"} />
@@ -46,11 +43,10 @@ const Login = () => {
           onFinish={onFinish}
           className="antd-login-form"
           initialValues={{
-            username: MOCK_USER, // Asigna el valor mock al campo 'username'
-            password: MOCK_PASS, // Asigna el valor mock al campo 'password'
+            username: MOCK_USER,
+            password: MOCK_PASS,
           }}
         >
-          {/* Campo Usuario */}
           <Form.Item
             name="username"
             rules={[{ required: true, message: "¡Ingresa tu usuario!" }]}
@@ -62,7 +58,6 @@ const Login = () => {
             />
           </Form.Item>
 
-          {/* Campo Contraseña */}
           <Form.Item
             name="password"
             rules={[{ required: true, message: "¡Ingresa tu contraseña!" }]}
@@ -77,14 +72,12 @@ const Login = () => {
             />
           </Form.Item>
 
-          {/* Enlace de Olvidaste Contraseña */}
           <div className="anotalo-forgot-password-container">
             <Link href="#" className="anotalo-forgot-password-link" disabled>
               ¿Olvidaste tu contraseña?
             </Link>
           </div>
 
-          {/* Botón Ingresar */}
           <Form.Item>
             <Button
               type="primary"
@@ -98,7 +91,6 @@ const Login = () => {
         </Form>
       </Content>
 
-      {/* 3. Sección inferior de Crear Cuenta */}
       <Footer className="anotalo-create-account-footer">
         <Button type="link" className="anotalo-create-account-button" disabled>
           Crear Cuenta
