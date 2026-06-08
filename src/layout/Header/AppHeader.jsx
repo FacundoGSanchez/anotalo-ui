@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDevice } from "../../context/DeviceContext";
 import { usePWAInstall } from "../../hooks/usePWAInstall";
 import { useAuth } from "../../context/AuthContext";
+import { authService } from "../../services/authService";
 import CardUser from "../CardUser/CardUser";
 import "./index.css";
 
@@ -14,7 +15,9 @@ const AppHeader = () => {
   const { isMobile } = useDevice();
   const navigate = useNavigate();
   const { session } = useAuth();
-  const orgName = session?.organizaciones?.[0]?.nombre || "ANOTALO";
+  const currentOrgId = authService.getCurrentOrgId();
+  const currentOrg = session?.organizaciones?.find((o) => o.id === currentOrgId);
+  const orgName = currentOrg?.nombre || session?.organizaciones?.[0]?.nombre || "ANOTALO";
   const { installPrompt, handleInstallClick } = usePWAInstall();
   const {
     token: { colorBorderSecondary },
@@ -39,7 +42,7 @@ const AppHeader = () => {
         />
       </div>
 
-      <Text strong style={{ fontSize: "15px", color: "#1890ff" }}>
+      <Text strong style={{ fontSize: "15px", color: "#001529" }}>
         {orgName}
       </Text>
 

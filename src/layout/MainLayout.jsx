@@ -6,6 +6,7 @@ import BottomNav from "./BottomNav/BottomNav";
 import CardUser from "./CardUser/CardUser";
 import { useDevice } from "../context/DeviceContext";
 import { useAuth } from "../context/AuthContext";
+import { authService } from "../services/authService";
 import "./index.css";
 
 const { Text } = Typography;
@@ -14,7 +15,9 @@ const { Content } = Layout;
 const MainLayout = () => {
   const { isMobile } = useDevice();
   const { session } = useAuth();
-  const orgName = session?.organizaciones?.[0]?.nombre || "ANOTALO";
+  const currentOrgId = authService.getCurrentOrgId();
+  const currentOrg = session?.organizaciones?.find((o) => o.id === currentOrgId);
+  const orgName = currentOrg?.nombre || session?.organizaciones?.[0]?.nombre || "ANOTALO";
 
   const {
     token: { colorBgContainer, colorBorderSecondary },
@@ -43,7 +46,7 @@ const MainLayout = () => {
               alt="ANOTALO"
               style={{ height: 28, width: "auto" }}
             />
-            <Text strong style={{ fontSize: "15px", color: "#1890ff" }}>
+            <Text strong style={{ fontSize: "15px", color: "#001529" }}>
               {orgName}
             </Text>
             <CardUser />

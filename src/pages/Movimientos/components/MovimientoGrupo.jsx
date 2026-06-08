@@ -49,7 +49,8 @@ const MovimientoGrupo = ({
         {items.map((mov, i) => {
           const esEntrada =
             mov.tipo === MOVIMIENTO_TIPOS.VENTA ||
-            mov.tipo === MOVIMIENTO_TIPOS.INGRESO;
+            mov.tipo === MOVIMIENTO_TIPOS.INGRESO ||
+            mov.tipo === MOVIMIENTO_TIPOS.COBRO;
 
           return (
             <div key={mov.id}>

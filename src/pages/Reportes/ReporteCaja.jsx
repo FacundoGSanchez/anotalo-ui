@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal, Input, Row, Col,
+  Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal, Row, Col,
 } from "antd";
 import {
   MdArrowBack, MdMoreHoriz, MdDeleteOutline, MdOutlineLock,
@@ -80,7 +80,8 @@ const ReporteCaja = () => {
         const importe = Number(mov.importe) || 0;
         const esEntrada =
           mov.tipo === MOVIMIENTO_TIPOS.VENTA ||
-          mov.tipo === MOVIMIENTO_TIPOS.INGRESO;
+          mov.tipo === MOVIMIENTO_TIPOS.INGRESO ||
+          mov.tipo === MOVIMIENTO_TIPOS.COBRO;
         balance += esEntrada ? importe : -importe;
         combined.push({ type: "mov", data: mov, balance });
         mi++;
@@ -430,7 +431,8 @@ const ReporteCaja = () => {
                   const mov = entry.data;
                   const esEntrada =
                     mov.tipo === MOVIMIENTO_TIPOS.VENTA ||
-                    mov.tipo === MOVIMIENTO_TIPOS.INGRESO;
+                    mov.tipo === MOVIMIENTO_TIPOS.INGRESO ||
+                    mov.tipo === MOVIMIENTO_TIPOS.COBRO;
 
                   return (
                     <div key={`mov-${mov.id}`}>
@@ -569,6 +571,21 @@ const ReporteCaja = () => {
             marginTop: "8px",
           }}
         >
+          {/* Saldo actual */}
+          <div
+            style={{
+              textAlign: "center",
+              padding: "8px",
+              background: "#f6ffed",
+              borderRadius: "8px",
+              border: "1px solid #b7eb8f",
+            }}
+          >
+            <Text style={{ fontSize: "12px", color: "#52c41a" }}>
+              Saldo actual: ${saldoActual.toLocaleString("es-AR")}
+            </Text>
+          </div>
+
           {/* Visor importe */}
           <div
             style={{
@@ -633,26 +650,6 @@ const ReporteCaja = () => {
               </Button>
             </Col>
           </Row>
-
-          {/* Observación */}
-          <div>
-            <Text
-              strong
-              style={{
-                display: "block",
-                marginBottom: "6px",
-                fontSize: "13px",
-              }}
-            >
-              Observación
-            </Text>
-            <Input
-              placeholder="Motivo del movimiento..."
-              value={movObservacion}
-              onChange={(e) => setMovObservacion(e.target.value)}
-              style={{ borderRadius: "8px", height: "42px" }}
-            />
-          </div>
 
           {/* Botón registrar */}
           <Button

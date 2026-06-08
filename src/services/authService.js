@@ -22,35 +22,40 @@ const MOCK_RESPONSE = {
       id: 1,
       nombre: "Org Principal",
       sucursalDefault: 1,
-      config: {
-        formasPago: {
-          Venta: [
-            { key: "Efectivo", label: "Efectivo", enabled: true },
-            { key: "Tarjetas", label: "Tarjetas", enabled: true },
-            { key: "Cuenta Cte", label: "Cuenta Cte", enabled: true },
-          ],
-          Pago: [
-            { key: "Efectivo", label: "Efectivo", enabled: true },
-            { key: "Transferencia", label: "Transferencia", enabled: true },
-          ],
-        },
+      FormasPago: {
+        Venta: [
+          { key: "Efectivo", label: "Efectivo", enabled: true },
+          { key: "Tarjetas", label: "Tarjetas", enabled: true },
+          { key: "Cuenta Cte", label: "Cuenta Cte", enabled: true },
+        ],
+        Pago: [
+          { key: "Efectivo", label: "Efectivo", enabled: true },
+          { key: "Transferencia", label: "Transferencia", enabled: true },
+        ],
+        Cobro: [
+          { key: "Efectivo", label: "Efectivo", enabled: true },
+          { key: "Cta Corriente", label: "Cta Corriente", enabled: true },
+        ],
       },
+      TiposMovimiento: ["Venta", "Pago", "Cobro"],
     },
     {
       id: 2,
       nombre: "Org Secundaria",
       sucursalDefault: null,
-      config: {
-        formasPago: {
-          Venta: [
-            { key: "Efectivo", label: "Efectivo", enabled: true },
-            { key: "Mercado Pago", label: "Mercado Pago", enabled: true },
-          ],
-          Pago: [
-            { key: "Transferencia", label: "Transferencia", enabled: true },
-          ],
-        },
+      FormasPago: {
+        Venta: [
+          { key: "Efectivo", label: "Efectivo", enabled: true },
+          { key: "Mercado Pago", label: "Mercado Pago", enabled: true },
+        ],
+        Pago: [
+          { key: "Transferencia", label: "Transferencia", enabled: true },
+        ],
+        Cobro: [
+          { key: "Efectivo", label: "Efectivo", enabled: true },
+        ],
       },
+      TiposMovimiento: ["Venta", "Pago", "Cobro"],
     },
   ],
   sucursales: [
@@ -81,9 +86,14 @@ export const authService = {
 
       // Inicializar config de la primera org
       const orgActual = session.organizaciones?.[0];
-      if (orgActual?.config) {
+      if (orgActual) {
         const { orgService } = await import("./orgService");
-        orgService.initOrgConfig(orgActual.id, orgActual.config);
+        const configPayload = {};
+        if (orgActual.FormasPago) configPayload.formasPago = orgActual.FormasPago;
+        if (orgActual.TiposMovimiento) configPayload.tiposMovimiento = orgActual.TiposMovimiento;
+        if (Object.keys(configPayload).length > 0) {
+          orgService.initOrgConfig(orgActual.id, configPayload);
+        }
       }
       localStorage.setItem(ORG_KEY, String(orgActual?.id || ""));
 
@@ -113,7 +123,12 @@ export const authService = {
     if (!org) return null;
     localStorage.setItem(ORG_KEY, String(orgId));
     const { orgService } = await import("./orgService");
-    orgService.initOrgConfig(orgId, org.config);
+    const configPayload = {};
+    if (org.FormasPago) configPayload.formasPago = org.FormasPago;
+    if (org.TiposMovimiento) configPayload.tiposMovimiento = org.TiposMovimiento;
+    if (Object.keys(configPayload).length > 0) {
+      orgService.initOrgConfig(orgId, configPayload);
+    }
     window.dispatchEvent(new Event("org-changed"));
     return org;
   },

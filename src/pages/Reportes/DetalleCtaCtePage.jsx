@@ -8,11 +8,16 @@ import {
   Empty,
   Popconfirm,
   message,
+  Modal,
+  Row,
+  Col,
 } from "antd";
 import {
   MdArrowBack,
   MdDeleteOutline,
   MdPayment,
+  MdOutlineBackspace,
+  MdClose,
 } from "react-icons/md";
 import { movimientoService } from "../../services/movimientoService";
 import { entidadService } from "../../services/entidadService";
@@ -20,15 +25,22 @@ import {
   MOVIMIENTO_TIPOS,
   POS_COLORS,
 } from "../../constants/posConstants";
+import { useAuth } from "../../context/AuthContext";
 
 const { Text } = Typography;
 
 const TIPO_ENTIDAD = { CLIENTES: "clientes", PROVEEDORES: "proveedores" };
 
+const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"];
+
 const DetalleCtaCtePage = () => {
   const { tipo, id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [movTipoModal, setMovTipoModal] = useState(null);
+  const [movImporte, setMovImporte] = useState(0);
 
   const incrementRefresh = useCallback(
     () => setRefreshKey((k) => k + 1),
@@ -70,6 +82,45 @@ const DetalleCtaCtePage = () => {
     window.addEventListener("local-db-update", handler);
     return () => window.removeEventListener("local-db-update", handler);
   }, [incrementRefresh]);
+
+  const handlePressTecla = (val) => {
+    if (movImporte.toString().length >= 12) return;
+    setMovImporte((prev) => {
+      if (val === "00") return prev * 100;
+      return prev * 10 + parseInt(val, 10);
+    });
+  };
+
+  const handleDeleteTecla = () => {
+    setMovImporte((prev) => Math.floor(prev / 10));
+  };
+
+  const handleRegistrarMov = () => {
+    if (movImporte <= 0) {
+      message.warning("Ingrese un importe válido");
+      return;
+    }
+    const movimientoData = {
+      tipo: movTipoModal,
+      importe: Number(movImporte),
+      formaPago: "Cta Corriente",
+      entidad: { id: entidad.id, nombre: entidad.nombre },
+    };
+    const result = movimientoService.save(movimientoData, user);
+    if (result.success) {
+      message.success(`${movTipoModal} registrado correctamente`);
+      setIsModalOpen(false);
+      setMovImporte(0);
+    } else {
+      message.error("Error al registrar movimiento");
+    }
+  };
+
+  const abrirModal = (tipoMov) => {
+    setMovTipoModal(tipoMov);
+    setMovImporte(0);
+    setIsModalOpen(true);
+  };
 
   if (!entidad) {
     return (
@@ -141,14 +192,7 @@ const DetalleCtaCtePage = () => {
             icon={<MdPayment size={20} />}
             style={{ color: "#52c41a", fontSize: "20px" }}
             onClick={() =>
-              navigate("/pos/anotalo", {
-                state: {
-                  tipoDirecto: esCliente ? MOVIMIENTO_TIPOS.COBRO : MOVIMIENTO_TIPOS.PAGO,
-                  entidadPreseleccionada: entidad,
-                  skipFirstStep: true,
-                  returnPath: window.location.pathname,
-                },
-              })
+              abrirModal(esCliente ? MOVIMIENTO_TIPOS.COBRO : MOVIMIENTO_TIPOS.PAGO)
             }
           />
         </div>
@@ -346,6 +390,114 @@ const DetalleCtaCtePage = () => {
           </div>
         </div>
       )}
+
+      {/* Modal COBRO/PAGO */}
+      <Modal
+        open={isModalOpen}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setMovImporte(0);
+        }}
+        footer={null}
+        width={360}
+        centered
+        title={movTipoModal === MOVIMIENTO_TIPOS.COBRO ? "Registrar Cobro" : "Registrar Pago"}
+        closeIcon={<MdClose size={20} />}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            marginTop: "8px",
+          }}
+        >
+          {/* Visor importe */}
+          <div
+            style={{
+              background: "#f8f9fa",
+              borderRadius: "12px",
+              padding: "8px 16px",
+              height: "56px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              border: "1px solid #f0f0f0",
+            }}
+          >
+            <Text
+              strong
+              style={{
+                fontSize: movImporte > 0 ? "28px" : "22px",
+                color: movImporte > 0 ? "#262626" : "#bfbfbf",
+                letterSpacing: "-1px",
+              }}
+            >
+              $ {movImporte.toLocaleString("es-AR")}
+            </Text>
+          </div>
+
+          {/* Teclado numérico */}
+          <Row gutter={[6, 6]}>
+            {BOTONES_TECLADO.map((btn) => (
+              <Col span={8} key={btn}>
+                <Button
+                  block
+                  style={{
+                    height: "48px",
+                    fontSize: "22px",
+                    borderRadius: "12px",
+                    background: "#fff",
+                    fontWeight: 500,
+                    border: "1px solid #f0f0f0",
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handlePressTecla(btn)}
+                >
+                  {btn}
+                </Button>
+              </Col>
+            ))}
+            <Col span={8}>
+              <Button
+                block
+                type="text"
+                danger
+                style={{
+                  height: "48px",
+                  fontSize: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onClick={handleDeleteTecla}
+              >
+                <MdOutlineBackspace />
+              </Button>
+            </Col>
+          </Row>
+
+          {/* Botón registrar */}
+          <Button
+            type="primary"
+            block
+            size="large"
+            disabled={movImporte <= 0}
+            onClick={handleRegistrarMov}
+            style={{
+              marginTop: "4px",
+              height: "48px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: 700,
+              background: "#52c41a",
+              borderColor: "#52c41a",
+            }}
+          >
+            Registrar {movTipoModal === MOVIMIENTO_TIPOS.COBRO ? "Cobro" : "Pago"}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

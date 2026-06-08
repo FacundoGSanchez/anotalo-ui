@@ -4,7 +4,7 @@ import {
   Modal, Input, Popconfirm,
 } from "antd";
 import {
-  MdArrowBack, MdSave, MdBusiness, MdDeleteOutline, MdEdit, MdClose,
+  MdArrowBack, MdSave, MdBusiness, MdDeleteOutline, MdEdit, MdClose, MdAdd,
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { orgService } from "../../services/orgService";
