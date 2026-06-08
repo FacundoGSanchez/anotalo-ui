@@ -35,6 +35,8 @@
 | `AppHeader` | `src/layout/Header/AppHeader.jsx` | Header responsivo con navegación (solo desktop) |
 | `BottomNav` | `src/layout/BottomNav/BottomNav.jsx` | Barra inferior fija con 5 íconos (solo mobile) |
 | `CardUser` | `src/layout/CardUser/CardUser.jsx` | Avatar + datos usuario + logout |
+| `MoreMenuPage` | `src/pages/MoreMenu/MoreMenuPage.jsx` | Página con opciones agrupadas por módulo (ruta `/more`) |
+| `FormasPagoConfigPage` | `src/pages/FormasPagoConfig/FormasPagoConfigPage.jsx` | Configuración de formas de pago con propiedades por org (ruta `/more/formas-pago`) |
 | `MenuList` | `src/components/MenuList.jsx` | Renderiza el menú desde datos configurables |
 | `MenuItems` | `src/data/MenuItems.jsx` | Datos de los ítems del menú |
 
@@ -73,7 +75,7 @@
 | Header | ❌ Oculto (maximiza espacio vertical) | ✅ Header completo con hamburguesa |
 | BottomNav | ✅ Barra inferior fija (64px) | ❌ No se renderiza |
 | Navegación | BottomNav: Inicio, POS, Movimientos, Nóminas, Más | Sidebar con menú completo |
-| Más (BottomNav) | Modal con perfil + Proveedores + Cerrar sesión | — |
+| Más (BottomNav) | Ruta `/more` → `MoreMenuPage` con módulos agrupados | — |
 | CardUser | Solo desde BottomNav → "Más" | Header derecho |
 | PWA Install | Solo desde BottomNav → "Más" (futuro) | Header derecho |
 | Contenido | `padding-bottom: 80px` para evitar solape | Sin padding extra |
@@ -102,7 +104,17 @@ Reemplaza el sidebar por una barra inferior de navegación fija en mobile:
 | 🏪 | POS | `/pos/anotalo` | Links al wizard POS |
 | 📋 | Movimientos | `/movimientos` | Links al listado |
 | 👥 | Nóminas | `/entidades/clientes` | Links a clientes |
-| ⋯ | Más | null | Abre modal con perfil, Proveedores, Cerrar sesión |
+| ⋯ | Más | null | Abre `NavMenuModal` con módulos agrupados |
+
+La opción "Más" navega a la ruta `/more` que renderiza `MoreMenuPage` (`src/pages/MoreMenu/MoreMenuPage.jsx`), una página con opciones organizadas por módulo:
+
+| Módulo | Opciones |
+|--------|----------|
+| PRINCIPAL | Inicio |
+| OPERACIONES | POS Anotalo, Movimientos |
+| ENTIDADES | Clientes, Proveedores |
+| REPORTES | Reporte Caja, Cta Corriente, Movimientos x Tipo |
+| CONFIGURACIÓN | Formas de Pago |
 
 **Características**:
 - Barra fija de 64px en la parte inferior
@@ -212,7 +224,7 @@ const filterByPermission = (items, session) => {
 | Página | Mobile | Desktop |
 |--------|--------|---------|
 | Dashboard | 1 columna, scroll horizontal | Grid 2-3 columnas |
-| POS | Full width, max 480px | Centrado, max 480px |
+| POS | POSAnotaloMobile (wizard 5 pasos, max 480px) | POSAnotaloDesktop (layout completo, en desarrollo) |
 | Movimientos | Lista simple, modal full screen | Tabla paginada |
 | Entidades | Lista + modal/drawer | Split view o modal |
 
@@ -230,6 +242,7 @@ const filterByPermission = (items, session) => {
 | `src/layout/Header/index.css` | Estilos del header |
 | `src/layout/BottomNav/BottomNav.jsx` | ✅ Barra inferior fija con 5 accesos (solo mobile) |
 | `src/layout/BottomNav/index.css` | ✅ Estilos del BottomNav y modal "Más" |
+| `src/pages/MoreMenu/MoreMenuPage.jsx` | ✅ Página con opciones agrupadas por módulo |
 | `src/layout/CardUser/CardUser.jsx` | Avatar con logout (desktop: header / mobile: modal Más) |
 | `src/layout/CardUser/index.css` | Estilos del card user |
 | `src/components/MenuList.jsx` | Renderizador de menú |

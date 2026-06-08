@@ -1,24 +1,49 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Card, Typography, Space } from "antd";
-import {
-  MOVIMIENTO_TIPOS,
-  POS_COLORS,
-  FORMAS_PAGO,
-} from "../../../../constants/posConstants";
+import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
+import { useAuth } from "../../../../context/AuthContext";
+import { orgService } from "../../../../services/orgService";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const StepFormaPago = ({ tipo, onNext }) => {
-  // 1. Acceso seguro al color del tema (usando 'tipo' directamente)
-  const activeColor = POS_COLORS[tipo] || POS_COLORS.DEFAULT;
+  const { session } = useAuth();
+  const orgId = session?.organizaciones?.[0]?.id;
+  const containerRef = useRef(null);
 
-  // 2. Filtrado de opciones según el tipo de movimiento
-  // Quitamos Cta Corriente para los Pagos (egresos a proveedores)
-  const opcionesFiltradas = FORMAS_PAGO.filter((opt) => {
+  const formasPagoOrg = orgService.getFormasPago(orgId, tipo);
+
+  const opcionesFiltradas = formasPagoOrg.filter((opt) => {
     if (tipo === MOVIMIENTO_TIPOS.PAGO && opt.key === "Cta Corriente")
+      return false;
+    if (tipo === MOVIMIENTO_TIPOS.COBRO && opt.key !== "Cta Corriente")
       return false;
     return true;
   });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const cards = container.querySelectorAll("[data-fp-card]");
+    if (cards.length > 0) {
+      cards[0].focus();
+    }
+    const handleKeyDown = (e) => {
+      const cardsArr = Array.from(container.querySelectorAll("[data-fp-card]"));
+      const currentIndex = cardsArr.findIndex((c) => c === document.activeElement);
+      if (e.key === "ArrowDown" || e.key === "Tab") {
+        e.preventDefault();
+        const next = (currentIndex + 1) % cardsArr.length;
+        cardsArr[next]?.focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const prev = (currentIndex - 1 + cardsArr.length) % cardsArr.length;
+        cardsArr[prev]?.focus();
+      }
+    };
+    container.addEventListener("keydown", handleKeyDown);
+    return () => container.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div
@@ -28,27 +53,46 @@ const StepFormaPago = ({ tipo, onNext }) => {
         animation: "fadeIn 0.3s ease",
       }}
     >
-      {/* LISTADO DE SELECCIÓN TÁCTIL */}
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1 }} ref={containerRef}>
         <Space direction="vertical" size={6} style={{ width: "100%" }}>
           {opcionesFiltradas.map((opt) => (
-            <Card
+            <div
               key={opt.key}
-              hoverable
+              data-fp-card
+              tabIndex={0}
+              role="button"
               onClick={() => onNext(opt.key)}
-              styles={{ body: { padding: "12px 20px" } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onNext(opt.key);
+                }
+              }}
               style={{
                 borderRadius: "16px",
                 border: "1px solid #f0f0f0",
                 background: "#ffffff",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
                 transition: "all 0.2s ease",
+                cursor: "pointer",
+                outline: "none",
+                padding: "12px 20px",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = opt.color;
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${opt.color}20`;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = "#f0f0f0";
+                e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = opt.color;
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${opt.color}30`;
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "#f0f0f0";
+                e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
               }}
             >
               <div
@@ -69,7 +113,6 @@ const StepFormaPago = ({ tipo, onNext }) => {
                   {opt.label.toUpperCase()}
                 </Text>
 
-                {/* ICONO CIRCULAR A LA DERECHA */}
                 <div
                   style={{
                     fontSize: "24px",
@@ -86,7 +129,7 @@ const StepFormaPago = ({ tipo, onNext }) => {
                   {opt.icon}
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </Space>
       </div>

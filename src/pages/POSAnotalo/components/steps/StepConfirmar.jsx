@@ -81,7 +81,7 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
           <InfoRow
             icon={<MdPerson size={20} color={activeColor} />}
             label={
-              movimiento.tipo === MOVIMIENTO_TIPOS.VENTA ? "CLIENTE" : "ENTIDAD"
+              movimiento.tipo === MOVIMIENTO_TIPOS.VENTA || movimiento.tipo === MOVIMIENTO_TIPOS.COBRO ? "CLIENTE" : "ENTIDAD"
             }
             value={movimiento.entidad?.nombre || "Caja Interna"}
             color={activeColor}

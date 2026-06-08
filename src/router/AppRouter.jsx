@@ -8,6 +8,11 @@ import MovimientosPage from "../pages/Movimientos/MovimientosPage.jsx";
 
 // IMPORTANTE: Importamos solo el Orquestador
 import EntidadesPage from "../pages/Entidades/EntidadesPage.jsx";
+import MoreMenuPage from "../pages/MoreMenu/MoreMenuPage.jsx";
+import FormasPagoConfigPage from "../pages/FormasPagoConfig/FormasPagoConfigPage.jsx";
+import ReporteCtaCte from "../pages/Reportes/ReporteCtaCte.jsx";
+import DetalleCtaCtePage from "../pages/Reportes/DetalleCtaCtePage.jsx";
+import ReporteCaja from "../pages/Reportes/ReporteCaja.jsx";
 
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -43,6 +48,15 @@ const AppRouter = () => {
         <Route path="entidades/:tipo" element={<EntidadesPage />} />
         <Route path="entidades/:tipo/:action" element={<EntidadesPage />} />
         <Route path="entidades/:tipo/:action/:id" element={<EntidadesPage />} />
+
+        {/* MAS OPCIONES */}
+        <Route path="more" element={<MoreMenuPage />} />
+        <Route path="more/formas-pago" element={<FormasPagoConfigPage />} />
+
+        {/* REPORTES */}
+        <Route path="reportes/ctacte" element={<ReporteCtaCte />} />
+        <Route path="reportes/ctacte/:tipo/:id" element={<DetalleCtaCtePage />} />
+        <Route path="reportes/caja" element={<ReporteCaja />} />
       </Route>
 
       <Route

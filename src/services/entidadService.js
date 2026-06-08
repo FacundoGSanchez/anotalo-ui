@@ -57,6 +57,10 @@ export const entidadService = {
     }
   },
 
+  saveCtaCteConfig: (tipo, id, ctaCteConfig) => {
+    return entidadService.update(tipo, id, { ctaCteConfig });
+  },
+
   softDelete: (tipo, id) => {
     return entidadService.update(tipo, id, { activo: false });
   },

@@ -9,11 +9,12 @@ const { Text } = Typography;
 const StepEntidad = ({ tipo, formaPago, onNext }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const esVenta = tipo === MOVIMIENTO_TIPOS.VENTA;
+  const esCliente = tipo === MOVIMIENTO_TIPOS.VENTA || tipo === MOVIMIENTO_TIPOS.COBRO;
   const esCtaCte = formaPago === "Cta Corriente";
 
-  const tablaDB = esVenta ? "db_clientes" : "db_proveedores";
-  const activeColor = esVenta ? "#1890ff" : "#fa8c16";
+  const tablaDB = esCliente ? "db_clientes" : "db_proveedores";
+  const activeColor = esCliente ? "#1890ff" : "#fa8c16";
+  const labelEntidad = esCliente ? "CLIENTE" : "PROVEEDOR";
 
   return (
     <div style={{ animation: "fadeIn 0.3s ease" }}>
@@ -26,7 +27,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
         }}
       >
         {/* 1. PREDETERMINADOS PRIMERO: Consumidor Final */}
-        {esVenta && !esCtaCte && (
+        {esCliente && !esCtaCte && (
           <Button
             block
             size="large"
@@ -48,7 +49,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
           </Button>
         )}
 
-        {esVenta && !esCtaCte && <Divider style={{ margin: "4px 0" }} />}
+        {esCliente && !esCtaCte && <Divider style={{ margin: "4px 0" }} />}
 
         {/* 2. ACCIÓN DE BÚSQUEDA PRINCIPAL */}
         <Button
@@ -69,7 +70,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
             boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
           }}
         >
-          {esVenta
+          {esCliente
             ? "Buscar cliente existente..."
             : "Buscar proveedor existente..."}
         </Button>
@@ -89,7 +90,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
       />
 
       {/* ADVERTENCIA PROVEEDOR O CTA CTE */}
-      {(!esVenta || esCtaCte) && (
+      {(!esCliente || esCtaCte) && (
         <div style={{ marginTop: "20px" }}>
           <Alert
             message="Identificación requerida"
@@ -115,7 +116,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
             letterSpacing: "0.5px",
           }}
         >
-          PASO 4 DE 4 | SELECCIONAR {esVenta ? "CLIENTE" : "PROVEEDOR"}
+          PASO 4 DE 4 | SELECCIONAR {labelEntidad}
         </Text>
       </div>
     </div>

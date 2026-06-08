@@ -1,5 +1,4 @@
 import { Layout, theme, Typography } from "antd";
-import { useState, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar/Sidebar";
 import AppHeader from "./Header/AppHeader";
@@ -13,7 +12,6 @@ const { Text } = Typography;
 const { Content } = Layout;
 
 const MainLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const { isMobile } = useDevice();
   const { session } = useAuth();
   const orgName = session?.organizaciones?.[0]?.nombre || "ANOTALO";
@@ -22,22 +20,12 @@ const MainLayout = () => {
     token: { colorBgContainer, colorBorderSecondary },
   } = theme.useToken();
 
-  const handleToggle = () => {
-    setCollapsed((prev) => !prev);
-  };
-
-  const currentCollapsed = useMemo(() => collapsed, [collapsed]);
-
   return (
     <Layout className="main-layout" style={{ minHeight: "100vh" }}>
-      {!isMobile && (
-        <Sidebar collapsed={currentCollapsed} setCollapsed={setCollapsed} />
-      )}
+      {!isMobile && <Sidebar />}
 
       <Layout className="main-layout__content">
-        {!isMobile && (
-          <AppHeader collapsed={currentCollapsed} handleToggle={handleToggle} />
-        )}
+        {!isMobile && <AppHeader />}
 
         {isMobile && (
           <div
@@ -55,7 +43,7 @@ const MainLayout = () => {
               alt="ANOTALO"
               style={{ height: 28, width: "auto" }}
             />
-            <Text strong style={{ fontSize: "15px", color: "#262626" }}>
+            <Text strong style={{ fontSize: "15px", color: "#1890ff" }}>
               {orgName}
             </Text>
             <CardUser />

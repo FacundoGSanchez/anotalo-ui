@@ -21,7 +21,14 @@ const EntidadDetalleContainer = () => {
     if (isEdit) {
       const item = entidadService.getById(tipo, id);
       if (item) {
-        form.setFieldsValue(item);
+        form.setFieldsValue({
+          ...item,
+          ctaCteConfig: item.ctaCteConfig || {
+            habilitado: false,
+            importeMaximo: null,
+            plazoDias: null,
+          },
+        });
       } else {
         message.error("No se encontró el registro");
         navigate(`/entidades/${tipo}`);

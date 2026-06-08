@@ -1,3 +1,6 @@
+import { MOVIMIENTO_TIPOS } from "../constants/posConstants";
+import { entidadService } from "./entidadService";
+
 const DB_KEY = "movimientos_db";
 
 const dispatchUpdate = () => {
@@ -7,6 +10,40 @@ const dispatchUpdate = () => {
       detail: { type: "movimiento_actualizado" },
     }),
   );
+};
+
+const getTipoEntidadFromMovimiento = (movimiento) => {
+  if (movimiento.tipo === MOVIMIENTO_TIPOS.VENTA || movimiento.tipo === MOVIMIENTO_TIPOS.COBRO) {
+    return "clientes";
+  }
+  if (movimiento.tipo === MOVIMIENTO_TIPOS.PAGO) {
+    return "proveedores";
+  }
+  return null;
+};
+
+const recalcularSaldoEntidad = (entidadId, movimiento) => {
+  const tipo = getTipoEntidadFromMovimiento(movimiento);
+  if (!tipo || !entidadId) return;
+
+  const movs = movimientoService.getAll().filter(
+    (m) => m.entidad?.id === entidadId && m.formaPago === "Cta Corriente",
+  );
+
+  let saldo = 0;
+  movs.forEach((m) => {
+    const importe = Number(m.importe) || 0;
+    if (m.tipo === MOVIMIENTO_TIPOS.VENTA) {
+      saldo += importe;
+    } else if (m.tipo === MOVIMIENTO_TIPOS.COBRO || m.tipo === MOVIMIENTO_TIPOS.PAGO) {
+      saldo -= importe;
+    }
+  });
+
+  const entidad = entidadService.getById(tipo, entidadId);
+  if (entidad) {
+    entidadService.update(tipo, entidadId, { ...entidad, saldo });
+  }
 };
 
 export const movimientoService = {
@@ -39,6 +76,33 @@ export const movimientoService = {
         hour12: false,
       });
 
+      const esCtaCte = movimiento.formaPago === "Cta Corriente";
+
+      let saldoCtaCte = null;
+      if (esCtaCte && movimiento.entidad?.id) {
+        const movsEntidad = historialPrevio
+          .filter(
+            (m) =>
+              m.entidad?.id === movimiento.entidad.id &&
+              m.formaPago === "Cta Corriente",
+          )
+          .sort((a, b) => a.id - b.id);
+        const saldoAnterior =
+          movsEntidad.length > 0
+            ? movsEntidad[movsEntidad.length - 1].saldoCtaCte || 0
+            : 0;
+        const importeNum = Number(movimiento.importe) || 0;
+        if (movimiento.tipo === MOVIMIENTO_TIPOS.VENTA) {
+          saldoCtaCte = saldoAnterior + importeNum;
+        } else if (movimiento.tipo === MOVIMIENTO_TIPOS.PAGO) {
+          saldoCtaCte = saldoAnterior - importeNum;
+        } else if (movimiento.tipo === MOVIMIENTO_TIPOS.COBRO) {
+          saldoCtaCte = saldoAnterior - importeNum;
+        } else {
+          saldoCtaCte = saldoAnterior;
+        }
+      }
+
       const nuevoRegistro = {
         ...movimiento,
         id: Date.now(),
@@ -48,10 +112,17 @@ export const movimientoService = {
         formaPago: movimiento.formaPago || "Efectivo",
         entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
         importe: Number(movimiento.importe) || 0,
+        observacion: movimiento.observacion || "",
+        saldoCtaCte,
       };
 
       const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
       localStorage.setItem(DB_KEY, JSON.stringify(nuevoHistorial));
+
+      if (esCtaCte && movimiento.entidad?.id) {
+        recalcularSaldoEntidad(movimiento.entidad.id, movimiento);
+      }
+
       dispatchUpdate();
 
       return { success: true, data: nuevoRegistro };
@@ -81,8 +152,14 @@ export const movimientoService = {
   deleteById: (id) => {
     try {
       const todos = movimientoService.getAll();
+      const eliminado = todos.find((m) => m.id === id);
       const filtered = todos.filter((m) => m.id !== id);
       localStorage.setItem(DB_KEY, JSON.stringify(filtered));
+
+      if (eliminado && eliminado.formaPago === "Cta Corriente" && eliminado.entidad?.id) {
+        recalcularSaldoEntidad(eliminado.entidad.id, eliminado);
+      }
+
       dispatchUpdate();
 
       return { success: true };
@@ -95,7 +172,7 @@ export const movimientoService = {
   getLeyendaInformativa: (movimiento, tipos) => {
     const { tipo, formaPago } = movimiento;
     const esEfectivo = formaPago === "Efectivo";
-    const esSalida = tipo === tipos.PAGO || tipo === tipos.RETIRO;
+    const esSalida = tipo === tipos.PAGO || tipo === tipos.RETIRO || tipo === tipos.COBRO;
 
     if (esEfectivo) {
       return esSalida

@@ -12,26 +12,30 @@
 
 Aplicación PWA de punto de venta (POS) y gestión de caja, completamente offline-first. Almacena todos los datos en `localStorage` sin backend ni API REST. Orientada a dispositivos móviles con soporte progresivo para desktop.
 
+### 1.1 Objetivo de Experiencia de Usuario
+
+El enfoque principal de la aplicación es la **UX ágil, intuitiva y accesible** para cualquier usuario, priorizando a dueños y empleados de pequeños comercios que no poseen conocimiento profundo en gestión administrativa, procedimientos contables ni uso de aplicaciones de gestión empresarial. Cada interacción debe sentirse natural, predecible y sin fricción, minimizando la curva de aprendizaje.
+
 ---
 
 ## 2. Stack Tecnológico
 
-| Capa | Tecnología | Versión |
-|------|-----------|---------|
-| Framework UI | React | ^18.3.1 |
-| Build tool | Vite | ^6.3.5 |
-| Router | React Router DOM | ^6.30.1 |
-| Componentes | Ant Design | ^5.26.3 |
-| Iconos (principales) | react-icons (Material Design) | ^5.5.0 |
-| Iconos (menú) | @ant-design/icons | ^6.1.0 |
-| Fechas | dayjs (no declarado en package.json) | — |
-| Lenguaje | JavaScript (JSX) — sin TypeScript | — |
-| PWA | vite-plugin-pwa | ^1.2.0 |
-| Linter | ESLint (flat config v9) | ^9.25.0 |
+| Capa                 | Tecnología                           | Versión |
+| -------------------- | ------------------------------------ | ------- |
+| Framework UI         | React                                | ^18.3.1 |
+| Build tool           | Vite                                 | ^6.3.5  |
+| Router               | React Router DOM                     | ^6.30.1 |
+| Componentes          | Ant Design                           | ^5.26.3 |
+| Iconos (principales) | react-icons (Material Design)        | ^5.5.0  |
+| Iconos (menú)        | @ant-design/icons                    | ^6.1.0  |
+| Fechas               | dayjs (no declarado en package.json) | —       |
+| Lenguaje             | JavaScript (JSX) — sin TypeScript    | —       |
+| PWA                  | vite-plugin-pwa                      | ^1.2.0  |
+| Linter               | ESLint (flat config v9)              | ^9.25.0 |
 
 ### Dependencias faltantes detectadas
 
-- `dayjs` se usa en múltiples componentes pero **no está declarado** en `package.json` (probablemente resuelto como dependencia transitiva de antd).
+- ~~`dayjs` se usa en múltiples componentes pero **no está declarado** en `package.json` (probablemente resuelto como dependencia transitiva de antd).~~ ✅ Agregado como dependencia directa en `package.json` (v1.11.13).
 
 ---
 
@@ -78,11 +82,13 @@ anotalo-ui/
     └── pages/                  # Módulos por funcionalidad
         ├── auth/               # LoginPage
         ├── Dashboard/          # Home con resumen, accesos directos, gestión
-        ├── POSAnotalo/         # Wizard POS (5 pasos): Tipo → Importe → FormaPago → Entidad → Confirmar
-        │   ├── components/steps/  # Componentes por paso
+        ├── POSAnotalo/         # POS con dos versiones según dispositivo (mobile/desktop)
+        │   ├── POSAnotalo.jsx  # Router: elige mobile o desktop según DeviceContext
+        │   ├── POSAnotaloMobile.jsx  # Versión mobile-first (wizard 5 pasos)
+        │   ├── POSAnotaloDesktop.jsx # Versión desktop (en desarrollo)
+        │   ├── components/steps/  # Componentes por paso (compartidos)
         │   ├── hooks/usePosFlow.js  # Lógica de navegación del wizard
-        │   ├── data/posMocks.js    # Mock data para desarrollo
-        │   └── services/movimientoService.js  # VACÍO (placeholder)
+        │   └── data/posMocks.js    # Mock data para desarrollo
         ├── Movimientos/        # Listado paginado, filtros, detalle modal
         └── Entidades/          # CRUD clientes/proveedores (lista + formulario)
 ```
@@ -109,14 +115,14 @@ pages/{Feature}/
 
 ### 4.2 Patrones identificados
 
-| Patrón | Ejemplo | Descripción |
-|--------|---------|-------------|
-| Container/Presentational | EntidadDetalleContainer + EntidadForm | El container maneja estado/lógica, el presentacional solo renderiza |
-| Orquestador multi-vista | EntidadesPage | Usa useParams() para decidir entre lista y formulario |
-| Wizard multi-paso | POSAnotalo + usePosFlow | Pasos controlados por estado, navegación centralizada en hook |
-| Datos como config | MenuList + MenuItems | Items del menú definidos como datos, no como JSX |
-| Modales autocontenidos | ModalFiltros, ModalDetalleMovimiento | Props: open, onClose, onSelect |
-| Hooks de lógica compartida | useAuth, useDevice, usePosFlow | Logica extraída de componentes |
+| Patrón                     | Ejemplo                               | Descripción                                                         |
+| -------------------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| Container/Presentational   | EntidadDetalleContainer + EntidadForm | El container maneja estado/lógica, el presentacional solo renderiza |
+| Orquestador multi-vista    | EntidadesPage                         | Usa useParams() para decidir entre lista y formulario               |
+| Wizard multi-paso          | POSAnotalo + usePosFlow               | Pasos controlados por estado, navegación centralizada en hook       |
+| Datos como config          | MenuList + MenuItems                  | Items del menú definidos como datos, no como JSX                    |
+| Modales autocontenidos     | ModalFiltros, ModalDetalleMovimiento  | Props: open, onClose, onSelect                                      |
+| Hooks de lógica compartida | useAuth, useDevice, usePosFlow        | Logica extraída de componentes                                      |
 
 ---
 
@@ -133,6 +139,10 @@ pages/{Feature}/
       /entidades/:tipo            → EntidadesPage (lista)
       /entidades/:tipo/:action    → EntidadesPage (nuevo/editar)
       /entidades/:tipo/:action/:id → EntidadesPage (editar específico)
+      /more                       → MoreMenuPage
+      /more/formas-pago           → FormasPagoConfigPage
+      /reportes/ctacte            → ReporteCtaCte
+      /reportes/ctacte/:tipo/:id  → DetalleCtaCtePage
     *                             → Redirige a / o /login
 ```
 
@@ -144,12 +154,12 @@ Future flags activadas: `v7_startTransition`, `v7_relativeSplatPath`.
 
 ### 6.1 Capas de Estado
 
-| Capa | Mecanismo | Ámbito |
-|------|-----------|--------|
-| Autenticación | React Context + localStorage | Global |
-| Dispositivo | React Context + window.innerWidth | Global |
-| Wizard POS | Custom Hook (usePosFlow) + useState | Local al feature |
-| Datos de negocio | localStorage directo | Global |
+| Capa             | Mecanismo                           | Ámbito           |
+| ---------------- | ----------------------------------- | ---------------- |
+| Autenticación    | React Context + localStorage        | Global           |
+| Dispositivo      | React Context + window.innerWidth   | Global           |
+| Wizard POS       | Custom Hook (usePosFlow) + useState | Local al feature |
+| Datos de negocio | localStorage directo                | Global           |
 
 ### 6.2 Esquema localStorage
 
@@ -163,6 +173,7 @@ user:          { username, name, role }
 ### 6.3 Sincronización entre tabs
 
 `movimientoService.save()` dispara:
+
 1. `storage` event (navegador, captura cambios de otras pestañas)
 2. Custom `local-db-update` event (captura cambios dentro de la misma pestaña)
 
@@ -192,39 +203,40 @@ Se aplicó patrón Repository para abstraer el acceso a datos. Todos los compone
 
 ### movimientoService (`src/services/movimientoService.js`)
 
-| Método | Descripción |
-|--------|-------------|
-| `getAll()` | Retorna todos los movimientos |
-| `getByDate(fecha)` | Retorna movimientos filtrados por fecha |
-| `save(movimiento, user)` | Crea un nuevo movimiento y notifica cambios vía eventos |
-| `update(id, data)` | Actualiza un movimiento por ID |
-| `deleteById(id)` | Elimina un movimiento por ID |
-| `getLeyendaInformativa(movimiento, tipos)` | Retorna texto informativo según tipo y forma de pago |
+| Método                                     | Descripción                                             |
+| ------------------------------------------ | ------------------------------------------------------- |
+| `getAll()`                                 | Retorna todos los movimientos                           |
+| `getByDate(fecha)`                         | Retorna movimientos filtrados por fecha                 |
+| `save(movimiento, user)`                   | Crea un nuevo movimiento y notifica cambios vía eventos |
+| `update(id, data)`                         | Actualiza un movimiento por ID                          |
+| `deleteById(id)`                           | Elimina un movimiento por ID                            |
+| `getLeyendaInformativa(movimiento, tipos)` | Retorna texto informativo según tipo y forma de pago    |
 
 ### entidadService (`src/services/entidadService.js`)
 
-| Método | Descripción |
-|--------|-------------|
-| `getAll(tipo)` | Retorna todas las entidades de un tipo (`clientes`/`proveedores`) |
-| `getActivos(tipo)` | Retorna solo entidades activas |
-| `getById(tipo, id)` | Retorna una entidad por ID |
-| `create(tipo, values)` | Crea una nueva entidad con número correlativo |
-| `update(tipo, id, values)` | Actualiza una entidad |
-| `softDelete(tipo, id)` | Marca entidad como inactiva (borrado lógico) |
+| Método                     | Descripción                                                       |
+| -------------------------- | ----------------------------------------------------------------- |
+| `getAll(tipo)`             | Retorna todas las entidades de un tipo (`clientes`/`proveedores`) |
+| `getActivos(tipo)`         | Retorna solo entidades activas                                    |
+| `getById(tipo, id)`        | Retorna una entidad por ID                                        |
+| `create(tipo, values)`     | Crea una nueva entidad con número correlativo                     |
+| `update(tipo, id, values)` | Actualiza una entidad                                             |
+| `softDelete(tipo, id)`     | Marca entidad como inactiva (borrado lógico)                      |
 
 ### Estado de migración
 
-| Servicio | Archivo | Estado |
-|----------|---------|--------|
-| Movimientos | `src/services/movimientoService.js` | ✅ Implementado |
-| Entidades | `src/services/entidadService.js` | ✅ Creado |
-| Placeholder POS | `src/pages/POSAnotalo/services/movimientoService.js` | ❌ Eliminado |
+| Servicio        | Archivo                                              | Estado          |
+| --------------- | ---------------------------------------------------- | --------------- |
+| Movimientos     | `src/services/movimientoService.js`                  | ✅ Implementado |
+| Entidades       | `src/services/entidadService.js`                     | ✅ Creado       |
+| Placeholder POS | `src/pages/POSAnotalo/services/movimientoService.js` | ❌ Eliminado    |
 
 ---
 
 ## 9. Observaciones Técnicas
 
 ### 9.1 Fortalezas
+
 - Arquitectura modular por feature, facilita escalado y aislamiento
 - Offline-first: funcionamiento completo sin conexión
 - PWA con service worker y manifest para instalación mobile
@@ -233,6 +245,7 @@ Se aplicó patrón Repository para abstraer el acceso a datos. Todos los compone
 - Responsive design con sidebar colapsable en mobile
 
 ### 9.2 Debilidades / Deuda Técnica
+
 - **Sin TypeScript**: `@types/react` instalados pero no usados
 - **Sin tests**: No hay framework ni archivos de test
 - **Sin HTTP client**: No hay axios ni fetch API — imposible conectar con backend
@@ -243,6 +256,7 @@ Se aplicó patrón Repository para abstraer el acceso a datos. Todos los compone
 - **Sin manejo de errores centralizado**: errores de localStorage no se capturan
 
 ### 9.3 Riesgos
+
 - Escalabilidad: localStorage tiene límite de ~5-10 MB
 - Migración futura a backend requerirá refactor completo del servicio de datos
 - Sin tests, cualquier cambio debe verificarse manualmente
@@ -252,14 +266,14 @@ Se aplicó patrón Repository para abstraer el acceso a datos. Todos los compone
 
 ## 10. Recomendaciones Iniciales
 
-| Prioridad | Acción | Impacto |
-|-----------|--------|---------|
-| Prioridad | Acción | Impacto |
-|-----------|--------|---------|
-| 🔴 Alta | Migrar a TypeScript | Prevención de errores, autocompletado |
-| 🔴 Alta | Agregar testing framework (Vitest) | Calidad, refactors seguros |
-| 🟡 Media | Declarar dayjs en package.json | Consistencia de dependencias |
-| 🟡 Media | Definir convención de estilos (CSS modules vs inline) | Consistencia |
-| ✅ Hecho | Abstraer servicios de datos (Repository pattern) | `movimientoService` extendido + `entidadService` creado |
-| ✅ Hecho | Eliminar service placeholder vacío | `POSAnotalo/services/movimientoService.js` eliminado |
-| 🔵 Futuro | Implementar backend API + capa HTTP (axios/fetch) | Reemplazar implementación de servicios manteniendo la misma interfaz |
+| Prioridad   | Acción                                                | Impacto                                                              |
+| ----------- | ----------------------------------------------------- | -------------------------------------------------------------------- |
+| Prioridad   | Acción                                                | Impacto                                                              |
+| ----------- | --------                                              | ---------                                                            |
+| 🔴 Alta     | Migrar a TypeScript                                   | Prevención de errores, autocompletado                                |
+| 🔴 Alta     | Agregar testing framework (Vitest)                    | Calidad, refactors seguros                                           |
+| ✅ Hecho    | Declarar dayjs en package.json (v1.11.13)              | Consistencia de dependencias                                         |
+| 🟡 Media    | Definir convención de estilos (CSS modules vs inline) | Consistencia                                                         |
+| ✅ Hecho    | Abstraer servicios de datos (Repository pattern)      | `movimientoService` extendido + `entidadService` creado              |
+| ✅ Hecho    | Eliminar service placeholder vacío                    | `POSAnotalo/services/movimientoService.js` eliminado                 |
+| 🔵 Futuro   | Implementar backend API + capa HTTP (axios/fetch)     | Reemplazar implementación de servicios manteniendo la misma interfaz |

@@ -10,6 +10,7 @@ import {
   MdSyncAlt,
   MdOutlineContactPage,
   MdQrCode2,
+  MdOutlinePayment,
 } from "react-icons/md";
 
 export const MOVIMIENTO_TIPOS = {
@@ -17,6 +18,7 @@ export const MOVIMIENTO_TIPOS = {
   PAGO: "Pago",
   RETIRO: "Retiro",
   INGRESO: "Ingreso",
+  COBRO: "Cobro",
 };
 
 export const POS_COLORS = {
@@ -24,6 +26,7 @@ export const POS_COLORS = {
   [MOVIMIENTO_TIPOS.PAGO]: "#fa8c16",
   [MOVIMIENTO_TIPOS.INGRESO]: "#52c41a",
   [MOVIMIENTO_TIPOS.RETIRO]: "#546e7a",
+  [MOVIMIENTO_TIPOS.COBRO]: "#eb2f96",
   DEFAULT: "#d9d9d9",
 };
 
@@ -41,16 +44,10 @@ export const OPCIONES_TIPO = [
     desc: "Salida de dinero para pagos",
   },
   {
-    key: MOVIMIENTO_TIPOS.INGRESO,
-    label: "Ingreso",
-    icon: <MdOutlineAddCircleOutline />,
-    desc: "Entrada interna de efectivo",
-  },
-  {
-    key: MOVIMIENTO_TIPOS.RETIRO,
-    label: "Retiro",
-    icon: <MdOutlineAccountBalanceWallet />,
-    desc: "Salida interna de efectivo",
+    key: MOVIMIENTO_TIPOS.COBRO,
+    label: "Cobro (Clientes)",
+    icon: <MdOutlinePayment />,
+    desc: "Cobro a cliente en cuenta corriente",
   },
 ];
 
@@ -60,27 +57,28 @@ export const FORMAS_PAGO = [
     label: "Efectivo",
     icon: <MdAttachMoney />,
     color: "#52c41a",
-  },
-  { key: "Debito", label: "Débito", icon: <MdCreditCard />, color: "#1890ff" },
-  {
-    key: "Credito",
-    label: "Crédito",
-    icon: <MdCreditScore />,
-    color: "#722ed1",
-  },
-  {
-    key: "Transferencia",
-    label: "Transferencia",
-    icon: <MdSyncAlt />,
-    color: "#fa8c16",
+    requiereEntidad: false,
+    impactaCaja: true,
+    impactaCtaCte: false,
   },
   {
     key: "Cta Corriente",
     label: "Cta. Corriente",
     icon: <MdOutlineContactPage />,
     color: "#eb2f96",
+    requiereEntidad: true,
+    impactaCaja: false,
+    impactaCtaCte: true,
   },
-  { key: "QR", label: "QR", icon: <MdQrCode2 />, color: "#13c2c2" },
+  {
+    key: "Tarjeta",
+    label: "Tarjeta",
+    icon: <MdCreditCard />,
+    color: "#1890ff",
+    requiereEntidad: false,
+    impactaCaja: false,
+    impactaCtaCte: false,
+  },
 ];
 
 // Helper para obtener solo los strings de nombres (útil para filtros y estados iniciales)

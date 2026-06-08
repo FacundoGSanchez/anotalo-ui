@@ -1,49 +1,16 @@
 import React from "react";
-import { Typography, Card, Row, Col, Divider } from "antd";
-import { MdChevronRight } from "react-icons/md";
-import {
-  OPCIONES_TIPO,
-  POS_COLORS,
-  MOVIMIENTO_TIPOS,
-} from "../../../../constants/posConstants";
+import { Typography, Card } from "antd";
+import { OPCIONES_TIPO, POS_COLORS } from "../../../../constants/posConstants";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const StepTipo = ({ onNext }) => {
   return (
     <div style={{ animation: "fadeIn 0.3s ease" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        {/* OPCIONES PRINCIPALES (Venta y Pago) */}
-        {OPCIONES_TIPO.filter(
-          (o) =>
-            o.key === MOVIMIENTO_TIPOS.VENTA || o.key === MOVIMIENTO_TIPOS.PAGO,
-        ).map((opt) => (
+        {OPCIONES_TIPO.map((opt) => (
           <TipoCard key={opt.key} opt={opt} onNext={onNext} fullWidth />
         ))}
-
-        {/* SECCIÓN CAJA */}
-        <div style={{ marginTop: "8px" }}>
-          <Divider orientation="left" plain style={{ margin: "12px 0" }}>
-            <Text
-              type="secondary"
-              style={{ fontSize: "12px", fontWeight: "600", color: "#8c8c8c" }}
-            >
-              MOVIMIENTOS DE CAJA
-            </Text>
-          </Divider>
-        </div>
-
-        <Row gutter={[12, 12]}>
-          {OPCIONES_TIPO.filter(
-            (o) =>
-              o.key === MOVIMIENTO_TIPOS.INGRESO ||
-              o.key === MOVIMIENTO_TIPOS.RETIRO,
-          ).map((opt) => (
-            <Col span={12} key={opt.key}>
-              <TipoCard opt={opt} onNext={onNext} />
-            </Col>
-          ))}
-        </Row>
       </div>
 
       <div style={{ textAlign: "center", marginTop: "24px" }}>
@@ -71,7 +38,7 @@ const TipoCard = ({ opt, onNext, fullWidth }) => {
       hoverable
       bordered={false}
       onClick={() => onNext(opt.key)}
-      styles={{ body: { padding: fullWidth ? "16px" : "12px" } }}
+      styles={{ body: { padding: "16px" } }}
       style={{
         borderRadius: "16px",
         border: "1px solid #f0f0f0",

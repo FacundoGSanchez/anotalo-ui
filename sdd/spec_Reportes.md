@@ -19,6 +19,8 @@ El módulo de Reportes centraliza la visualización analítica de los datos del 
 | Reporte de Caja | `/reportes/caja` | 🔴 Alta | ⬜ Pendiente (acceso desde dashboard listo) |
 | Cta Corriente | `/reportes/ctacte` | 🔴 Alta | ⬜ Pendiente (acceso desde dashboard listo) |
 | Movimientos por Tipo/FormaPago | `/reportes/movimientos` | 🟡 Media | ⬜ Pendiente (acceso desde dashboard listo) |
+
+Cada reporte tiene su propia especificación con el patrón `spec_rpx_{modulo}.md`. Ver `sdd/spec_rpx_movimientos.md`.
 | Reportes existente (MovimientosPage) | `/movimientos` | ✅ | Actual |
 
 > El listado actual de movimientos (`/movimientos`) se conserva como herramienta de consulta diaria. Los reportes agregan capas de agregación, filtros por fecha y cálculos de saldos.
@@ -320,5 +322,8 @@ No requieren persistencia adicional. Los filtros y agregaciones se hacen en memo
 | `src/pages/Reportes/components/TablaSaldos.jsx` | ⬜ Tabla saldos cta cte |
 | `src/pages/Reportes/components/MatrizResumen.jsx` | ⬜ Matriz doble entrada |
 | `src/services/reporteService.js` | ⬜ Servicio de reportes |
+| `sdd/spec_rpx_movimientos.md` | 📝 Spec de reporte movimientos (formato RPX) |
+| `sdd/spec_rxp_Cta_Cte.md` | 📝 Spec de reporte cuenta corriente |
+| `sdd/spec_config.md` | 📝 Spec de configuración por organización |
 | `src/data/MenuItems.jsx` | 📝 Agregar sección Reportes |
 | `src/router/AppRouter.jsx` | 📝 Agregar rutas de reportes |

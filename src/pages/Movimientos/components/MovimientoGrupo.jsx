@@ -1,10 +1,8 @@
 import React from "react";
-import { Card, Typography, Space, Divider, Tag } from "antd";
-import dayjs from "dayjs";
-import { MdChevronRight, MdEdit } from "react-icons/md";
+import { Card, Typography, Tag } from "antd";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 const MovimientoGrupo = ({
   fecha,
@@ -14,50 +12,42 @@ const MovimientoGrupo = ({
   onSelect,
 }) => {
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div style={{ marginBottom: "16px" }}>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "12px",
-          padding: "8px 12px",
-          backgroundColor: "#f0f2f5",
-          borderRadius: "8px",
+          marginBottom: "8px",
+          padding: "0 4px",
         }}
       >
-        <Title
-          level={5}
+        <Text
+          type="secondary"
           style={{
-            fontSize: "14px",
-            color: "#595959",
-            margin: 0,
-            fontWeight: 600,
+            fontSize: "12px",
+            fontWeight: 700,
           }}
         >
           {fecha}
-        </Title>
+        </Text>
         {showSubtotal && (
-          <Text style={{ color: "#8c8c8c", fontSize: "14px" }}>
-            Subtotal{" "}
-            <span style={{ marginLeft: "12px", fontWeight: 700 }}>
-              $ {subtotal.toLocaleString("es-AR")}
-            </span>
+          <Text style={{ color: "#8c8c8c", fontSize: "13px", fontWeight: 600 }}>
+            Subtotal $ {subtotal.toLocaleString("es-AR")}
           </Text>
         )}
       </div>
 
-      <Card
-        styles={{ body: { padding: "0 16px" } }}
+      <div
         style={{
+          background: "#fff",
           borderRadius: "12px",
-          border: "none",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+          border: "1px solid #f0f0f0",
+          overflow: "hidden",
         }}
       >
-        {items.map((mov, index) => {
-          // VARIABLE DEFINIDA COMO: isEntrada
-          const isEntrada =
+        {items.map((mov, i) => {
+          const esEntrada =
             mov.tipo === MOVIMIENTO_TIPOS.VENTA ||
             mov.tipo === MOVIMIENTO_TIPOS.INGRESO;
 
@@ -69,79 +59,76 @@ const MovimientoGrupo = ({
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "14px 0",
+                  padding: "10px 12px",
                   cursor: "pointer",
                 }}
               >
-                {/* IZQUIERDA: Info apilada */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ marginBottom: "4px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      marginBottom: "2px",
+                    }}
+                  >
                     <Tag
                       color={POS_COLORS[mov.tipo]}
                       style={{
-                        borderRadius: "6px",
-                        fontSize: "14px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: 700,
                         border: "none",
-                        fontWeight: 900,
-                        marginRight: "8px",
-                        width: "24px",
-                        height: "24px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: 0,
+                        margin: 0,
+                        lineHeight: "18px",
+                        padding: "0 6px",
                       }}
                     >
                       {mov.tipo.charAt(0).toUpperCase()}
                     </Tag>
-                    <Text strong style={{ fontSize: "14px", color: "#595959" }}>
+                    <Text
+                      style={{
+                        fontSize: "13px",
+                        color: "#595959",
+                        fontWeight: 600,
+                      }}
+                    >
                       {mov.entidad?.nombre || "Caja Interna"}
                     </Text>
                   </div>
-
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Text
-                      type="secondary"
-                      style={{ fontSize: "12px", fontWeight: "500" }}
-                    >
-                      {mov.formaPago}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: "11px" }}>
-                      {dayjs(mov.fecha).format("HH:mm")} hs
-                    </Text>
-                  </div>
+                  <Text
+                    type="secondary"
+                    style={{ fontSize: "11px", marginLeft: "32px" }}
+                  >
+                    {mov.formaPago} · {mov.hora || mov.fecha} hs
+                  </Text>
                 </div>
 
-                {/* DERECHA: Importe e Icono */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ textAlign: "right", minWidth: "125px" }}>
-                    <Text
-                      strong
-                      style={{
-                        color: isEntrada ? "#52c41a" : "#ff4d4f",
-                        fontSize: "22px",
-                        letterSpacing: "-0.5px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      ${mov.importe.toLocaleString("es-AR")}
-                    </Text>
-                  </div>
-                  <MdChevronRight size={18} color="#bfbfbf" />
-                </div>
-              </div>
-              {index < items.length - 1 && (
-                <Divider
+                <Text
+                  strong
                   style={{
-                    margin: 0,
-                    borderBlockStart: "1px solid rgba(0, 0, 0, 0.05)",
+                    fontSize: "15px",
+                    color: esEntrada ? "#52c41a" : "#ff4d4f",
+                    flexShrink: 0,
+                    marginLeft: "8px",
+                  }}
+                >
+                  ${mov.importe.toLocaleString("es-AR")}
+                </Text>
+              </div>
+              {i < items.length - 1 && (
+                <div
+                  style={{
+                    height: 1,
+                    background: "#f0f0f0",
+                    margin: "0 12px",
                   }}
                 />
               )}
             </div>
           );
         })}
-      </Card>
+      </div>
     </div>
   );
 };

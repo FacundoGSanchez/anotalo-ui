@@ -39,9 +39,19 @@ export const AuthProvider = ({ children }) => {
 
   const getToken = useCallback(() => authService.getToken(), []);
 
+  const switchOrganization = useCallback(async (orgId) => {
+    const org = await authService.switchOrganization(orgId);
+    if (org) {
+      const stored = authService.getSession();
+      setSession(stored);
+      setUser(stored?.usuario);
+    }
+    return org;
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, session, login, logout, getToken, loading }}
+      value={{ isAuthenticated, user, session, login, logout, getToken, loading, switchOrganization }}
     >
       {children}
     </AuthContext.Provider>

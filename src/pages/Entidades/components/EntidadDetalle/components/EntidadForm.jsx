@@ -1,34 +1,12 @@
 import React from "react";
-import { Form, Input, Button, Space, Popconfirm } from "antd";
-import { MdSave, MdDeleteOutline, MdPhone } from "react-icons/md";
+import { Form, Input, Button, Space, Switch, InputNumber, Typography } from "antd";
+import { MdSave, MdPhone } from "react-icons/md";
 
-/**
- * Componente Presentacional del Formulario de Entidades
- * @param {Object} form - Instancia de Form de Ant Design
- * @param {Boolean} isEdit - Define si estamos editando o creando
- * @param {String} colorTema - Color principal (Azul para clientes, Naranja para proveedores)
- * @param {Boolean} isCliente - Define el texto dinámico del botón
- * @param {Function} onFinish - Función que procesa el guardado
- */
+const { Text } = Typography;
+
 const EntidadForm = ({ form, isEdit, colorTema, isCliente, onFinish }) => {
-  // Función para manejar la eliminación (Baja Lógica)
-  const handleConfirmDelete = () => {
-    // Obtenemos los valores actuales del form y forzamos activo: false
-    const currentValues = form.getFieldsValue();
-    onFinish({ ...currentValues, activo: false });
-  };
-
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      requiredMark={false} // Limpia los asteriscos rojos para un look más moderno
-    >
-      {/* Nota: El campo NRO y ID están ocultos por requerimiento, 
-          pero se gestionan internamente en el Container. 
-      */}
-
+    <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
       <Form.Item
         name="nombre"
         label="Denominación / Nombre"
@@ -52,12 +30,94 @@ const EntidadForm = ({ form, isEdit, colorTema, isCliente, onFinish }) => {
         />
       </Form.Item>
 
+      <div
+        style={{
+          marginTop: "24px",
+          marginBottom: "16px",
+          borderTop: "1px solid #f0f0f0",
+          paddingTop: "16px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "12px",
+          }}
+        >
+          <Text strong style={{ fontSize: "14px" }}>
+            Cuenta Corriente
+          </Text>
+          <Form.Item
+            name={["ctaCteConfig", "habilitado"]}
+            valuePropName="checked"
+            style={{ margin: 0 }}
+          >
+            <Switch />
+          </Form.Item>
+        </div>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prev, cur) =>
+            prev?.ctaCteConfig?.habilitado !== cur?.ctaCteConfig?.habilitado
+          }
+        >
+          {({ getFieldValue }) => {
+            const habilitado = getFieldValue(["ctaCteConfig", "habilitado"]);
+            return habilitado ? (
+              <>
+                <Form.Item
+                  name={["ctaCteConfig", "importeMaximo"]}
+                  label="Tope CuentaCorriente"
+                  rules={[
+                    { required: true, message: "Indicá el tope máximo" },
+                  ]}
+                >
+                  <InputNumber
+                    style={{ width: "100%", borderRadius: "8px" }}
+                    size="large"
+                    min={0}
+                    formatter={(value) =>
+                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(\.*)/g, "")}
+                    placeholder="Ej: 50000"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name={["ctaCteConfig", "plazoDias"]}
+                  label="Plazo (días)"
+                  rules={[
+                    { required: true, message: "Indicá el plazo en días" },
+                  ]}
+                >
+                  <InputNumber
+                    style={{ width: "100%", borderRadius: "8px" }}
+                    size="large"
+                    min={0}
+                    placeholder="Ej: 30"
+                  />
+                </Form.Item>
+                <Text
+                  type="secondary"
+                  style={{ fontSize: "11px", display: "block", marginTop: "-16px" }}
+                >
+                  Sobre primer compra
+                </Text>
+              </>
+            ) : null;
+          }}
+        </Form.Item>
+      </div>
+
       <Space
         direction="vertical"
         style={{ width: "100%", marginTop: "24px" }}
         size={16}
       >
-        {/* BOTÓN GUARDAR */}
         <Button
           type="primary"
           block
@@ -75,32 +135,6 @@ const EntidadForm = ({ form, isEdit, colorTema, isCliente, onFinish }) => {
         >
           Guardar {isCliente ? "Cliente" : "Proveedor"}
         </Button>
-
-        {/* BOTÓN ELIMINAR (Solo en edición) */}
-        {isEdit && (
-          <Popconfirm
-            title="¿Deseas eliminar esta entidad?"
-            description="Ya no aparecerá en el listado de activos."
-            onConfirm={handleConfirmDelete}
-            okText="Eliminar"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true, size: "large" }}
-            cancelButtonProps={{ size: "large" }}
-          >
-            <Button
-              type="text"
-              danger
-              block
-              icon={<MdDeleteOutline size={22} />}
-              style={{
-                marginTop: "8px",
-                fontWeight: "500",
-              }}
-            >
-              Eliminar
-            </Button>
-          </Popconfirm>
-        )}
       </Space>
     </Form>
   );

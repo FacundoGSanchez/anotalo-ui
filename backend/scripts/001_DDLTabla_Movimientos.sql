@@ -8,6 +8,7 @@ CREATE TABLE `Movimientos` (
   `EntidadNro` int DEFAULT NULL,
   `Fecha` date DEFAULT NULL,
   `Hora` varchar(10) DEFAULT NULL,
+  `Observacion` varchar(500) DEFAULT NULL,
   `Usuario` varchar(100) DEFAULT NULL,
   `Activo` tinyint(1) DEFAULT '1',
   `OrganizacionId` int NOT NULL,

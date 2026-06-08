@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import { Button, Typography } from "antd";
-import { MdChevronRight } from "react-icons/md";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Button, Typography, Input } from "antd";
+import { MdChevronRight, MdKeyboard } from "react-icons/md";
 import { VISOR_CONFIG, POS_COLORS } from "../../../../constants/posConstants";
 import Calculadora from "./components/Calculadora";
 
 const { Title, Text } = Typography;
 
-const StepImporte = ({ tipo, onNext }) => {
+const StepImporte = ({ tipo, onNext, desktop }) => {
   const [importe, setImporte] = useState(0);
+  const [showCalc, setShowCalc] = useState(false);
+  const inputRef = useRef(null);
 
-  // 1. Uso de colores centralizado (Usa 'tipo' que viene por props)
   const activeColor = POS_COLORS[tipo] || POS_COLORS.DEFAULT;
 
-  // Lógica de tamaño de fuente basada en las constantes de utils
   const getFontSize = () => {
     const largo = importe.toLocaleString("es-AR").length;
     if (largo > 9) return VISOR_CONFIG.SIZES.SMALL;
@@ -20,19 +20,41 @@ const StepImporte = ({ tipo, onNext }) => {
     return VISOR_CONFIG.SIZES.DEFAULT;
   };
 
-  const handlePress = (val) => {
-    // Evitamos que el número crezca más allá de lo que el diseño soporta
-    if (importe.toString().length >= VISOR_CONFIG.MAX_DIGITOS) return;
-
+  const addDigit = useCallback((val) => {
     setImporte((prev) => {
+      if (prev.toString().length >= VISOR_CONFIG.MAX_DIGITOS) return prev;
       if (val === "00") return prev * 100;
       return prev * 10 + parseInt(val);
     });
-  };
+  }, []);
 
-  const handleDelete = () => {
+  const deleteDigit = useCallback(() => {
     setImporte((prev) => Math.floor(prev / 10));
-  };
+  }, []);
+
+  // Handle input change for desktop visible input
+  const handleInputChange = useCallback((e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    const num = raw ? parseInt(raw, 10) : 0;
+    setImporte(num);
+  }, []);
+
+  // Handle Enter key on the desktop input
+  const handleInputKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" && importe > 0) {
+        onNext(importe);
+      }
+    },
+    [importe, onNext],
+  );
+
+  // Desktop: auto-focus the input on mount
+  useEffect(() => {
+    if (desktop) {
+      inputRef.current?.focus();
+    }
+  }, [desktop]);
 
   return (
     <div
@@ -42,20 +64,19 @@ const StepImporte = ({ tipo, onNext }) => {
         animation: "fadeIn 0.3s ease",
       }}
     >
-      {/* VISOR CON FUENTE DINÁMICA Y ALTURA FIJA */}
+      {/* VISOR */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           background: "#f8f9fa",
           borderRadius: "16px",
-          marginBottom: "20px",
-          height: "110px",
+          marginBottom: "12px",
+          height: desktop ? "80px" : "88px",
           overflow: "hidden",
           border: "1px solid #f0f0f0",
         }}
       >
-        {/* Barra lateral indicadora dinámica */}
         <div
           style={{
             width: "8px",
@@ -64,7 +85,6 @@ const StepImporte = ({ tipo, onNext }) => {
             transition: "background-color 0.3s ease",
           }}
         />
-
         <div
           style={{
             flex: 1,
@@ -74,7 +94,6 @@ const StepImporte = ({ tipo, onNext }) => {
             justifyContent: "space-between",
           }}
         >
-          {/* Signo Pesos con color dinámico */}
           <Text
             style={{
               fontSize: "28px",
@@ -86,33 +105,75 @@ const StepImporte = ({ tipo, onNext }) => {
             $
           </Text>
 
-          {/* Importe Formateado */}
-          <Title
-            level={1}
-            style={{
-              margin: 0,
-              fontSize: getFontSize(),
-              letterSpacing: "-1.5px",
-              color: importe > 0 ? "#000" : "#bfbfbf",
-              lineHeight: 1,
-              transition: "font-size 0.2s ease-in-out",
-              textAlign: "right",
-              wordBreak: "break-all",
-            }}
-          >
-            {importe.toLocaleString("es-AR")}
-          </Title>
+          {desktop ? (
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              value={importe > 0 ? importe.toLocaleString("es-AR") : ""}
+              onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
+              placeholder="0"
+              style={{
+                flex: 1,
+                border: "none",
+                background: "transparent",
+                fontSize: getFontSize(),
+                fontWeight: 700,
+                textAlign: "right",
+                outline: "none",
+                color: importe > 0 ? "#000" : "#bfbfbf",
+                letterSpacing: "-1px",
+                fontFamily: "inherit",
+              }}
+            />
+          ) : (
+            <Title
+              level={1}
+              style={{
+                margin: 0,
+                fontSize: getFontSize(),
+                letterSpacing: "-1.5px",
+                color: importe > 0 ? "#000" : "#bfbfbf",
+                lineHeight: 1,
+                transition: "font-size 0.2s ease-in-out",
+                textAlign: "right",
+                wordBreak: "break-all",
+              }}
+            >
+              {importe.toLocaleString("es-AR")}
+            </Title>
+          )}
         </div>
       </div>
 
-      {/* COMPONENTE CALCULADORA */}
-      <Calculadora
-        onPress={handlePress}
-        onDelete={handleDelete}
-        activeColor={activeColor}
-      />
+      {/* Desktop: toggle calculator button */}
+      {desktop && (
+        <Button
+          type="text"
+          icon={<MdKeyboard size={16} />}
+          onClick={() => setShowCalc((c) => !c)}
+          style={{
+            alignSelf: "flex-end",
+            fontSize: "12px",
+            color: "#8c8c8c",
+            marginBottom: "8px",
+          }}
+        >
+          {showCalc ? "Ocultar teclado" : "Mostrar teclado"}
+        </Button>
+      )}
 
-      {/* BOTÓN CONTINUAR DINÁMICO */}
+      {/* CALCULADORA — always visible on mobile, toggled on desktop */}
+      {(desktop ? showCalc : true) && (
+        <Calculadora
+          onPress={addDigit}
+          onDelete={deleteDigit}
+          activeColor={activeColor}
+        />
+      )}
+
+      {/* BOTÓN CONTINUAR */}
       <Button
         type="primary"
         block
@@ -148,6 +209,19 @@ const StepImporte = ({ tipo, onNext }) => {
       >
         PASO 2 DE 4 | INGRESAR IMPORTE
       </Text>
+      {desktop && (
+        <Text
+          type="secondary"
+          style={{
+            textAlign: "center",
+            marginTop: "4px",
+            fontSize: "10px",
+            color: "#bfbfbf",
+          }}
+        >
+          Escribí el importe con el teclado físico
+        </Text>
+      )}
     </div>
   );
 };

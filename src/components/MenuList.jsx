@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import MenuItems from "../data/MenuItems";
 import { useDevice } from "../context/DeviceContext";
 
-// buscar item recursivamente
 const findMenuItem = (items, key) => {
   for (const item of items) {
     if (item.key === key) return item;
@@ -15,22 +14,15 @@ const findMenuItem = (items, key) => {
   return null;
 };
 
-const MenuList = ({ darkTheme, setCollapsed }) => {
+const MenuList = ({ darkTheme }) => {
   const navigate = useNavigate();
   const { isMobile } = useDevice();
 
   const handleClick = ({ key }) => {
     const item = findMenuItem(MenuItems, key);
-
     if (item?.disabled) return;
-
     const route = item?.meta?.route?.[isMobile ? "mobile" : "desktop"] || key;
-
     navigate(route);
-
-    if (isMobile || item?.meta?.collapseOnClick) {
-      setCollapsed(true);
-    }
   };
 
   return (

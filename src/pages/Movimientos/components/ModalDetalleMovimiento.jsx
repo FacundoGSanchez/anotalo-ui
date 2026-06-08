@@ -53,7 +53,7 @@ const ModalDetalleMovimiento = ({
     }
   };
 
-  const isVenta = movimiento.tipo === "Venta";
+  const isVenta = movimiento.tipo === "Venta" || movimiento.tipo === "Cobro";
   const tablaDB = isVenta ? "db_clientes" : "db_proveedores";
   const activeColor = isVenta ? "#1890ff" : "#fa8c16";
 
@@ -166,7 +166,8 @@ const ModalDetalleMovimiento = ({
               >
                 <Text strong>{movimiento.entidad?.nombre || "General"}</Text>
                 {(movimiento.tipo === MOVIMIENTO_TIPOS.VENTA ||
-                  movimiento.tipo === MOVIMIENTO_TIPOS.PAGO) && (
+                  movimiento.tipo === MOVIMIENTO_TIPOS.PAGO ||
+                  movimiento.tipo === MOVIMIENTO_TIPOS.COBRO) && (
                   <Button
                     type="link"
                     size="small"
@@ -178,6 +179,9 @@ const ModalDetalleMovimiento = ({
             </Descriptions.Item>
             <Descriptions.Item label="Usuario">
               <Text>{movimiento.usuario}</Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Observación">
+              <Text>{movimiento.observacion || "—"}</Text>
             </Descriptions.Item>
           </Descriptions>
         </div>

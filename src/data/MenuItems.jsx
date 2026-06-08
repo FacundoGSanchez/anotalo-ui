@@ -1,12 +1,12 @@
 import {
   HomeOutlined,
   ShopOutlined,
-  FormOutlined,
   UsergroupAddOutlined,
   DeliveredProcedureOutlined,
-  ProjectOutlined,
   UnorderedListOutlined,
-  UserSwitchOutlined,
+  BankOutlined,
+  FileTextOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 const MenuItems = [
@@ -14,57 +14,70 @@ const MenuItems = [
     key: "/",
     icon: <HomeOutlined />,
     label: "Inicio",
-    meta: { collapseOnClick: false },
   },
   {
-    key: "/pos",
-    icon: <ShopOutlined />,
-    label: "Pos Anotalo",
-    meta: {
-      collapseOnClick: true,
-      route: {
-        mobile: "/pos/anotalo",
-        desktop: "/pos/anotalo",
-      },
-    },
+    type: "divider",
   },
   {
-    key: "gestion",
-    icon: <FormOutlined />,
-    label: "Nóminas",
+    key: "op_group",
+    label: "OPERACIONES",
+    type: "group",
     children: [
       {
-        // ✅ KEY ÚNICA: Coincide con la ruta dinámica de Clientes
-        key: "/entidades/clientes",
-        icon: <UsergroupAddOutlined />,
-        label: "Clientes",
-        disabled: false, // Activado
-      },
-      {
-        // ✅ KEY ÚNICA: Coincide con la ruta dinámica de Proveedores
-        key: "/entidades/proveedores",
-        icon: <DeliveredProcedureOutlined />,
-        label: "Proveedores",
-        disabled: false, // Activado
+        key: "/pos/anotalo",
+        icon: <ShopOutlined />,
+        label: "POS Anotalo",
       },
     ],
   },
   {
-    key: "actividad", // Cambié la key de movimientos para evitar conflictos si el path es igual
-    icon: <ProjectOutlined />,
-    label: "Actividad",
+    key: "ent_group",
+    label: "ENTIDADES",
+    type: "group",
     children: [
+      {
+        key: "/entidades/clientes",
+        icon: <UsergroupAddOutlined />,
+        label: "Clientes",
+      },
+      {
+        key: "/entidades/proveedores",
+        icon: <DeliveredProcedureOutlined />,
+        label: "Proveedores",
+      },
+    ],
+  },
+  {
+    key: "rpt_group",
+    label: "REPORTES",
+    type: "group",
+    children: [
+      {
+        key: "/reportes/caja",
+        icon: <BankOutlined />,
+        label: "Reporte Caja",
+      },
+      {
+        key: "/reportes/ctacte",
+        icon: <FileTextOutlined />,
+        label: "Cta Corriente",
+      },
       {
         key: "/movimientos",
         icon: <UnorderedListOutlined />,
         label: "Movimientos",
-        disabled: false,
       },
+    ],
+  },
+  {
+    key: "cfg_group",
+    label: "CONFIGURACIÓN",
+    type: "group",
+    children: [
       {
-        key: "/saldocuentas",
-        icon: <UserSwitchOutlined />,
-        label: "Saldo Cuentas",
-        disabled: true,
+        key: "/more/formas-pago",
+        icon: <SettingOutlined />,
+        label: "Formas de Pago",
       },
     ],
   },

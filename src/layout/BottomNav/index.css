@@ -11,7 +11,6 @@
   justify-content: space-around;
   z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom, 0);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .bottom-nav__item {
@@ -40,6 +39,41 @@
 
 .bottom-nav__item--active .bottom-nav__icon {
   transform: scale(1.05);
+}
+
+.bottom-nav__item--featured {
+  position: relative;
+  min-width: 64px;
+  margin-top: -18px;
+}
+
+.bottom-nav__item--featured .bottom-nav__icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1890ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(24, 144, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bottom-nav__item--featured:hover .bottom-nav__icon-wrapper {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.45);
+}
+
+.bottom-nav__item--featured .bottom-nav__icon {
+  font-size: 28px;
+  color: #fff;
+}
+
+.bottom-nav__item--featured .bottom-nav__label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1890ff;
+  margin-top: 2px;
 }
 
 .bottom-nav__icon {
@@ -99,4 +133,20 @@
 
 .bottom-nav-modal__action--danger {
   color: #ff4d4f;
+}
+
+.bottom-nav-modal__modules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bottom-nav-modal__module {
+  padding: 0;
+}
+
+.bottom-nav-modal__module-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }

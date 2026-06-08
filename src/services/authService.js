@@ -18,8 +18,40 @@ const MOCK_RESPONSE = {
   },
   token: "mock-jwt-token-anotalo-2024",
   organizaciones: [
-    { id: 1, nombre: "Org Principal", sucursalDefault: 1 },
-    { id: 2, nombre: "Org Secundaria", sucursalDefault: null },
+    {
+      id: 1,
+      nombre: "Org Principal",
+      sucursalDefault: 1,
+      config: {
+        formasPago: {
+          Venta: [
+            { key: "Efectivo", label: "Efectivo", enabled: true },
+            { key: "Tarjetas", label: "Tarjetas", enabled: true },
+            { key: "Cuenta Cte", label: "Cuenta Cte", enabled: true },
+          ],
+          Pago: [
+            { key: "Efectivo", label: "Efectivo", enabled: true },
+            { key: "Transferencia", label: "Transferencia", enabled: true },
+          ],
+        },
+      },
+    },
+    {
+      id: 2,
+      nombre: "Org Secundaria",
+      sucursalDefault: null,
+      config: {
+        formasPago: {
+          Venta: [
+            { key: "Efectivo", label: "Efectivo", enabled: true },
+            { key: "Mercado Pago", label: "Mercado Pago", enabled: true },
+          ],
+          Pago: [
+            { key: "Transferencia", label: "Transferencia", enabled: true },
+          ],
+        },
+      },
+    },
   ],
   sucursales: [
     { id: 1, organizacionId: 1, nombre: "Sucursal Centro" },
@@ -33,6 +65,8 @@ function generateSessionId() {
   return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+const ORG_KEY = "current_org_id";
+
 export const authService = {
   async login(username, password) {
     const useMock = !API_BASE;
@@ -44,6 +78,15 @@ export const authService = {
       const session = { ...MOCK_RESPONSE, sessionId: generateSessionId() };
       localStorage.setItem(TOKEN_KEY, session.token);
       localStorage.setItem(USER_KEY, JSON.stringify(session));
+
+      // Inicializar config de la primera org
+      const orgActual = session.organizaciones?.[0];
+      if (orgActual?.config) {
+        const { orgService } = await import("./orgService");
+        orgService.initOrgConfig(orgActual.id, orgActual.config);
+      }
+      localStorage.setItem(ORG_KEY, String(orgActual?.id || ""));
+
       return session;
     }
     const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -56,6 +99,23 @@ export const authService = {
     localStorage.setItem(TOKEN_KEY, data.token);
     localStorage.setItem(USER_KEY, JSON.stringify(data));
     return data;
+  },
+
+  getCurrentOrgId() {
+    const raw = localStorage.getItem(ORG_KEY);
+    return raw ? Number(raw) : null;
+  },
+
+  async switchOrganization(orgId) {
+    const session = this.getSession();
+    if (!session) return null;
+    const org = session.organizaciones?.find((o) => o.id === orgId);
+    if (!org) return null;
+    localStorage.setItem(ORG_KEY, String(orgId));
+    const { orgService } = await import("./orgService");
+    orgService.initOrgConfig(orgId, org.config);
+    window.dispatchEvent(new Event("org-changed"));
+    return org;
   },
 
   logout() {
