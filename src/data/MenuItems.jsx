@@ -7,6 +7,9 @@ import {
   BankOutlined,
   FileTextOutlined,
   SettingOutlined,
+  ShoppingCartOutlined,
+  BarChartOutlined,
+  AccountBookOutlined,
 } from "@ant-design/icons";
 
 const MenuItems = [
@@ -55,7 +58,7 @@ const MenuItems = [
       {
         key: "/reportes/caja",
         icon: <BankOutlined />,
-        label: "Reporte Caja",
+        label: "Caja",
       },
       {
         key: "/reportes/ctacte",
@@ -63,24 +66,40 @@ const MenuItems = [
         label: "Cta Corriente",
       },
       {
+        key: "/reportes/saldo-ctas-ctes",
+        icon: <AccountBookOutlined />,
+        label: "Saldo Ctas Ctes",
+      },
+      {
         key: "/movimientos",
         icon: <UnorderedListOutlined />,
         label: "Movimientos",
       },
-    ],
-  },
-  {
-    key: "cfg_group",
-    label: "CONFIGURACIÓN",
-    type: "group",
-    children: [
       {
-        key: "/more/formas-pago",
-        icon: <SettingOutlined />,
-        label: "Formas de Pago",
+        key: "/reportes/resumen-ventas",
+        icon: <BarChartOutlined />,
+        label: "Resumen Ventas",
       },
     ],
   },
+  {
+    key: "comp_group",
+    label: "COMPRAS",
+    type: "group",
+    children: [
+      {
+        key: "/compras",
+        icon: <ShoppingCartOutlined />,
+        label: "Compras",
+      },
+      {
+        key: "/pedidos",
+        icon: <DeliveredProcedureOutlined />,
+        label: "Pedidos",
+      },
+    ],
+  },
+
 ];
 
 export default MenuItems;

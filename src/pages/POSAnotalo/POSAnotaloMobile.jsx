@@ -7,7 +7,6 @@ import { STEPS } from "../../constants/posConstants";
 
 import PosHeader from "./components/PosHeader";
 
-import StepTipo from "./components/steps/StepTipo";
 import StepImporte from "./components/steps/StepImporte";
 import StepFormaPago from "./components/steps/StepFormaPago";
 import StepEntidad from "./components/steps/StepEntidad";
@@ -29,8 +28,8 @@ const POSAnotaloMobile = () => {
   } = usePosFlow();
 
   const finalizarRegistro = () => {
-    setMovimiento({ tipo: null, importe: 0, formaPago: null, entidad: null });
-    setCurrentStep(STEPS.TIPO);
+    setMovimiento({ tipo: "Venta", importe: 0, lineItems: [], formaPago: null, entidad: null });
+    setCurrentStep(STEPS.IMPORTE);
     if (locState?.returnPath) {
       navigate(locState.returnPath);
     } else {
@@ -63,15 +62,12 @@ const POSAnotaloMobile = () => {
             boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
           }}
         >
-          {currentStep === STEPS.TIPO && (
-            <StepTipo onNext={(tipo) => handleNext({ tipo })} />
-          )}
-
           {currentStep === STEPS.IMPORTE && (
             <StepImporte
               desktop={false}
               tipo={movimiento.tipo}
-              onNext={(monto) => handleNext({ importe: monto })}
+              initialLineItems={movimiento.lineItems || []}
+              onNext={({ importe, lineItems }) => handleNext({ importe, lineItems })}
             />
           )}
 

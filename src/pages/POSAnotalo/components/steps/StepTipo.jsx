@@ -36,7 +36,7 @@ const TipoCard = ({ opt, onNext, fullWidth }) => {
   return (
     <Card
       hoverable
-      bordered={false}
+      variant="borderless"
       onClick={() => onNext(opt.key)}
       styles={{ body: { padding: "16px" } }}
       style={{

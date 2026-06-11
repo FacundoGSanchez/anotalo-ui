@@ -1,10 +1,18 @@
-import { FORMAS_PAGO } from "../constants/posConstants";
+import React from "react";
+import { FORMAS_PAGO, ICONOS_POS } from "../constants/posConstants";
 
 const getConfigKey = (orgId) => `org_config_${orgId || "default"}`;
 
 const TIPOS_MOVIMIENTO = ["Venta", "Pago"];
 
 const MERGE_PROPS = ["icon", "color", "requiereEntidad", "impactaCaja", "impactaCtaCte"];
+
+const resolveIcon = (iconKey, fallback) => {
+  if (!iconKey) return fallback ?? null;
+  const IconComponent = ICONOS_POS[iconKey];
+  if (!IconComponent) return fallback ?? null;
+  return React.createElement(IconComponent);
+};
 
 const mergeWithDefault = (orgFormas) => {
   return (orgFormas || [])
@@ -18,6 +26,7 @@ const mergeWithDefault = (orgFormas) => {
       MERGE_PROPS.forEach((prop) => {
         merged[prop] = f[prop] ?? defaultOpt?.[prop] ?? null;
       });
+      merged.icon = resolveIcon(f.iconKey, merged.icon);
       return merged;
     });
 };
@@ -72,10 +81,4 @@ export const orgService = {
     return FORMAS_PAGO;
   },
 
-  saveFormasPago: (orgId, tipo, formas) => {
-    const config = orgService.getConfig(orgId);
-    const current = config.formasPago || {};
-    config.formasPago = { ...current, [tipo]: formas };
-    return orgService.saveConfig(orgId, { formasPago: config.formasPago });
-  },
 };

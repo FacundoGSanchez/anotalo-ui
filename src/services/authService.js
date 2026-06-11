@@ -24,35 +24,23 @@ const MOCK_RESPONSE = {
       sucursalDefault: 1,
       FormasPago: {
         Venta: [
-          { key: "Efectivo", label: "Efectivo", enabled: true },
-          { key: "Tarjetas", label: "Tarjetas", enabled: true },
-          { key: "Cuenta Cte", label: "Cuenta Cte", enabled: true },
+          { key: "Efectivo", label: "Efectivo", iconKey: "Efectivo", enabled: true, impactaCaja: true, impactaCtaCte: false },
+          { key: "Transferencia", label: "Transferencia", iconKey: "Transferencia", enabled: true, impactaCaja: false, impactaCtaCte: false },
+          { key: "Cta Corriente", label: "Cuenta Corriente", iconKey: "CtaCorriente", enabled: true, impactaCaja: false, impactaCtaCte: true },
+          { key: "Tarjeta", label: "Tarjetas", iconKey: "TarjetaCredito", enabled: true, impactaCaja: false, impactaCtaCte: false },
+          { key: "QR", label: "QR", iconKey: "QR", enabled: true, impactaCaja: false, impactaCtaCte: false },
         ],
         Pago: [
-          { key: "Efectivo", label: "Efectivo", enabled: true },
-          { key: "Transferencia", label: "Transferencia", enabled: true },
+          { key: "Efectivo", label: "Efectivo", iconKey: "Efectivo", enabled: true, impactaCaja: true, impactaCtaCte: false },
+          { key: "Transferencia", label: "Transferencia", iconKey: "Transferencia", enabled: true, impactaCaja: false, impactaCtaCte: false },
+          { key: "Tarjeta", label: "Tarjetas", iconKey: "TarjetaCredito", enabled: true, impactaCaja: false, impactaCtaCte: false },
+          { key: "QR", label: "QR", iconKey: "QR", enabled: true, impactaCaja: false, impactaCtaCte: false },
         ],
         Cobro: [
-          { key: "Efectivo", label: "Efectivo", enabled: true },
-          { key: "Cta Corriente", label: "Cta Corriente", enabled: true },
-        ],
-      },
-      TiposMovimiento: ["Venta", "Pago", "Cobro"],
-    },
-    {
-      id: 2,
-      nombre: "Org Secundaria",
-      sucursalDefault: null,
-      FormasPago: {
-        Venta: [
-          { key: "Efectivo", label: "Efectivo", enabled: true },
-          { key: "Mercado Pago", label: "Mercado Pago", enabled: true },
-        ],
-        Pago: [
-          { key: "Transferencia", label: "Transferencia", enabled: true },
-        ],
-        Cobro: [
-          { key: "Efectivo", label: "Efectivo", enabled: true },
+          { key: "Efectivo", label: "Efectivo", iconKey: "Efectivo", enabled: true, impactaCaja: true, impactaCtaCte: false },
+          { key: "Transferencia", label: "Transferencia", iconKey: "Transferencia", enabled: true, impactaCaja: false, impactaCtaCte: false },
+          { key: "Tarjeta", label: "Tarjetas", iconKey: "TarjetaCredito", enabled: true, impactaCaja: false, impactaCtaCte: false },
+          { key: "QR", label: "QR", iconKey: "QR", enabled: true, impactaCaja: false, impactaCtaCte: false },
         ],
       },
       TiposMovimiento: ["Venta", "Pago", "Cobro"],
@@ -83,6 +71,9 @@ export const authService = {
       const session = { ...MOCK_RESPONSE, sessionId: generateSessionId() };
       localStorage.setItem(TOKEN_KEY, session.token);
       localStorage.setItem(USER_KEY, JSON.stringify(session));
+
+      // Limpiar datos de prueba anteriores para el MVP
+      localStorage.removeItem("movimientos_db");
 
       // Inicializar config de la primera org
       const orgActual = session.organizaciones?.[0];

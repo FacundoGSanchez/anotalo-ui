@@ -2,31 +2,28 @@
 
 ## Especificación del Reporte de Cuenta Corriente
 
-**Versión:** 0.1
-**Fecha:** 07/06/2026
-**Propósito:** Definir la estructura del reporte de cuenta corriente, con tabs por tipo de entidad, listado de saldos y detalle de movimientos.
+**Versión:** 0.2
+**Fecha:** 11/06/2026
+**Propósito:** Definir la estructura del reporte de cuenta corriente, exclusivo para Clientes. No se administra cuenta corriente para Proveedores.
 
 ---
 
 ## 1. Estructura General
 
 ```
-┌─────────────────────────────────────────────┐
-│  CUENTA CORRIENTE                    [⋯]    │
-├─────────────────────────────────────────────┤
-│  ┌──────────┬──────────┐                    │
-│  │Clientes  │Proveed.  │  ← Tabs           │
-│  ├──────────┴──────────┤                    │
-│  │                     │                    │
-│  │  ┌─────────────────┐│                    │
-│  │  │ Cliente A    $5K ││  ← Lista de      │
-│  │  │ Cliente B   $12K ││     entidades     │
-│  │  │ Cliente C   -$2K ││     con saldo     │
-│  │  └─────────────────┘│                    │
-│  │                     │                    │
-│  │  Click en entidad → │  Modal detalle     │
-│  └─────────────────────┘                    │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│  CUENTA CORRIENTE            [⋯]    │
+├─────────────────────────────────────┤
+│  Clientes                           │  ← Solo Clientes (sin tabs)
+│                                     │
+│  ┌─────────────────────────────────┐│
+│  │ Cliente A                  $5K  ││  ← Lista de clientes
+│  │ Cliente B                 $12K  ││     con saldo <> 0
+│  │ Cliente C                -$2K   ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  Click en entidad → Modal detalle   │
+└─────────────────────────────────────┘
 ```
 
 ---
@@ -37,25 +34,25 @@
 
 | Elemento | Descripción |
 |----------|-------------|
-| Tabs | Clientes / Proveedores |
-| Listado | Entidades con nombre y saldo actual (solo saldo <> 0) |
+| Título | "Cuenta Corriente" |
+| Listado | Clientes con nombre y saldo actual (solo saldo <> 0) |
 | Botón ⋯ | Acciones futuras: compartir, descargar, admin condiciones |
+
+> **Nota:** No hay tabs Clientes/Proveedores. El reporte muestra solo Clientes con saldo de cuenta corriente.
 
 ### 2.2 Modal Detalle: `ModalDetalleCtaCte.jsx`
 
 | Elemento | Descripción |
 |----------|-------------|
-| Header | Nombre de la entidad en grande |
+| Header | Nombre del cliente en grande |
 | Saldo actual | Visible y destacado |
-| Lista movimientos | Últimos 20 movimientos de la entidad |
+| Lista movimientos | Últimos 20 movimientos del cliente |
 | Cada movimiento | Tipo (tag), Importe, Fecha, FormaPago |
 | Botón eliminar | Delete de cada movimiento individual |
 
 ---
 
-## 3. Tabs
-
-### 3.1 Clientes
+## 3. Listado de Clientes
 
 ```
 ┌─────────────────────────────────────┐
@@ -70,19 +67,7 @@
 └─────────────────────────────────────┘
 ```
 
-### 3.2 Proveedores
-
-```
-┌─────────────────────────────────────┐
-│  Proveedores (8)                    │
-│                                     │
-│  ┌──────────────────────────────┐   │
-│  │ Distribuidora ABC   +$22,000 │   │
-│  │ Proveedor XYZ       +$5,400  │   │
-│  │ Suministros SA      +$1,200  │   │
-│  └──────────────────────────────┘   │
-└─────────────────────────────────────┘
-```
+Solo se muestran clientes con `saldo <> 0`.
 
 ---
 
@@ -110,22 +95,23 @@
 
 ## 5. Filtros
 
-No hay filtros por ahora. El reporte muestra todas las entidades con saldo <> 0.
+No hay filtros por ahora. El reporte muestra todos los clientes con saldo <> 0.
 
 ---
 
 ## 6. Condiciones de Cuenta Corriente
 
-Cada entidad tendrá condiciones configurables:
+Cada cliente tendrá condiciones configurables desde el formulario de entidad:
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
-| `alertaDiasVencimiento` | number | Días antes del vencimiento para alertar |
-| `plazoMaximo` | number | Plazo máximo en días |
-| `cantidadMaxima` | number | Monto máximo permitido |
-| `periodicidadPago` | string | periodicidad (semanal, quincenal, mensual) |
+| `habilitado` | boolean | Activa/desactiva la Cta Cte para el cliente |
+| `importeMaximo` | number | Monto máximo permitido (Input numérico) |
+| `plazoDias` | number | Plazo máximo en días (Input numérico) |
+| `alertaDiasVencimiento` | number | (Futuro) Días antes del vencimiento para alertar |
+| `periodicidadPago` | string | (Futuro) periodicidad (semanal, quincenal, mensual) |
 
-> Futuro: Administrar condiciones desde el botón ⋯
+> **Nota:** Las condiciones se administran desde el formulario de Cliente, no desde el reporte.
 
 ---
 
@@ -133,7 +119,8 @@ Cada entidad tendrá condiciones configurables:
 
 | Archivo | Rol |
 |---------|-----|
-| `src/pages/Reportes/ReporteCtaCte.jsx` | ⬜ Página principal con tabs |
+| `src/pages/Reportes/ReporteCtaCte.jsx` | ⬜ Página principal (solo Clientes) |
 | `src/pages/Reportes/components/ModalDetalleCtaCte.jsx` | ⬜ Modal detalle movimientos |
 | `src/services/reporteService.js` | ⬜ Servicio de reportes |
+| `sdd/spec_CuentaCorriente.md` | Especificación general del módulo Cta Cte |
 | `sdd/spec_rxp_Cta_Cte.md` | Esta especificación |

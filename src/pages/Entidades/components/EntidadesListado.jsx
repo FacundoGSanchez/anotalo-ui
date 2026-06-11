@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { entidadService } from "../../../services/entidadService";
 import { movimientoService } from "../../../services/movimientoService";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const calcularSaldoEntidad = (entidadId) => {
   const movs = movimientoService.getAll().filter(
@@ -171,16 +171,21 @@ const EntidadesListado = ({ tipo: tipoProp, onBack, simple }) => {
       >
         <Space>
           {!simple && (
-            <Button
-              icon={<MdArrowBack size={20} />}
-              type="text"
-              onClick={() => (onBack ? onBack() : navigate("/"))}
-            />
+            <>
+              <Button
+                icon={<MdArrowBack size={20} />}
+                type="text"
+                onClick={() => (onBack ? onBack() : navigate("/"))}
+              />
+              <Text strong style={{ fontSize: "18px", margin: 0 }}>
+                {tipo === "clientes" ? "Clientes" : "Proveedores"}
+              </Text>
+            </>
           )}
           {simple && (
-            <Title level={5} style={{ margin: 0, textTransform: "capitalize", color: "#595959" }}>
+            <Text strong style={{ fontSize: "18px", margin: 0, textTransform: "capitalize" }}>
               {tipo}
-            </Title>
+            </Text>
           )}
         </Space>
         <Button

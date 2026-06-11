@@ -68,6 +68,53 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
           </Title>
         </div>
 
+        {/* LINE ITEMS */}
+        {movimiento.lineItems?.length > 0 && (
+          <div
+            style={{
+              background: "#f8f9fa",
+              borderRadius: "12px",
+              padding: "12px 16px",
+              marginBottom: "16px",
+            }}
+          >
+            <Text
+              type="secondary"
+              style={{
+                fontSize: "10px",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                display: "block",
+                marginBottom: "8px",
+              }}
+            >
+              DETALLE ({movimiento.lineItems.length} items)
+            </Text>
+            {movimiento.lineItems.map((item, idx) => (
+              <div
+                key={item.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "6px 0",
+                  borderBottom:
+                    idx < movimiento.lineItems.length - 1
+                      ? "1px solid #e8e8e8"
+                      : "none",
+                }}
+              >
+                <Text style={{ fontSize: "13px", color: "#595959" }}>
+                  Item {idx + 1}
+                </Text>
+                <Text strong style={{ fontSize: "13px" }}>
+                  $ {Number(item.importe).toLocaleString("es-AR")}
+                </Text>
+              </div>
+            ))}
+          </div>
+        )}
+
         <Divider style={{ margin: "16px 0" }} />
 
         {/* INFO GRID */}

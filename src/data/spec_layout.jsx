@@ -27,9 +27,7 @@ export const LAYOUT_SPEC = {
             { label: "Cta Corriente", icon: "FileTextOutlined", route: "/reportes/ctacte" },
             { label: "Movimientos", icon: "UnorderedListOutlined", route: "/movimientos" },
           ]},
-          { label: "CONFIGURACIÓN", type: "group", children: [
-            { label: "Formas de Pago", icon: "SettingOutlined", route: "/more/formas-pago" },
-          ]},
+
         ],
       },
     },
@@ -72,7 +70,7 @@ export const LAYOUT_SPEC = {
     },
     moreMenu: {
       route: "/more",
-      sections: ["OPERACIONES", "ENTIDADES", "REPORTES", "CONFIGURACIÓN"],
+      sections: ["OPERACIONES", "ENTIDADES", "REPORTES"],
     },
   },
 };

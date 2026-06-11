@@ -2,8 +2,8 @@
 
 ## Especificación de Layout, Menú y Modo First-Mobile
 
-**Versión:** 0.1
-**Fecha:** 07/06/2026
+**Versión:** 0.2
+**Fecha:** 11/06/2026
 **Propósito:** Definir la arquitectura del layout principal, el sistema de menú navegación y la estrategia first-mobile para una experiencia responsive óptima.
 
 ---
@@ -113,8 +113,8 @@ La opción "Más" navega a la ruta `/more` que renderiza `MoreMenuPage` (`src/pa
 | PRINCIPAL | Inicio |
 | OPERACIONES | POS Anotalo, Movimientos |
 | ENTIDADES | Clientes, Proveedores |
-| REPORTES | Reporte Caja, Cta Corriente, Movimientos x Tipo |
-| CONFIGURACIÓN | Formas de Pago |
+| REPORTES | Caja, Cta Corriente, Saldo Ctas Ctes, Resumen Ventas |
+| COMPRAS | Compras, Pedidos |
 
 **Características**:
 - Barra fija de 64px en la parte inferior
@@ -154,10 +154,15 @@ MenuItem = {
 |-----|-------|------|--------|
 | `/` | Inicio | HomeOutlined | ✅ Activo |
 | `/pos` | POS Anotalo | ShopOutlined | ✅ Activo (collapseOnClick) |
-| `gestion` → `/entidades/clientes` | Nóminas → Clientes | UsergroupAddOutlined | ✅ Activo |
-| `gestion` → `/entidades/proveedores` | Nóminas → Proveedores | DeliveredProcedureOutlined | ✅ Activo |
-| `actividad` → `/movimientos` | Actividad → Movimientos | UnorderedListOutlined | ✅ Activo |
-| `actividad` → `/saldocuentas` | Actividad → Saldo Cuentas | UserSwitchOutlined | ❌ Disabled |
+| `/entidades/clientes` | Clientes | UsergroupAddOutlined | ✅ Activo |
+| `/entidades/proveedores` | Proveedores | DeliveredProcedureOutlined | ✅ Activo |
+| `/movimientos` | Movimientos | UnorderedListOutlined | ✅ Activo |
+| `/reportes/caja` | Caja | BankOutlined | ✅ Activo |
+| `/reportes/ctacte` | Cta Corriente | FileTextOutlined | ✅ Activo |
+| `/reportes/saldo-ctas-ctes` | Saldo Ctas Ctes | AccountBookOutlined | ✅ Activo (placeholder) |
+| `/reportes/resumen-ventas` | Resumen Ventas | BarChartOutlined | ✅ Activo (placeholder) |
+| `/compras` | Compras | ShoppingCartOutlined | ✅ Activo (placeholder) |
+| `/pedidos` | Pedidos | DeliveredProcedureOutlined | ✅ Activo (placeholder) |
 
 ### 3.3 MenuList — Comportamiento
 
@@ -246,5 +251,6 @@ const filterByPermission = (items, session) => {
 | `src/layout/CardUser/CardUser.jsx` | Avatar con logout (desktop: header / mobile: modal Más) |
 | `src/layout/CardUser/index.css` | Estilos del card user |
 | `src/components/MenuList.jsx` | Renderizador de menú |
-| `src/data/MenuItems.jsx` | Datos del menú |
+| `src/data/MenuItems.jsx` | Datos del menú (sidebar desktop) |
+| `src/data/spec_Menu.jsx` | Datos del menú (página "Más" mobile) |
 | `src/context/DeviceContext.jsx` | Contexto de dispositivo |

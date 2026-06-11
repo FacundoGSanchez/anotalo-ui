@@ -2,8 +2,8 @@
 
 ## Especificación del Módulo POS (Punto de Venta)
 
-**Versión:** 0.1
-**Fecha:** 07/06/2026
+**Versión:** 0.2
+**Fecha:** 10/06/2026
 **Propósito:** Definir la arquitectura del módulo POS, el flujo de registro de movimientos y la configuración por organización.
 
 ---
@@ -31,7 +31,7 @@ TIPO → IMPORTE → FORMA_PAGO → ENTIDAD → CONFIRMAR
 | Paso | Componente | Descripción |
 |------|-----------|-------------|
 | 0 - TIPO | `StepTipo.jsx` | Selección del tipo de movimiento (Venta, Pago, Ingreso, Retiro) |
-| 1 - IMPORTE | `StepImporte.jsx` | Ingreso del importe con calculadora táctil |
+| 1 - IMPORTE | `StepImporte.jsx` | Ingreso de múltiples importes con calculadora táctil. Cada monto se agrega a una lista. Se muestra el total acumulado y se puede eliminar items individualmente. Al confirmar, se envía el total y el detalle de items |
 | 2 - FORMA_PAGO | `StepFormaPago.jsx` | Selección de forma de pago (personalizable por org) |
 | 3 - ENTIDAD | `StepEntidad.jsx` | Selección de cliente/proveedor |
 | 4 - CONFIRMAR | `StepConfirmar.jsx` | Resumen y confirmación del registro |
@@ -179,13 +179,53 @@ Cada forma de pago tiene tres propiedades booleanas configurables:
 
 ---
 
+## 3.7 Modelo de datos del movimiento
+
+El objeto `movimiento` incluye ahora un array `lineItems` que almacena el detalle de los importes individuales que componen el total:
+
+```js
+{
+  tipo: "Venta" | "Pago" | "Retiro" | "Ingreso" | "Cobro" | null,
+  importe: number,              // suma total de lineItems
+  lineItems: [                  // detalle de items
+    { id: number, importe: number },
+  ],
+  formaPago: string | null,
+  entidad: { id: number, nombre: string } | null,
+}
+```
+
+### 3.8 Flujo del paso Importe (multi-importe)
+
+El paso `StepImporte` permite cargar múltiples montos antes de continuar:
+
+1. El usuario ingresa un monto en el visor usando la calculadora táctil (o teclado físico en desktop)
+2. Presiona **"AGREGAR"** para añadir el monto a la lista de items
+3. El visor se resetea a 0 para ingresar el próximo monto
+4. Cada item se muestra en una lista con su importe y un botón de eliminar (✕)
+5. El total acumulado se actualiza automáticamente
+6. Al presionar **"CONTINUAR"**, se envía `{ importe: total, lineItems }` al hook `usePosFlow`
+
+**Comportamiento en desktop:**
+- El input de texto acepta entrada por teclado físico
+- Enter en el input ejecuta "AGREGAR" (no continúa al siguiente paso)
+- La calculadora táctil es toggleable con el botón "Mostrar teclado"
+
+**Validaciones:**
+- No se permite agregar un monto de 0
+- Cada item respeta el límite de `VISOR_CONFIG.MAX_DIGITOS` (12 dígitos)
+- El botón CONTINUAR se deshabilita si no hay al menos 1 item en la lista
+- Al navegar hacia atrás desde pasos posteriores, los `lineItems` se restauran desde el estado del movimiento
+
+---
+
 ## 4. Componentes
 
 | Componente | Archivo | Descripción |
 |------------|---------|-------------|
 | `PosHeader` | `components/PosHeader.jsx` | Header con título, back y close |
 | `StepTipo` | `components/steps/StepTipo.jsx` | Selección de tipo (full-width cards) |
-| `StepImporte` | `components/steps/StepImporte.jsx` | Calculadora + visor de importe |
+| `StepImporte` | `components/steps/StepImporte.jsx` | Calculadora + multi-importe: agrega montos a lista, muestra total acumulado |
 | `StepFormaPago` | `components/steps/StepFormaPago.jsx` | Selección de forma de pago |
 | `StepEntidad` | `components/steps/StepEntidad.jsx` | Selección de entidad |
 | `StepConfirmar` | `components/steps/StepConfirmar.jsx` | Confirmación y registro |
@@ -224,7 +264,7 @@ Cada forma de pago tiene tres propiedades booleanas configurables:
 | `src/pages/POSAnotalo/POSAnotaloDesktop.jsx` | Layout desktop con sidebar + movimientos recientes |
 | `src/pages/POSAnotalo/components/PosHeader.jsx` | Header del POS |
 | `src/pages/POSAnotalo/components/steps/StepTipo.jsx` | Paso selección tipo |
-| `src/pages/POSAnotalo/components/steps/StepImporte.jsx` | Paso ingreso importe |
+| `src/pages/POSAnotalo/components/steps/StepImporte.jsx` | Paso ingreso de múltiples importes con calculadora y lista acumulada |
 | `src/pages/POSAnotalo/components/steps/StepFormaPago.jsx` | Paso forma de pago |
 | `src/pages/POSAnotalo/components/steps/StepEntidad.jsx` | Paso selección entidad |
 | `src/pages/POSAnotalo/components/steps/StepConfirmar.jsx` | Paso confirmación |

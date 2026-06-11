@@ -1,25 +1,20 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Typography, Card, Tag, Divider } from "antd";
+import { Button, Typography, Card, Tag } from "antd";
 import {
   MdArrowBack,
   MdClose,
   MdOutlinePointOfSale,
   MdReceipt,
-  MdCheckCircle,
 } from "react-icons/md";
-import dayjs from "dayjs";
-import "dayjs/locale/es";
 
 import { usePosFlow } from "./hooks/usePosFlow";
 import {
   STEPS,
   POS_COLORS,
-  MOVIMIENTO_TIPOS,
 } from "../../constants/posConstants";
 import { movimientoService } from "../../services/movimientoService";
 
-import StepTipo from "./components/steps/StepTipo";
 import StepImporte from "./components/steps/StepImporte";
 import StepFormaPago from "./components/steps/StepFormaPago";
 import StepEntidad from "./components/steps/StepEntidad";
@@ -28,7 +23,6 @@ import StepConfirmar from "./components/steps/StepConfirmar";
 const { Text, Title } = Typography;
 
 const STEP_TITLE = {
-  [STEPS.TIPO]: "Seleccionar Tipo",
   [STEPS.IMPORTE]: "Ingresar Importe",
   [STEPS.FORMA_PAGO]: "Forma de Pago",
   [STEPS.ENTIDAD]: "Seleccionar Entidad",
@@ -71,7 +65,7 @@ const POSAnotaloDesktop = () => {
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
-        if (currentStep > STEPS.TIPO) handleBack();
+        if (currentStep > STEPS.IMPORTE) handleBack();
         else closePos();
       }
     };
@@ -79,27 +73,9 @@ const POSAnotaloDesktop = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [currentStep, handleBack, closePos]);
 
-  // Yearly summary from recent movements
-  const yearlyTotals = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    const thisYear = recentMovements.filter(
-      (m) => new Date(m.fecha).getFullYear() === currentYear,
-    );
-    const ventas = thisYear
-      .filter((m) => m.tipo === MOVIMIENTO_TIPOS.VENTA)
-      .reduce((s, m) => s + Number(m.importe), 0);
-    const cobros = thisYear
-      .filter((m) => m.tipo === MOVIMIENTO_TIPOS.COBRO)
-      .reduce((s, m) => s + Number(m.importe), 0);
-    const pagos = thisYear
-      .filter((m) => m.tipo === MOVIMIENTO_TIPOS.PAGO)
-      .reduce((s, m) => s + Number(m.importe), 0);
-    return { ventas, cobros, pagos };
-  }, [recentMovements]);
-
   const finalizarRegistro = () => {
-    setMovimiento({ tipo: null, importe: 0, formaPago: null, entidad: null });
-    setCurrentStep(STEPS.TIPO);
+    setMovimiento({ tipo: "Venta", importe: 0, lineItems: [], formaPago: null, entidad: null });
+    setCurrentStep(STEPS.IMPORTE);
     if (locState?.returnPath) {
       navigate(locState.returnPath);
     } else {
@@ -109,14 +85,13 @@ const POSAnotaloDesktop = () => {
 
   const renderStep = () => {
     switch (currentStep) {
-      case STEPS.TIPO:
-        return <StepTipo onNext={(tipo) => handleNext({ tipo })} />;
       case STEPS.IMPORTE:
         return (
           <StepImporte
             desktop={true}
             tipo={movimiento.tipo}
-            onNext={(monto) => handleNext({ importe: monto })}
+            initialLineItems={movimiento.lineItems || []}
+            onNext={({ importe, lineItems }) => handleNext({ importe, lineItems })}
           />
         );
       case STEPS.FORMA_PAGO:
@@ -145,23 +120,6 @@ const POSAnotaloDesktop = () => {
         return null;
     }
   };
-
-  const summaryItems = [
-    { label: "Tipo", value: movimiento.tipo || "—", key: "tipo" },
-    {
-      label: "Importe",
-      value: movimiento.importe
-        ? `$ ${Number(movimiento.importe).toLocaleString("es-AR")}`
-        : "—",
-      key: "importe",
-    },
-    { label: "Forma de Pago", value: movimiento.formaPago || "—", key: "fp" },
-    {
-      label: "Entidad",
-      value: movimiento.entidad?.nombre || "—",
-      key: "ent",
-    },
-  ];
 
   const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
 
@@ -254,7 +212,7 @@ const POSAnotaloDesktop = () => {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {currentStep > STEPS.TIPO && (
+                {currentStep > STEPS.IMPORTE && (
                   <Button
                     type="text"
                     icon={<MdArrowBack size={20} />}
@@ -267,7 +225,7 @@ const POSAnotaloDesktop = () => {
                 </Text>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                {[0, 1, 2, 3, 4].map((s) => (
+                {[1, 2, 3, 4].map((s) => (
                   <div
                     key={s}
                     style={{
@@ -325,71 +283,6 @@ const POSAnotaloDesktop = () => {
             </div>
           </div>
 
-          {/* Inline Transaction Summary */}
-          {movimiento.tipo && (
-            <Card
-              size="small"
-              style={{
-                borderRadius: "12px",
-                border: "1px solid #f0f0f0",
-                background: "#fafafa",
-              }}
-              styles={{ body: { padding: "12px 16px" } }}
-            >
-              <Text
-                style={{
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  color: "#8c8c8c",
-                  display: "block",
-                  marginBottom: "8px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Resumen de transacción
-              </Text>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "6px 16px",
-                }}
-              >
-                {summaryItems.map((item) => (
-                  <div key={item.key}>
-                    <Text
-                      type="secondary"
-                      style={{ fontSize: "10px", display: "block" }}
-                    >
-                      {item.label}
-                    </Text>
-                    <Text strong style={{ fontSize: "13px" }}>
-                      {item.value}
-                    </Text>
-                  </div>
-                ))}
-              </div>
-              {currentStep === STEPS.CONFIRMAR && (
-                <>
-                  <Divider style={{ margin: "8px 0" }} />
-                  <Text
-                    style={{
-                      fontSize: "12px",
-                      color: "#52c41a",
-                      textAlign: "center",
-                      display: "block",
-                    }}
-                  >
-                    <MdCheckCircle
-                      style={{ verticalAlign: "middle", marginRight: 4 }}
-                    />
-                    Todos los datos completos
-                  </Text>
-                </>
-              )}
-            </Card>
-          )}
         </div>
 
         {/* RIGHT — Recent movements */}
@@ -403,65 +296,7 @@ const POSAnotaloDesktop = () => {
             flexShrink: 0,
           }}
         >
-          {/* Daily summary */}
-          <Card
-            size="small"
-            style={{
-              borderRadius: "12px",
-              border: "1px solid #f0f0f0",
-            }}
-            styles={{ body: { padding: "14px 16px" } }}
-          >
-            <Text
-              style={{
-                fontSize: "10px",
-                fontWeight: 700,
-                color: "#8c8c8c",
-                display: "block",
-                marginBottom: "10px",
-                textTransform: "uppercase",
-              }}
-            >
-              {dayjs().locale("es").format("dddd, DD [de] MMMM")} · Resumen de Hoy
-            </Text>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "6px",
-              }}
-            >
-              <Text style={{ fontSize: "12px" }}>Ventas</Text>
-              <Text strong style={{ fontSize: "12px", color: "#1890ff" }}>
-                ${yearlyTotals.ventas.toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "6px",
-              }}
-            >
-              <Text style={{ fontSize: "12px" }}>Cobros</Text>
-              <Text strong style={{ fontSize: "12px", color: "#eb2f96" }}>
-                ${yearlyTotals.cobros.toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text style={{ fontSize: "12px" }}>Pagos</Text>
-              <Text strong style={{ fontSize: "12px", color: "#fa8c16" }}>
-                ${yearlyTotals.pagos.toLocaleString("es-AR")}
-              </Text>
-            </div>
-          </Card>
-
-          {/* Recent movements list — ReporteCaja style */}
+          {/* Recent movements list */}
           <Card
             size="small"
             style={{

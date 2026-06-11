@@ -14,9 +14,7 @@ const StepFormaPago = ({ tipo, onNext }) => {
   const formasPagoOrg = orgService.getFormasPago(orgId, tipo);
 
   const opcionesFiltradas = formasPagoOrg.filter((opt) => {
-    if (tipo === MOVIMIENTO_TIPOS.PAGO && opt.key === "Cta Corriente")
-      return false;
-    if (tipo === MOVIMIENTO_TIPOS.COBRO && opt.key !== "Cta Corriente")
+    if ((tipo === MOVIMIENTO_TIPOS.PAGO || tipo === MOVIMIENTO_TIPOS.COBRO) && opt.key === "Cta Corriente")
       return false;
     return true;
   });

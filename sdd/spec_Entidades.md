@@ -2,8 +2,8 @@
 
 ## Especificación de Administración de Clientes y Proveedores
 
-**Versión:** 0.2
-**Fecha:** 07/06/2026
+**Versión:** 0.4
+**Fecha:** 11/06/2026
 **Propósito:** Definir la arquitectura del módulo de entidades (clientes/proveedores), su estado actual y hoja de ruta de mejoras.
 
 ---
@@ -28,10 +28,10 @@ BottomNav / Sidebar / Dashboard
 | Componente | Archivo | Función |
 |------------|---------|---------|
 | `EntidadesPage` | `pages/Entidades/EntidadesPage.jsx` | Orquestador: selector de tipo o listado o detalle |
-| `SelectorEntidad` | (inline en EntidadesPage) | Dos paneles (Clientes/Proveedores) para elegir tipo |
+| `SelectorEntidad` | (inline en EntidadesPage) | Dos cards grandes (Clientes/Proveedores) para elegir tipo |
 | `EntidadesListado` | `pages/Entidades/components/EntidadesListado.jsx` | Tabla con búsqueda de entidades activas |
 | `EntidadDetalleContainer` | `pages/Entidades/components/EntidadDetalle/EntidadDetalleContainer.jsx` | Contenedor alta/edición |
-| `EntidadForm` | `pages/Entidades/components/EntidadDetalle/components/EntidadForm.jsx` | Formulario (nombre, teléfono) |
+| `EntidadForm` | `pages/Entidades/components/EntidadDetalle/components/EntidadForm.jsx` | Formulario (nombre, teléfono, Cta Cte solo para Clientes) |
 | `EntidadHeader` | `pages/Entidades/components/EntidadDetalle/components/EntidadHeader.jsx` | Header con volver y título |
 
 ### 1.3 Datos almacenados
@@ -43,6 +43,9 @@ db_clientes / db_proveedores (localStorage)
 
 - `entidadService` provee CRUD básico con soft-delete
 - Sin datos financieros ni de cuenta corriente
+- Cuenta Corriente (plazoDias, importeMaximo, habilitado) solo disponible para Clientes, no para Proveedores
+- Los campos `plazoDias` e `importeMaximo` usan `<Input type="number" inputMode="numeric">` (numérico plano como el teléfono, no InputNumber)
+- Cada listado de entidad muestra su título ("Clientes" o "Proveedores") junto al botón de volver, con `fontSize: "18px"` (mismo tamaño que "Administrar Caja")
 
 ### 1.4 Limitaciones actuales
 
@@ -94,8 +97,8 @@ db_clientes / db_proveedores (localStorage)
 | Registrar pago | ✅ (cobra) | ✅ (paga) |
 | Ver movimientos | ✅ | ✅ |
 | Condiciones comerciales | ✅ (plazos, límite crédito) | ✅ (plazos, forma de pago) |
-| Consultar saldo Cta Cte | ✅ | ✅ |
-| Estado de cuenta | ✅ | ✅ |
+| Consultar saldo Cta Cte | ✅ | ❌ Solo Clientes |
+| Estado de cuenta | ✅ | ❌ Solo Clientes |
 
 ### 2.3 Cuenta Corriente
 
@@ -182,9 +185,9 @@ EntidadesPage
 | Fase | Feature | Estado |
 |------|---------|--------|
 | Fase 1 | CRUD básico (nombre, teléfono) | ✅ Actual |
-| Fase 2 | Selector Clientes/Proveedores en /entidades | ✅ Actual |
-| Fase 3 | Vista detalle de entidad con datos | 🔵 Pendiente |
-| Fase 4 | Cuenta corriente (saldo + movimientos) | 🔵 Pendiente |
+| Fase 2 | Selector Clientes/Proveedores en /entidades (cards clickeables, no Tabs) | ✅ Actual |
+| Fase 3 | Cuenta corriente en formulario de Clientes (plazo, tope, switch) | ✅ Actual |
+| Fase 4 | Vista detalle de entidad con datos y saldo Cta Cte | 🔵 Pendiente |
 | Fase 5 | Condiciones comerciales (IVA, CUIT, plazos) | 🔵 Pendiente |
 | Fase 6 | Acciones contextuales por tipo de entidad | 🔵 Pendiente |
 | Fase 7 | Estado de cuenta descargable | 🔵 Futuro |

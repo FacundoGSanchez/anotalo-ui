@@ -9,10 +9,13 @@ import MovimientosPage from "../pages/Movimientos/MovimientosPage.jsx";
 // IMPORTANTE: Importamos solo el Orquestador
 import EntidadesPage from "../pages/Entidades/EntidadesPage.jsx";
 import MoreMenuPage from "../pages/MoreMenu/MoreMenuPage.jsx";
-import FormasPagoConfigPage from "../pages/FormasPagoConfig/FormasPagoConfigPage.jsx";
 import ReporteCtaCte from "../pages/Reportes/ReporteCtaCte.jsx";
 import DetalleCtaCtePage from "../pages/Reportes/DetalleCtaCtePage.jsx";
 import ReporteCaja from "../pages/Reportes/ReporteCaja.jsx";
+import ComprasPage from "../pages/Compras/ComprasPage.jsx";
+import SaldoCtasCtesPage from "../pages/Reportes/SaldoCtasCtes/SaldoCtasCtesPage.jsx";
+import PedidosPage from "../pages/Pedidos/PedidosPage.jsx";
+import ResumenVentasPage from "../pages/Reportes/ResumenVentas/ResumenVentasPage.jsx";
 
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -51,12 +54,17 @@ const AppRouter = () => {
 
         {/* MAS OPCIONES */}
         <Route path="more" element={<MoreMenuPage />} />
-        <Route path="more/formas-pago" element={<FormasPagoConfigPage />} />
 
         {/* REPORTES */}
         <Route path="reportes/ctacte" element={<ReporteCtaCte />} />
         <Route path="reportes/ctacte/:tipo/:id" element={<DetalleCtaCtePage />} />
         <Route path="reportes/caja" element={<ReporteCaja />} />
+
+        {/* COMPRAS */}
+        <Route path="compras" element={<ComprasPage />} />
+        <Route path="pedidos" element={<PedidosPage />} />
+        <Route path="reportes/saldo-ctas-ctes" element={<SaldoCtasCtesPage />} />
+        <Route path="reportes/resumen-ventas" element={<ResumenVentasPage />} />
       </Route>
 
       <Route

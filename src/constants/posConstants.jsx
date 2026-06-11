@@ -2,8 +2,6 @@ import React from "react";
 import {
   MdOutlineAddShoppingCart,
   MdOutlineLocalShipping,
-  MdOutlineAccountBalanceWallet,
-  MdOutlineAddCircleOutline,
   MdAttachMoney,
   MdCreditCard,
   MdCreditScore,
@@ -19,6 +17,15 @@ export const MOVIMIENTO_TIPOS = {
   RETIRO: "Retiro",
   INGRESO: "Ingreso",
   COBRO: "Cobro",
+};
+
+export const ICONOS_POS = {
+  Efectivo: MdAttachMoney,
+  TarjetaCredito: MdCreditCard,
+  TarjetaDebito: MdCreditScore,
+  Transferencia: MdSyncAlt,
+  QR: MdQrCode2,
+  CtaCorriente: MdOutlineContactPage,
 };
 
 export const POS_COLORS = {
@@ -55,6 +62,7 @@ export const FORMAS_PAGO = [
   {
     key: "Efectivo",
     label: "Efectivo",
+    iconKey: "Efectivo",
     icon: <MdAttachMoney />,
     color: "#52c41a",
     requiereEntidad: false,
@@ -64,6 +72,7 @@ export const FORMAS_PAGO = [
   {
     key: "Cta Corriente",
     label: "Cta. Corriente",
+    iconKey: "CtaCorriente",
     icon: <MdOutlineContactPage />,
     color: "#eb2f96",
     requiereEntidad: true,
@@ -73,8 +82,29 @@ export const FORMAS_PAGO = [
   {
     key: "Tarjeta",
     label: "Tarjeta",
+    iconKey: "TarjetaCredito",
     icon: <MdCreditCard />,
     color: "#1890ff",
+    requiereEntidad: false,
+    impactaCaja: false,
+    impactaCtaCte: false,
+  },
+  {
+    key: "QR",
+    label: "QR",
+    iconKey: "QR",
+    icon: <MdQrCode2 />,
+    color: "#00b4d8",
+    requiereEntidad: false,
+    impactaCaja: false,
+    impactaCtaCte: false,
+  },
+  {
+    key: "Transferencia",
+    label: "Transferencia",
+    iconKey: "Transferencia",
+    icon: <MdSyncAlt />,
+    color: "#722ed1",
     requiereEntidad: false,
     impactaCaja: false,
     impactaCtaCte: false,

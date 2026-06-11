@@ -7,9 +7,8 @@ const { Text } = Typography;
 
 const PosHeader = ({ currentStep, tipo, onBack, onClose }) => {
   const getStepTitle = () => {
-    if (currentStep === STEPS.TIPO) return "Nuevo Movimiento";
     if (currentStep === STEPS.CONFIRMAR) return "Confirmar Registro";
-    return tipo || "Registro";
+    return "Venta";
   };
 
   return (
@@ -23,7 +22,7 @@ const PosHeader = ({ currentStep, tipo, onBack, onClose }) => {
     >
       {/* 1. Lado Izquierdo: Botón Volver (Solo si NO es el primer paso) */}
       <div style={{ width: "40px" }}>
-        {currentStep !== STEPS.TIPO && (
+        {currentStep > STEPS.IMPORTE && (
           <Button
             type="text"
             shape="circle"
@@ -38,9 +37,9 @@ const PosHeader = ({ currentStep, tipo, onBack, onClose }) => {
         <Text strong style={{ fontSize: "17px", display: "block" }}>
           {getStepTitle()}
         </Text>
-        {currentStep > STEPS.TIPO && currentStep < STEPS.CONFIRMAR && (
+        {currentStep > STEPS.IMPORTE && currentStep < STEPS.CONFIRMAR && (
           <Text type="secondary" style={{ fontSize: "12px" }}>
-            Paso {currentStep + 1} de 4
+            Paso {currentStep} de 3
           </Text>
         )}
       </div>

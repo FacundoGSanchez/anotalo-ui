@@ -7,6 +7,7 @@ import { movimientoService } from "../../services/movimientoService";
 import { useDevice } from "../../context/DeviceContext";
 import ResumenCards from "./components/ResumenCards";
 import AccesoReportes from "./components/AccesoReportes";
+import AccesoReportesNuevo from "./components/AccesoReportesNuevo";
 
 const DashboardPage = () => {
   const { isMobile } = useDevice();
@@ -62,9 +63,14 @@ const DashboardPage = () => {
           <ResumenCards totales={totales} />
         </Card>
 
-        {/* REPORTES */}
+        {/* GESTIONES */}
         <div style={{ marginBottom: "16px" }}>
           <AccesoReportes />
+        </div>
+
+        {/* REPORTES */}
+        <div style={{ marginBottom: "16px" }}>
+          <AccesoReportesNuevo />
         </div>
       </div>
     </div>

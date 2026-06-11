@@ -5,7 +5,8 @@ import {
   MdBarChart,
   MdAccountBalance,
   MdListAlt,
-  MdSettings,
+  MdShoppingCart,
+  MdAssignment,
 } from "react-icons/md";
 
 export const MODULES = [
@@ -13,6 +14,7 @@ export const MODULES = [
     title: "OPERACIONES",
     items: [
       { key: "pos", icon: <MdStore size={20} />, label: "POS Anotalo", route: "/pos/anotalo" },
+      { key: "movimientos", icon: <MdListAlt size={20} />, label: "Movimientos", route: "/movimientos" },
     ],
   },
   {
@@ -25,15 +27,17 @@ export const MODULES = [
   {
     title: "REPORTES",
     items: [
-      { key: "rpt_caja", icon: <MdAccountBalance size={20} />, label: "Reporte Caja", route: "/reportes/caja" },
+      { key: "rpt_caja", icon: <MdAccountBalance size={20} />, label: "Caja", route: "/reportes/caja" },
       { key: "rpt_ctacte", icon: <MdBarChart size={20} />, label: "Cta Corriente", route: "/reportes/ctacte" },
-      { key: "movimientos", icon: <MdListAlt size={20} />, label: "Movimientos", route: "/movimientos" },
+      { key: "rpt_saldo_ctas_ctes", icon: <MdAccountBalance size={20} />, label: "Saldo Ctas Ctes", route: "/reportes/saldo-ctas-ctes" },
+      { key: "rpt_resumen_ventas", icon: <MdBarChart size={20} />, label: "Resumen Ventas", route: "/reportes/resumen-ventas" },
     ],
   },
   {
-    title: "CONFIGURACIÓN",
+    title: "COMPRAS",
     items: [
-      { key: "formaspago", icon: <MdSettings size={20} />, label: "Formas de Pago", route: "/more/formas-pago" },
+      { key: "compras", icon: <MdShoppingCart size={20} />, label: "Compras", route: "/compras" },
+      { key: "pedidos", icon: <MdAssignment size={20} />, label: "Pedidos", route: "/pedidos" },
     ],
   },
 ];
