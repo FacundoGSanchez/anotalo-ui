@@ -4,7 +4,7 @@ import { MdShoppingCart } from "react-icons/md";
 
 const { Title, Text } = Typography;
 
-const ComprasPage = () => {
+const AdminComprasPage = () => {
   return (
     <div style={{ padding: "40px 20px", textAlign: "center", maxWidth: "500px", margin: "0 auto" }}>
       <div style={{ fontSize: "48px", color: "#fa8c16", marginBottom: "16px" }}>
@@ -16,4 +16,4 @@ const ComprasPage = () => {
   );
 };
 
-export default ComprasPage;
+export default AdminComprasPage;

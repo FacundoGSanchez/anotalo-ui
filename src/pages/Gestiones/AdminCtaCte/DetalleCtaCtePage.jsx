@@ -11,6 +11,8 @@ import {
   Modal,
   Row,
   Col,
+  Form,
+  Input,
 } from "antd";
 import {
   MdArrowBack,
@@ -18,29 +20,40 @@ import {
   MdPayment,
   MdOutlineBackspace,
   MdClose,
+  MdSettings,
 } from "react-icons/md";
-import { movimientoService } from "../../services/movimientoService";
-import { entidadService } from "../../services/entidadService";
+import { movimientoService } from "../../../services/movimientoService";
+import { entidadService } from "../../../services/entidadService";
+import { orgService } from "../../../services/orgService";
+import { authService } from "../../../services/authService";
 import {
   MOVIMIENTO_TIPOS,
   POS_COLORS,
-} from "../../constants/posConstants";
-import { useAuth } from "../../context/AuthContext";
+} from "../../../constants/posConstants";
+import { useAuth } from "../../../context/AuthContext";
 
 const { Text } = Typography;
-
-const TIPO_ENTIDAD = { CLIENTES: "clientes", PROVEEDORES: "proveedores" };
 
 const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"];
 
 const DetalleCtaCtePage = () => {
-  const { tipo, id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movTipoModal, setMovTipoModal] = useState(null);
   const [movImporte, setMovImporte] = useState(0);
+  const [configModalOpen, setConfigModalOpen] = useState(false);
+  const [configForm] = Form.useForm();
+  const [modalStep, setModalStep] = useState("amount");
+
+  const formasPago = useMemo(() => {
+    const orgId = authService.getCurrentOrgId();
+    return (orgService.getFormasPago(orgId, "Cobro") || []).filter(
+      (fp) => fp.key !== "Cta Corriente",
+    );
+  }, []);
 
   const incrementRefresh = useCallback(
     () => setRefreshKey((k) => k + 1),
@@ -48,9 +61,9 @@ const DetalleCtaCtePage = () => {
   );
 
   const entidad = useMemo(
-    () => entidadService.getById(tipo, id),
+    () => entidadService.getById("clientes", id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tipo, id, refreshKey],
+    [id, refreshKey],
   );
 
   const ctaCteConfig = entidad?.ctaCteConfig || {};
@@ -61,7 +74,8 @@ const DetalleCtaCtePage = () => {
       .getAll()
       .filter(
         (m) =>
-          m.entidad?.id === entidad.id && m.formaPago === "Cta Corriente",
+          m.entidad?.id === entidad.id &&
+          (m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO),
       )
       .sort((a, b) => b.id - a.id)
       .slice(0, 20);
@@ -95,7 +109,7 @@ const DetalleCtaCtePage = () => {
     setMovImporte((prev) => Math.floor(prev / 10));
   };
 
-  const handleRegistrarMov = () => {
+  const handleRegistrarConForma = (formaPago) => {
     if (movImporte <= 0) {
       message.warning("Ingrese un importe válido");
       return;
@@ -103,7 +117,7 @@ const DetalleCtaCtePage = () => {
     const movimientoData = {
       tipo: movTipoModal,
       importe: Number(movImporte),
-      formaPago: "Cta Corriente",
+      formaPago,
       entidad: { id: entidad.id, nombre: entidad.nombre },
     };
     const result = movimientoService.save(movimientoData, user);
@@ -116,10 +130,41 @@ const DetalleCtaCtePage = () => {
     }
   };
 
+  const handleRegistrarMov = () => {
+    if (movImporte <= 0) {
+      message.warning("Ingrese un importe válido");
+      return;
+    }
+    setModalStep("formaPago");
+  };
+
   const abrirModal = (tipoMov) => {
     setMovTipoModal(tipoMov);
     setMovImporte(0);
+    setModalStep("amount");
     setIsModalOpen(true);
+  };
+
+  const abrirConfigModal = () => {
+    configForm.setFieldsValue({
+      importeMaximo: ctaCteConfig.importeMaximo || null,
+      plazoDias: ctaCteConfig.plazoDias || null,
+    });
+    setConfigModalOpen(true);
+  };
+
+  const guardarConfig = () => {
+    configForm.validateFields().then((values) => {
+      entidadService.saveCtaCteConfig("clientes", entidad.id, {
+        ...ctaCteConfig,
+        habilitado: true,
+        importeMaximo: values.importeMaximo,
+        plazoDias: values.plazoDias,
+      });
+      message.success("Configuración guardada");
+      setConfigModalOpen(false);
+      incrementRefresh();
+    });
   };
 
   if (!entidad) {
@@ -136,21 +181,16 @@ const DetalleCtaCtePage = () => {
         <Button
           type="text"
           icon={<MdArrowBack size={24} />}
-          onClick={() => navigate("/reportes/ctacte")}
+          onClick={() => navigate("/gestiones/ctacte")}
         />
         <Empty description="Entidad no encontrada" />
       </div>
     );
   }
 
-  const esPositivo = (mov) => {
-    if (tipo === TIPO_ENTIDAD.CLIENTES) {
-      return mov.tipo === MOVIMIENTO_TIPOS.COBRO || mov.tipo === MOVIMIENTO_TIPOS.PAGO;
-    }
-    return mov.tipo === MOVIMIENTO_TIPOS.VENTA;
-  };
+  const esPositivo = (mov) =>
+    mov.tipo === MOVIMIENTO_TIPOS.COBRO || mov.tipo === MOVIMIENTO_TIPOS.PAGO;
 
-  const esCliente = tipo === TIPO_ENTIDAD.CLIENTES;
   const sobreLimite =
     ctaCteConfig.habilitado &&
     ctaCteConfig.importeMaximo &&
@@ -179,7 +219,7 @@ const DetalleCtaCtePage = () => {
           <Button
             type="text"
             icon={<MdArrowBack size={24} />}
-            onClick={() => navigate("/reportes/ctacte")}
+            onClick={() => navigate("/gestiones/ctacte")}
           />
           <Text strong style={{ fontSize: "18px" }}>
             {entidad.nombre}
@@ -189,10 +229,16 @@ const DetalleCtaCtePage = () => {
         <div style={{ display: "flex", gap: "4px" }}>
           <Button
             type="text"
+            icon={<MdSettings size={20} />}
+            style={{ color: "#8c8c8c" }}
+            onClick={abrirConfigModal}
+          />
+          <Button
+            type="text"
             icon={<MdPayment size={20} />}
             style={{ color: "#52c41a", fontSize: "20px" }}
             onClick={() =>
-              abrirModal(esCliente ? MOVIMIENTO_TIPOS.COBRO : MOVIMIENTO_TIPOS.PAGO)
+              abrirModal(MOVIMIENTO_TIPOS.COBRO)
             }
           />
         </div>
@@ -225,7 +271,7 @@ const DetalleCtaCtePage = () => {
           })}
         </Text>
 
-        {/* Leyenda nos debe / les debemos */}
+        {/* Leyenda nos debe / a favor */}
         <div style={{ marginTop: "6px" }}>
           <Text
             type="secondary"
@@ -237,13 +283,9 @@ const DetalleCtaCtePage = () => {
           >
             {saldo === 0
               ? "Saldo en cero"
-              : esCliente
-                ? saldo > 0
-                  ? `Nos debe $${Math.abs(saldo).toLocaleString("es-AR")}`
-                  : `A favor $${Math.abs(saldo).toLocaleString("es-AR")}`
-                : saldo > 0
-                  ? `Les debemos $${Math.abs(saldo).toLocaleString("es-AR")}`
-                  : `A favor $${Math.abs(saldo).toLocaleString("es-AR")}`}
+              : saldo > 0
+                ? `Nos debe $${Math.abs(saldo).toLocaleString("es-AR")}`
+                : `A favor $${Math.abs(saldo).toLocaleString("es-AR")}`}
           </Text>
         </div>
 
@@ -262,13 +304,11 @@ const DetalleCtaCtePage = () => {
           </div>
         )}
 
-        {ctaCteConfig.habilitado && ctaCteConfig.plazoDias && (
-          <div style={{ marginTop: "2px" }}>
-            <Text type="secondary" style={{ fontSize: "11px" }}>
-              Vencimiento: {ctaCteConfig.plazoDias} días
-            </Text>
-          </div>
-        )}
+        <div style={{ marginTop: "4px" }}>
+          <Text type="secondary" style={{ fontSize: "11px" }}>
+            Tope: ${(ctaCteConfig.importeMaximo || 0).toLocaleString("es-AR")} · Plazo: {ctaCteConfig.plazoDias || 0} días
+          </Text>
+        </div>
       </div>
 
       {/* Movement list */}
@@ -391,112 +431,254 @@ const DetalleCtaCtePage = () => {
         </div>
       )}
 
-      {/* Modal COBRO/PAGO */}
+      {/* Modal COBRO — 2 pasos: importe → forma de pago */}
       <Modal
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
           setMovImporte(0);
+          setModalStep("amount");
         }}
         footer={null}
         width={360}
         centered
-        title={movTipoModal === MOVIMIENTO_TIPOS.COBRO ? "Registrar Cobro" : "Registrar Pago"}
+        title={modalStep === "amount" ? "Registrar Cobro" : "Forma de pago"}
         closeIcon={<MdClose size={20} />}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            marginTop: "8px",
-          }}
-        >
-          {/* Visor importe */}
+        {modalStep === "amount" ? (
           <div
             style={{
-              background: "#f8f9fa",
-              borderRadius: "12px",
-              padding: "8px 16px",
-              height: "56px",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              border: "1px solid #f0f0f0",
+              flexDirection: "column",
+              gap: "12px",
+              marginTop: "8px",
             }}
           >
-            <Text
-              strong
+            {/* Visor importe */}
+            <div
               style={{
-                fontSize: movImporte > 0 ? "28px" : "22px",
-                color: movImporte > 0 ? "#262626" : "#bfbfbf",
-                letterSpacing: "-1px",
+                background: "#f8f9fa",
+                borderRadius: "12px",
+                padding: "8px 16px",
+                height: "56px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                border: "1px solid #f0f0f0",
               }}
             >
-              $ {movImporte.toLocaleString("es-AR")}
-            </Text>
-          </div>
+              <Text
+                strong
+                style={{
+                  fontSize: movImporte > 0 ? "28px" : "22px",
+                  color: movImporte > 0 ? "#262626" : "#bfbfbf",
+                  letterSpacing: "-1px",
+                }}
+              >
+                $ {movImporte.toLocaleString("es-AR")}
+              </Text>
+            </div>
 
-          {/* Teclado numérico */}
-          <Row gutter={[6, 6]}>
-            {BOTONES_TECLADO.map((btn) => (
-              <Col span={8} key={btn}>
+            {/* Teclado numérico */}
+            <Row gutter={[6, 6]}>
+              {BOTONES_TECLADO.map((btn) => (
+                <Col span={8} key={btn}>
+                  <Button
+                    block
+                    style={{
+                      height: "48px",
+                      fontSize: "22px",
+                      borderRadius: "12px",
+                      background: "#fff",
+                      fontWeight: 500,
+                      border: "1px solid #f0f0f0",
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handlePressTecla(btn)}
+                  >
+                    {btn}
+                  </Button>
+                </Col>
+              ))}
+              <Col span={8}>
                 <Button
                   block
+                  type="text"
+                  danger
                   style={{
                     height: "48px",
-                    fontSize: "22px",
-                    borderRadius: "12px",
-                    background: "#fff",
-                    fontWeight: 500,
-                    border: "1px solid #f0f0f0",
+                    fontSize: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => handlePressTecla(btn)}
+                  onClick={handleDeleteTecla}
                 >
-                  {btn}
+                  <MdOutlineBackspace />
                 </Button>
               </Col>
-            ))}
-            <Col span={8}>
-              <Button
-                block
-                type="text"
-                danger
-                style={{
-                  height: "48px",
-                  fontSize: "24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onClick={handleDeleteTecla}
-              >
-                <MdOutlineBackspace />
-              </Button>
-            </Col>
-          </Row>
+            </Row>
 
-          {/* Botón registrar */}
-          <Button
-            type="primary"
-            block
-            size="large"
-            disabled={movImporte <= 0}
-            onClick={handleRegistrarMov}
+            {/* Botón continuar */}
+            <Button
+              type="primary"
+              block
+              size="large"
+              disabled={movImporte <= 0}
+              onClick={handleRegistrarMov}
+              style={{
+                marginTop: "4px",
+                height: "48px",
+                borderRadius: "12px",
+                fontSize: "15px",
+                fontWeight: 700,
+                background: "#52c41a",
+                borderColor: "#52c41a",
+              }}
+            >
+              Continuar
+            </Button>
+          </div>
+        ) : (
+          <div
             style={{
-              marginTop: "4px",
-              height: "48px",
-              borderRadius: "12px",
-              fontSize: "15px",
-              fontWeight: 700,
-              background: "#52c41a",
-              borderColor: "#52c41a",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              marginTop: "8px",
             }}
           >
-            Registrar {movTipoModal === MOVIMIENTO_TIPOS.COBRO ? "Cobro" : "Pago"}
-          </Button>
-        </div>
+            {/* Importe a cobrar */}
+            <div
+              style={{
+                textAlign: "center",
+                padding: "8px 0 12px",
+              }}
+            >
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Importe a cobrar
+              </Text>
+              <Text
+                strong
+                style={{
+                  display: "block",
+                  fontSize: "26px",
+                  color: "#262626",
+                }}
+              >
+                $ {movImporte.toLocaleString("es-AR")}
+              </Text>
+            </div>
+
+            {/* Opciones de forma de pago */}
+            {formasPago.map((fp) => (
+              <div
+                key={fp.key}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleRegistrarConForma(fp.key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleRegistrarConForma(fp.key);
+                  }
+                }}
+                style={{
+                  borderRadius: "12px",
+                  border: "1px solid #f0f0f0",
+                  background: "#fff",
+                  cursor: "pointer",
+                  padding: "10px 16px",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  outline: "none",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = fp.color;
+                  e.currentTarget.style.boxShadow = `0 0 0 2px ${fp.color}20`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#f0f0f0";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = fp.color;
+                  e.currentTarget.style.boxShadow = `0 0 0 2px ${fp.color}30`;
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#f0f0f0";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <Text strong style={{ fontSize: "16px", color: "#262626" }}>
+                  {fp.label.toUpperCase()}
+                </Text>
+                <div
+                  style={{
+                    fontSize: "24px",
+                    color: fp.color,
+                    backgroundColor: `${fp.color}15`,
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {fp.icon}
+                </div>
+              </div>
+            ))}
+
+            {/* Botón volver */}
+            <Button
+              type="text"
+              block
+              style={{
+                marginTop: "4px",
+                height: "42px",
+                borderRadius: "12px",
+                color: "#8c8c8c",
+              }}
+              onClick={() => setModalStep("amount")}
+            >
+              ← Atrás
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      {/* Config modal */}
+      <Modal
+        open={configModalOpen}
+        onCancel={() => setConfigModalOpen(false)}
+        onOk={guardarConfig}
+        okText="Guardar"
+        cancelText="Cancelar"
+        title={<div style={{ lineHeight: 1.4 }}>Configuración Cta Cte<div style={{ fontSize: "13px", fontWeight: 400, color: "#8c8c8c" }}>{entidad.nombre}</div></div>}
+        centered
+      >
+        <Form form={configForm} layout="vertical">
+          <Form.Item
+            name="importeMaximo"
+            label="Tope Cuenta Corriente"
+            rules={[{ required: true, message: "Indicá el tope máximo" }]}
+          >
+            <Input type="number" inputMode="numeric" placeholder="Ej: 50000"
+              size="large" style={{ padding: "12px", borderRadius: "8px" }} />
+          </Form.Item>
+          <Form.Item
+            name="plazoDias"
+            label="Plazo (días)"
+            rules={[{ required: true, message: "Indicá el plazo en días" }]}
+          >
+            <Input type="number" inputMode="numeric" placeholder="Ej: 30"
+              size="large" style={{ padding: "12px", borderRadius: "8px" }} suffix="días" />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

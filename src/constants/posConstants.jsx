@@ -37,26 +37,7 @@ export const POS_COLORS = {
   DEFAULT: "#d9d9d9",
 };
 
-export const OPCIONES_TIPO = [
-  {
-    key: MOVIMIENTO_TIPOS.VENTA,
-    label: "Venta (Cliente)",
-    icon: <MdOutlineAddShoppingCart />,
-    desc: "Ingreso por ventas de productos",
-  },
-  {
-    key: MOVIMIENTO_TIPOS.PAGO,
-    label: "Pago (Proveedor)",
-    icon: <MdOutlineLocalShipping />,
-    desc: "Salida de dinero para pagos",
-  },
-  {
-    key: MOVIMIENTO_TIPOS.COBRO,
-    label: "Cobro (Clientes)",
-    icon: <MdOutlinePayment />,
-    desc: "Cobro a cliente en cuenta corriente",
-  },
-];
+export const OPCIONES_TIPO = [];
 
 export const FORMAS_PAGO = [
   {
@@ -71,7 +52,7 @@ export const FORMAS_PAGO = [
   },
   {
     key: "Cta Corriente",
-    label: "Cta. Corriente",
+    label: "Cuenta Corriente",
     iconKey: "CtaCorriente",
     icon: <MdOutlineContactPage />,
     color: "#eb2f96",

@@ -174,19 +174,6 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
           )}
         </Text>
       </div>
-
-      <div style={{ textAlign: "center", marginTop: "12px" }}>
-        <Text
-          type="secondary"
-          style={{
-            fontSize: "11px",
-            fontWeight: "700",
-            letterSpacing: "0.5px",
-          }}
-        >
-          RESUMEN FINAL | CONFIRMAR REGISTRO
-        </Text>
-      </div>
     </div>
   );
 };

@@ -46,17 +46,13 @@ El dashboard es la pantalla principal post-login. Su objetivo es:
 
 ### 2.1 Secciones del Dashboard
 
-| Sección | Componente | Prioridad | Estado |
-|---------|-----------|-----------|--------|
-| Header | Título inline (fecha + link) | Alta | ✅ Actual |
-| Indicadores del día | `ResumenCards` | Media | ✅ Actual (compacto, condicional) |
-| Accesos Rápidos | `AccesosDirectos` | Alta | ✅ Actual |
-| Gestiones | `AccesoReportes` | Alta | ✅ Actual |
-| Reportes | `AccesoReportesNuevo` | Alta | ✅ Actual |
-
-> **Nota:**
-> - La sección anteriormente llamada "Reportes" ahora se denomina **"Gestiones"** e incluye acceso a Caja, Cta Corriente y Compras.
-> - Se agregó una nueva sección **"Reportes"** con acceso a Movimientos (actual), Saldo Ctas Ctes (futuro), Pedidos (futuro) y Resumen Ventas (futuro).
+| Sección             | Componente                   | Prioridad | Estado                            |
+| ------------------- | ---------------------------- | --------- | --------------------------------- |
+| Header              | Título inline (fecha + link) | Alta      | ✅ Actual                         |
+| Indicadores del día | `ResumenCards`               | Media     | ✅ Actual (compacto, condicional) |
+| Accesos Rápidos     | `AccesosDirectos`            | Alta      | ✅ Actual                         |
+| Gestiones           | `AccesoReportes`             | Alta      | ✅ Actual                         |
+| Reportes            | `AccesoReportesNuevo`        | Alta      | ✅ Actual                         |
 
 ---
 
@@ -65,15 +61,15 @@ El dashboard es la pantalla principal post-login. Su objetivo es:
 ### 3.1 Header — "Resumen de Hoy"
 
 ```
-Resumen de Hoy                        [Consultar Todos →]
+Resumen de Hoy
 lunes, 07 de junio
 ```
 
-| Elemento | Descripción |
-|----------|-------------|
-| Título | "Resumen de Hoy" con fontWeight 700 |
-| Fecha | dayjs locale 'es', formato "dddd, DD [de] MMMM" |
-| Link | "Consultar Todos" → navega a `/movimientos` |
+| Elemento | Descripción                                     |
+| -------- | ----------------------------------------------- |
+| Título   | "Resumen de Hoy" con fontWeight 700             |
+| Fecha    | dayjs locale 'es', formato "dddd, DD [de] MMMM" |
+| Link     | "Consultar Todos" → navega a `/movimientos`     |
 
 ### 3.2 Indicadores del Día — `ResumenCards`
 
@@ -115,11 +111,11 @@ Scroll horizontal, snap align
 └──────────────────────────────────────┘
 ```
 
-| Gestión | Ruta | Descripción |
-|---------|------|-------------|
-| Caja | `/reportes/caja` | Administración de movimientos en efectivo: registro de ingresos y egresos de caja |
-| Cta Corriente | `/reportes/ctacte` | Saldo de cuenta corriente por cliente/proveedor |
-| Compras | `/compras` | Gestión de compras y órdenes de compra |
+| Gestión       | Ruta               | Descripción                                                                       |
+| ------------- | ------------------ | --------------------------------------------------------------------------------- |
+| Caja          | `/reportes/caja`   | Administración de movimientos en efectivo: registro de ingresos y egresos de caja |
+| Cta Corriente | `/reportes/ctacte` | Saldo de cuenta corriente por cliente/proveedor                                   |
+| Compras       | `/compras`         | Gestión de compras y órdenes de compra                                            |
 
 ### 3.5 Reportes — `AccesoReportesNuevo`
 
@@ -138,16 +134,17 @@ Scroll horizontal, snap align
 └──────────────────────────────────────────┘
 ```
 
-| Reporte | Ruta | Estado | Descripción |
-|---------|------|--------|-------------|
-| Movimientos | `/movimientos` | ✅ Actual | Listado completo de movimientos registrados |
+| Reporte         | Ruta                        | Estado    | Descripción                                               |
+| --------------- | --------------------------- | --------- | --------------------------------------------------------- |
+| Movimientos     | `/movimientos`              | ✅ Actual | Listado completo de movimientos registrados               |
 | Saldo Ctas Ctes | `/reportes/saldo-ctas-ctes` | 🔵 Futuro | Reporte de cuentas corrientes según alertas y condiciones |
-| Pedidos | `/pedidos` | 🔵 Futuro | Pedidos a proveedores, valores y pendientes de pago |
-| Resumen Ventas | `/reportes/resumen-ventas` | 🔵 Futuro | Desglose de ventas por periodo y rubro |
+| Pedidos         | `/pedidos`                  | 🔵 Futuro | Pedidos a proveedores, valores y pendientes de pago       |
+| Resumen Ventas  | `/reportes/resumen-ventas`  | 🔵 Futuro | Desglose de ventas por periodo y rubro                    |
 
 ### 3.6 Gestión de Entidades
 
 El acceso a la gestión de entidades (clientes/proveedores) se realiza desde:
+
 - **BottomNav**: "Nóminas"
 - **Sidebar**: "Clientes" y "Proveedores"
 - Dashboard: ya no se incluye grid de gestión, se centraliza en la navegación inferior.
@@ -177,13 +174,13 @@ DashboardPage
 
 ### 5.1 Comportamiento responsive
 
-| Elemento | Mobile (< 768px) | Desktop (>= 768px) |
-|----------|-----------------|-------------------|
-| Layout | Padding 16px, full width | Padding 24px, max-width 50% |
-| Indicadores | Cards 50% tamaño, grid 2x2 | Cards 50% tamaño, grid 2x2 |
-| Accesos Rápidos | Scroll horizontal, 75px min | Grid wrap, más grande |
-| Gestiones | Scroll horizontal | Grid 3 columnas |
-| Reportes | Scroll horizontal | Grid 4 columnas |
+| Elemento        | Mobile (< 768px)            | Desktop (>= 768px)          |
+| --------------- | --------------------------- | --------------------------- |
+| Layout          | Padding 16px, full width    | Padding 24px, max-width 50% |
+| Indicadores     | Cards 50% tamaño, grid 2x2  | Cards 50% tamaño, grid 2x2  |
+| Accesos Rápidos | Scroll horizontal, 75px min | Grid wrap, más grande       |
+| Gestiones       | Scroll horizontal           | Grid 3 columnas             |
+| Reportes        | Scroll horizontal           | Grid 4 columnas             |
 
 ### 5.2 Touch targets
 
@@ -195,29 +192,29 @@ DashboardPage
 
 ## 6. Roadmap
 
-| Fase | Feature | Estado |
-|------|---------|--------|
-| Fase 1 | ResumenCards compactos (50%, condicional) | ✅ Actual |
-| Fase 2 | AccesosDirectos a POS | ✅ Actual |
-| Fase 3 | Gestiones (Caja, Cta Cte, Compras) | ✅ Actual |
+| Fase   | Feature                                                          | Estado                                      |
+| ------ | ---------------------------------------------------------------- | ------------------------------------------- |
+| Fase 1 | ResumenCards compactos (50%, condicional)                        | ✅ Actual                                   |
+| Fase 2 | AccesosDirectos a POS                                            | ✅ Actual                                   |
+| Fase 3 | Gestiones (Caja, Cta Cte, Compras)                               | ✅ Actual                                   |
 | Fase 4 | Reportes (Movimientos, Saldo Ctas Ctes, Pedidos, Resumen Ventas) | ✅ Actual (Movimientos) / 🔵 Futuro (resto) |
-| Fase 5 | Indicadores visuales (gráficos sparkline) | 🔵 Futuro |
-| Fase 6 | Personalización de secciones visibles | 🔵 Futuro |
+| Fase 5 | Indicadores visuales (gráficos sparkline)                        | 🔵 Futuro                                   |
+| Fase 6 | Personalización de secciones visibles                            | 🔵 Futuro                                   |
 
 ---
 
 ## 7. Archivos involucrados
 
-| Archivo | Rol |
-|---------|-----|
-| `src/pages/Home.jsx` | Wrapper simple que renderiza DashboardPage |
-| `src/pages/Dashboard/DashboardPage.jsx` | Orquestador del dashboard (totales + eventos) |
-| `src/pages/Dashboard/components/ResumenCards.jsx` | Cards compactas (50%, condicional) |
-| `src/pages/Dashboard/components/AccesosDirectos.jsx` | Acceso rápido a POS |
-| `src/pages/Dashboard/components/AccesoReportes.jsx` | Acceso a gestiones (Caja, Cta Cte, Compras) |
+| Archivo                                                  | Rol                                                                       |
+| -------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `src/pages/Home.jsx`                                     | Wrapper simple que renderiza DashboardPage                                |
+| `src/pages/Dashboard/DashboardPage.jsx`                  | Orquestador del dashboard (totales + eventos)                             |
+| `src/pages/Dashboard/components/ResumenCards.jsx`        | Cards compactas (50%, condicional)                                        |
+| `src/pages/Dashboard/components/AccesosDirectos.jsx`     | Acceso rápido a POS                                                       |
+| `src/pages/Dashboard/components/AccesoReportes.jsx`      | Acceso a gestiones (Caja, Cta Cte, Compras)                               |
 | `src/pages/Dashboard/components/AccesoReportesNuevo.jsx` | Acceso a reportes (Movimientos, Saldo Ctas Ctes, Pedidos, Resumen Ventas) |
-| `src/pages/Compras/ComprasPage.jsx` | Módulo de compras |
-| `src/pages/Pedidos/PedidosPage.jsx` | Módulo de pedidos (futuro) |
-| `src/pages/Reportes/SaldoCtasCtes/SaldoCtasCtesPage.jsx` | Reporte Saldo Ctas Ctes (futuro) |
-| `src/pages/Reportes/ResumenVentas/ResumenVentasPage.jsx` | Reporte Resumen Ventas (futuro) |
-| `src/router/AppRouter.jsx` | Rutas del dashboard y módulos |
+| `src/pages/Compras/ComprasPage.jsx`                      | Módulo de compras                                                         |
+| `src/pages/Pedidos/PedidosPage.jsx`                      | Módulo de pedidos (futuro)                                                |
+| `src/pages/Reportes/SaldoCtasCtes/SaldoCtasCtesPage.jsx` | Reporte Saldo Ctas Ctes (futuro)                                          |
+| `src/pages/Reportes/ResumenVentas/ResumenVentasPage.jsx` | Reporte Resumen Ventas (futuro)                                           |
+| `src/router/AppRouter.jsx`                               | Rutas del dashboard y módulos                                             |

@@ -1,22 +1,25 @@
-import { useState, useMemo } from "react";
-import { Typography, Tabs, Card, Input, Empty, Button, Tag } from "antd";
-import { MdArrowBack, MdSearch, MdWarning, MdPerson, MdGroups } from "react-icons/md";
+import { useState, useMemo, useEffect } from "react";
+import { Typography, Card, Input, Empty, Button } from "antd";
+import { MdArrowBack, MdSearch, MdWarning } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { movimientoService } from "../../services/movimientoService";
-import { entidadService } from "../../services/entidadService";
-import { MOVIMIENTO_TIPOS } from "../../constants/posConstants";
+import { movimientoService } from "../../../services/movimientoService";
+import { entidadService } from "../../../services/entidadService";
+import { MOVIMIENTO_TIPOS } from "../../../constants/posConstants";
 
 const { Text } = Typography;
 
-const TIPO_ENTIDAD = { CLIENTES: "clientes", PROVEEDORES: "proveedores" };
-
-const calcularSaldos = (tipoEntidad) => {
+const calcularSaldos = () => {
   const movs = movimientoService.getAll().filter(
-    (m) => m.formaPago === "Cta Corriente",
+    (m) => m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO,
   );
-  const entidades = entidadService.getActivos(tipoEntidad)
-    .filter((e) => e.ctaCteConfig?.habilitado);
+
+  // Discover entities from movements, regardless of ctaCteConfig
+  const entidadIds = [...new Set(movs.map((m) => m.entidad?.id).filter(Boolean))];
+  const entidades = entidadIds
+    .map((id) => entidadService.getById("clientes", id))
+    .filter(Boolean);
+
   const saldos = {};
 
   entidades.forEach((e) => {
@@ -53,12 +56,18 @@ const calcularSaldos = (tipoEntidad) => {
     .sort((a, b) => a.entidad.nombre.localeCompare(b.entidad.nombre));
 };
 
-const ReporteCtaCte = () => {
+const AdminCtaCtePage = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState(TIPO_ENTIDAD.CLIENTES);
   const [busqueda, setBusqueda] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const saldos = useMemo(() => calcularSaldos(tab), [tab]);
+  useEffect(() => {
+    const handler = () => setRefreshKey((k) => k + 1);
+    window.addEventListener("local-db-update", handler);
+    return () => window.removeEventListener("local-db-update", handler);
+  }, []);
+
+  const saldos = useMemo(() => calcularSaldos(), [refreshKey]);
 
   const filtrados = useMemo(() => {
     if (!busqueda.trim()) return saldos;
@@ -82,66 +91,18 @@ const ReporteCtaCte = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          marginBottom: "12px",
+          marginBottom: "16px",
         }}
       >
         <Button
           type="text"
           icon={<MdArrowBack size={24} />}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
         />
         <Text strong style={{ fontSize: "18px" }}>
-          Cuenta Corriente
+          Admin Cta Cte Clientes
         </Text>
       </div>
-
-      <Tabs
-        activeKey={tab}
-        onChange={setTab}
-        items={[
-          {
-            key: TIPO_ENTIDAD.CLIENTES,
-            label: (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "4px 0",
-                }}
-              >
-                <span style={{ color: "#1890ff", fontSize: "18px" }}>
-                  <MdPerson />
-                </span>
-                <Text strong style={{ color: "#1890ff" }}>
-                  Clientes
-                </Text>
-              </div>
-            ),
-          },
-          {
-            key: TIPO_ENTIDAD.PROVEEDORES,
-            label: (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "4px 0",
-                }}
-              >
-                <span style={{ color: "#52c41a", fontSize: "18px" }}>
-                  <MdGroups />
-                </span>
-                <Text strong style={{ color: "#52c41a" }}>
-                  Proveedores
-                </Text>
-              </div>
-            ),
-          },
-        ]}
-        style={{ marginBottom: "0" }}
-      />
 
       <Input
         placeholder="Buscar por nombre..."
@@ -151,7 +112,7 @@ const ReporteCtaCte = () => {
         allowClear
         style={{
           borderRadius: "10px",
-          margin: "8px 0 12px 0",
+          marginBottom: "12px",
           height: "42px",
           border: "1px solid #e8e8e8",
           background: "#fff",
@@ -165,15 +126,14 @@ const ReporteCtaCte = () => {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {filtrados.map((s) => {
-            const esCliente = tab === TIPO_ENTIDAD.CLIENTES;
-            const saldoDisplay = esCliente ? -s.saldo : s.saldo;
+            const saldoDisplay = -s.saldo;
 
             return (
               <Card
                 key={s.entidad.id}
                 hoverable
                 onClick={() =>
-                  navigate(`/reportes/ctacte/${tab}/${s.entidad.id}`)
+                  navigate(`/gestiones/ctacte/clientes/${s.entidad.id}`)
                 }
                 styles={{ body: { padding: "12px 16px" } }}
                 style={{ borderRadius: "12px", border: "1px solid #f0f0f0" }}
@@ -196,41 +156,51 @@ const ReporteCtaCte = () => {
                     >
                       {s.entidad.nombre}
                     </Text>
-                    {(s.sobreLimite || s.plazoVencido) && (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          marginTop: "2px",
-                        }}
-                      >
-                        {s.sobreLimite && (
-                          <Text
-                            style={{
-                              fontSize: "11px",
-                              color: "#faad14",
-                              fontWeight: 600,
-                            }}
-                          >
-                            <MdWarning size={12} style={{ verticalAlign: "middle", marginRight: 2 }} />
-                            Superó límite
-                          </Text>
-                        )}
-                        {s.plazoVencido && (
-                          <Text
-                            style={{
-                              fontSize: "11px",
-                              color: "#ff4d4f",
-                              fontWeight: 600,
-                            }}
-                          >
-                            <MdWarning size={12} style={{ verticalAlign: "middle", marginRight: 2 }} />
-                            Plazo vencido
-                          </Text>
-                        )}
-                      </div>
-                    )}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        marginTop: "2px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {!s.entidad.ctaCteConfig?.habilitado && (
+                        <Text
+                          style={{
+                            fontSize: "11px",
+                            color: "#ff4d4f",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Configurar cuenta
+                        </Text>
+                      )}
+                      {s.sobreLimite && (
+                        <Text
+                          style={{
+                            fontSize: "11px",
+                            color: "#faad14",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <MdWarning size={12} style={{ verticalAlign: "middle", marginRight: 2 }} />
+                          Superó límite
+                        </Text>
+                      )}
+                      {s.plazoVencido && (
+                        <Text
+                          style={{
+                            fontSize: "11px",
+                            color: "#ff4d4f",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <MdWarning size={12} style={{ verticalAlign: "middle", marginRight: 2 }} />
+                          Plazo vencido
+                        </Text>
+                      )}
+                    </div>
                   </div>
                   <Text
                     strong
@@ -248,8 +218,9 @@ const ReporteCtaCte = () => {
           })}
         </div>
       )}
+
     </div>
   );
 };
 
-export default ReporteCtaCte;
+export default AdminCtaCtePage;

@@ -131,19 +131,6 @@ const StepFormaPago = ({ tipo, onNext }) => {
           ))}
         </Space>
       </div>
-
-      <div style={{ textAlign: "center", marginTop: "12px" }}>
-        <Text
-          type="secondary"
-          style={{
-            fontSize: "11px",
-            fontWeight: "700",
-            letterSpacing: "0.5px",
-          }}
-        >
-          PASO 3 DE 4 | SELECCIONAR FORMA DE PAGO
-        </Text>
-      </div>
     </div>
   );
 };

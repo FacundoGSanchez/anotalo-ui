@@ -106,19 +106,6 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
           />
         </div>
       )}
-
-      <div style={{ textAlign: "center", marginTop: "12px" }}>
-        <Text
-          type="secondary"
-          style={{
-            fontSize: "11px",
-            fontWeight: "700",
-            letterSpacing: "0.5px",
-          }}
-        >
-          PASO 4 DE 4 | SELECCIONAR {labelEntidad}
-        </Text>
-      </div>
     </div>
   );
 };

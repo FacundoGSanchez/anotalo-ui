@@ -10,17 +10,17 @@ import {
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { useNavigate } from "react-router-dom";
-import { movimientoService } from "../../services/movimientoService";
-import { cierreService } from "../../services/cierreService";
-import { orgService } from "../../services/orgService";
-import { useAuth } from "../../context/AuthContext";
-import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../constants/posConstants";
+import { movimientoService } from "../../../services/movimientoService";
+import { cierreService } from "../../../services/cierreService";
+import { orgService } from "../../../services/orgService";
+import { useAuth } from "../../../context/AuthContext";
+import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
 
 const { Text } = Typography;
 
 const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"];
 
-const ReporteCaja = () => {
+const AdminCajaPage = () => {
   const navigate = useNavigate();
   const { session, user } = useAuth();
   const orgId = session?.organizaciones?.[0]?.id;
@@ -64,7 +64,6 @@ const ReporteCaja = () => {
   const entries = useMemo(() => {
     const combined = [];
 
-    // Merge movs and cierres sorted by id
     let mi = 0;
     let ci = 0;
     let balance = 0;
@@ -91,7 +90,7 @@ const ReporteCaja = () => {
       }
     }
 
-    return combined.reverse(); // newest first
+    return combined.reverse();
   }, [movsCaja, cierres]);
 
   const saldoActual = entries.length > 0 ? entries[0].balance : 0;
@@ -187,7 +186,7 @@ const ReporteCaja = () => {
             onClick={() => navigate(-1)}
           />
           <Text strong style={{ fontSize: "18px" }}>
-            Administrar Caja
+            Admin Caja
           </Text>
         </div>
         <Button
@@ -676,4 +675,4 @@ const ReporteCaja = () => {
   );
 };
 
-export default ReporteCaja;
+export default AdminCajaPage;

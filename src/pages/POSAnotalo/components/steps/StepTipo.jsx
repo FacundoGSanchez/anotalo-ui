@@ -12,19 +12,6 @@ const StepTipo = ({ onNext }) => {
           <TipoCard key={opt.key} opt={opt} onNext={onNext} fullWidth />
         ))}
       </div>
-
-      <div style={{ textAlign: "center", marginTop: "24px" }}>
-        <Text
-          type="secondary"
-          style={{
-            fontSize: "11px",
-            letterSpacing: "0.5px",
-            fontWeight: "700",
-          }}
-        >
-          PASO 1 DE 4 | SELECCIONAR TIPO
-        </Text>
-      </div>
     </div>
   );
 };

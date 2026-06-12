@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Typography, Card, Tag } from "antd";
+import { Typography, Card, Tag } from "antd";
 import {
-  MdArrowBack,
-  MdClose,
-  MdOutlinePointOfSale,
   MdReceipt,
 } from "react-icons/md";
 
@@ -21,13 +18,6 @@ import StepEntidad from "./components/steps/StepEntidad";
 import StepConfirmar from "./components/steps/StepConfirmar";
 
 const { Text, Title } = Typography;
-
-const STEP_TITLE = {
-  [STEPS.IMPORTE]: "Ingresar Importe",
-  [STEPS.FORMA_PAGO]: "Forma de Pago",
-  [STEPS.ENTIDAD]: "Seleccionar Entidad",
-  [STEPS.CONFIRMAR]: "Confirmar Registro",
-};
 
 const POSAnotaloDesktop = () => {
   const locState = useLocation().state;
@@ -121,8 +111,6 @@ const POSAnotaloDesktop = () => {
     }
   };
 
-  const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
-
   return (
     <div
       style={{
@@ -132,43 +120,6 @@ const POSAnotaloDesktop = () => {
         background: "#f0f2f5",
       }}
     >
-      {/* TOP HEADER */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "10px 24px",
-          background: "#fff",
-          borderBottom: "1px solid #e8e8e8",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <MdOutlinePointOfSale size={26} color={activeColor} />
-          <Title level={5} style={{ margin: 0 }}>
-            POS Anotalo
-          </Title>
-          {movimiento.tipo && (
-            <Tag
-              color={activeColor}
-              style={{ borderRadius: "6px", marginLeft: 8 }}
-            >
-              {movimiento.tipo}
-            </Tag>
-          )}
-        </div>
-        <Button
-          type="text"
-          icon={<MdClose size={20} />}
-          onClick={closePos}
-          style={{ color: "#8c8c8c" }}
-        >
-          Cerrar
-        </Button>
-      </div>
-
       {/* BODY */}
       <div
         style={{
@@ -201,50 +152,6 @@ const POSAnotaloDesktop = () => {
               overflow: "hidden",
             }}
           >
-            {/* Step header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 20px",
-                borderBottom: "1px solid #f0f0f0",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {currentStep > STEPS.IMPORTE && (
-                  <Button
-                    type="text"
-                    icon={<MdArrowBack size={20} />}
-                    onClick={handleBack}
-                    style={{ marginLeft: -8 }}
-                  />
-                )}
-                <Text strong style={{ fontSize: "15px" }}>
-                  {STEP_TITLE[currentStep]}
-                </Text>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                {[1, 2, 3, 4].map((s) => (
-                  <div
-                    key={s}
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background:
-                        s === currentStep
-                          ? activeColor
-                          : s < currentStep
-                            ? "#52c41a"
-                            : "#e8e8e8",
-                      transition: "all 0.2s",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
             {/* Step body */}
             <div
               style={{

@@ -80,7 +80,7 @@ export const authService = {
       if (orgActual) {
         const { orgService } = await import("./orgService");
         const configPayload = {};
-        if (orgActual.FormasPago) configPayload.formasPago = orgActual.FormasPago;
+        // Mock org uses the FORMAS_PAGO constant — no need to store formasPago
         if (orgActual.TiposMovimiento) configPayload.tiposMovimiento = orgActual.TiposMovimiento;
         if (Object.keys(configPayload).length > 0) {
           orgService.initOrgConfig(orgActual.id, configPayload);
@@ -115,7 +115,8 @@ export const authService = {
     localStorage.setItem(ORG_KEY, String(orgId));
     const { orgService } = await import("./orgService");
     const configPayload = {};
-    if (org.FormasPago) configPayload.formasPago = org.FormasPago;
+    const useMock = !import.meta.env.VITE_API_URL;
+    if (!useMock && org.FormasPago) configPayload.formasPago = org.FormasPago;
     if (org.TiposMovimiento) configPayload.tiposMovimiento = org.TiposMovimiento;
     if (Object.keys(configPayload).length > 0) {
       orgService.initOrgConfig(orgId, configPayload);
@@ -127,6 +128,19 @@ export const authService = {
   logout() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(ORG_KEY);
+
+    const appPrefixes = ["db_", "org_config_"];
+    const appKeys = ["movimientos_db", "cierres_db"];
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (appPrefixes.some((p) => key.startsWith(p)) || appKeys.includes(key)) {
+        toRemove.push(key);
+      }
+    }
+    toRemove.forEach((key) => localStorage.removeItem(key));
   },
 
   getToken() {

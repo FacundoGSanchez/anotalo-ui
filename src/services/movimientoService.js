@@ -27,7 +27,9 @@ const recalcularSaldoEntidad = (entidadId, movimiento) => {
   if (!tipo || !entidadId) return;
 
   const movs = movimientoService.getAll().filter(
-    (m) => m.entidad?.id === entidadId && m.formaPago === "Cta Corriente",
+    (m) =>
+      m.entidad?.id === entidadId &&
+      (m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO),
   );
 
   let saldo = 0;
@@ -76,7 +78,9 @@ export const movimientoService = {
         hour12: false,
       });
 
-      const esCtaCte = movimiento.formaPago === "Cta Corriente";
+      const esCtaCte =
+        movimiento.formaPago === "Cta Corriente" ||
+        (movimiento.entidad?.id && movimiento.tipo === MOVIMIENTO_TIPOS.COBRO);
 
       let saldoCtaCte = null;
       if (esCtaCte && movimiento.entidad?.id) {
@@ -84,13 +88,13 @@ export const movimientoService = {
           .filter(
             (m) =>
               m.entidad?.id === movimiento.entidad.id &&
-              m.formaPago === "Cta Corriente",
+              (m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO),
           )
           .sort((a, b) => a.id - b.id);
-        const saldoAnterior =
-          movsEntidad.length > 0
-            ? movsEntidad[movsEntidad.length - 1].saldoCtaCte || 0
-            : 0;
+        const ultimoConSaldo = [...movsEntidad]
+          .reverse()
+          .find((m) => m.saldoCtaCte != null);
+        const saldoAnterior = ultimoConSaldo ? ultimoConSaldo.saldoCtaCte : 0;
         const importeNum = Number(movimiento.importe) || 0;
         if (movimiento.tipo === MOVIMIENTO_TIPOS.VENTA) {
           saldoCtaCte = saldoAnterior + importeNum;
@@ -156,7 +160,11 @@ export const movimientoService = {
       const filtered = todos.filter((m) => m.id !== id);
       localStorage.setItem(DB_KEY, JSON.stringify(filtered));
 
-      if (eliminado && eliminado.formaPago === "Cta Corriente" && eliminado.entidad?.id) {
+      if (
+        eliminado &&
+        eliminado.entidad?.id &&
+        (eliminado.formaPago === "Cta Corriente" || eliminado.tipo === MOVIMIENTO_TIPOS.COBRO)
+      ) {
         recalcularSaldoEntidad(eliminado.entidad.id, eliminado);
       }
 

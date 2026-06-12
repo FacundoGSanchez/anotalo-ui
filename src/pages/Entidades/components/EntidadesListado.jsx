@@ -10,7 +10,9 @@ const { Text } = Typography;
 
 const calcularSaldoEntidad = (entidadId) => {
   const movs = movimientoService.getAll().filter(
-    (m) => m.entidad?.id === entidadId && m.formaPago === "Cta Corriente",
+    (m) =>
+      m.entidad?.id === entidadId &&
+      (m.formaPago === "Cta Corriente" || m.tipo === "Cobro"),
   );
   let saldo = 0;
   movs.forEach((m) => {
@@ -27,7 +29,9 @@ const calcularSaldoEntidad = (entidadId) => {
 const verificarPlazoVencido = (entidadId, plazoDias) => {
   if (!plazoDias) return false;
   const movs = movimientoService.getAll().filter(
-    (m) => m.entidad?.id === entidadId && m.formaPago === "Cta Corriente",
+    (m) =>
+      m.entidad?.id === entidadId &&
+      (m.formaPago === "Cta Corriente" || m.tipo === "Cobro"),
   );
   if (movs.length === 0) return false;
   const fechas = movs.map((m) => dayjs(m.fecha));

@@ -25,10 +25,10 @@ export const MODULES = [
     ],
   },
   {
-    title: "REPORTES",
+    title: "GESTIONES",
     items: [
-      { key: "rpt_caja", icon: <MdAccountBalance size={20} />, label: "Caja", route: "/reportes/caja" },
-      { key: "rpt_ctacte", icon: <MdBarChart size={20} />, label: "Cta Corriente", route: "/reportes/ctacte" },
+      { key: "rpt_caja", icon: <MdAccountBalance size={20} />, label: "Caja", route: "/gestiones/caja" },
+      { key: "rpt_ctacte", icon: <MdBarChart size={20} />, label: "Cta Corriente", route: "/gestiones/ctacte" },
       { key: "rpt_saldo_ctas_ctes", icon: <MdAccountBalance size={20} />, label: "Saldo Ctas Ctes", route: "/reportes/saldo-ctas-ctes" },
       { key: "rpt_resumen_ventas", icon: <MdBarChart size={20} />, label: "Resumen Ventas", route: "/reportes/resumen-ventas" },
     ],

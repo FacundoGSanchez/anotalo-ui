@@ -50,6 +50,9 @@ export const entidadService = {
         String(e.id) === String(id) ? { ...e, ...values } : e,
       );
       localStorage.setItem(`${STORAGE_PREFIX}${tipo}`, JSON.stringify(nuevaLista));
+      window.dispatchEvent(new CustomEvent("local-db-update", {
+        detail: { type: "entidad_actualizada" },
+      }));
       return { success: true };
     } catch (error) {
       console.error("Error al actualizar entidad:", error);

@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Typography, Tag } from "antd";
-import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
+import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../../constants/posConstants";
 
 const { Text } = Typography;
 

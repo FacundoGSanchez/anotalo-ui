@@ -22,9 +22,9 @@ export const LAYOUT_SPEC = {
             { label: "Clientes", icon: "UsergroupAddOutlined", route: "/entidades/clientes" },
             { label: "Proveedores", icon: "DeliveredProcedureOutlined", route: "/entidades/proveedores" },
           ]},
-          { label: "REPORTES", type: "group", children: [
-            { label: "Reporte Caja", icon: "BankOutlined", route: "/reportes/caja" },
-            { label: "Cta Corriente", icon: "FileTextOutlined", route: "/reportes/ctacte" },
+          { label: "GESTIONES", type: "group", children: [
+            { label: "Admin Caja", icon: "BankOutlined", route: "/gestiones/caja" },
+            { label: "Cta Corriente", icon: "FileTextOutlined", route: "/gestiones/ctacte" },
             { label: "Movimientos", icon: "UnorderedListOutlined", route: "/movimientos" },
           ]},
 
@@ -70,7 +70,7 @@ export const LAYOUT_SPEC = {
     },
     moreMenu: {
       route: "/more",
-      sections: ["OPERACIONES", "ENTIDADES", "REPORTES"],
+      sections: ["OPERACIONES", "ENTIDADES", "GESTIONES"],
     },
   },
 };

@@ -6,8 +6,8 @@ import "dayjs/locale/es";
 import {
   MOVIMIENTO_TIPOS,
   NOMBRES_FORMAS_PAGO,
-} from "../../constants/posConstants";
-import { movimientoService } from "../../services/movimientoService";
+} from "../../../constants/posConstants";
+import { movimientoService } from "../../../services/movimientoService";
 
 import HeaderMovimientos from "./components/HeaderMovimientos";
 import ModalFiltros from "./components/ModalFiltros";

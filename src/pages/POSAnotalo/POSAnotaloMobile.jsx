@@ -5,8 +5,6 @@ import { Layout } from "antd";
 import { usePosFlow } from "./hooks/usePosFlow";
 import { STEPS } from "../../constants/posConstants";
 
-import PosHeader from "./components/PosHeader";
-
 import StepImporte from "./components/steps/StepImporte";
 import StepFormaPago from "./components/steps/StepFormaPago";
 import StepEntidad from "./components/steps/StepEntidad";
@@ -21,7 +19,6 @@ const POSAnotaloMobile = () => {
     currentStep,
     movimiento,
     handleNext,
-    handleBack,
     closePos,
     setCurrentStep,
     setMovimiento,
@@ -47,13 +44,6 @@ const POSAnotaloMobile = () => {
           width: "100%",
         }}
       >
-        <PosHeader
-          currentStep={currentStep}
-          tipo={movimiento.tipo}
-          onBack={handleBack}
-          onClose={closePos}
-        />
-
         <div
           style={{
             background: "#fff",

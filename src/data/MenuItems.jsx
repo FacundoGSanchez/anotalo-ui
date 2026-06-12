@@ -52,16 +52,16 @@ const MenuItems = [
   },
   {
     key: "rpt_group",
-    label: "REPORTES",
+    label: "GESTIONES",
     type: "group",
     children: [
       {
-        key: "/reportes/caja",
+        key: "/gestiones/caja",
         icon: <BankOutlined />,
         label: "Caja",
       },
       {
-        key: "/reportes/ctacte",
+        key: "/gestiones/ctacte",
         icon: <FileTextOutlined />,
         label: "Cta Corriente",
       },

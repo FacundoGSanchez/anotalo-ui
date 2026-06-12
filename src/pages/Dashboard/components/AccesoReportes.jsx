@@ -9,15 +9,15 @@ const GESTIONES = [
   {
     key: "caja",
     icon: <MdAttachMoney />,
-    label: "Caja",
-    route: "/reportes/caja",
+    label: "Admin Caja",
+    route: "/gestiones/caja",
     color: "#52c41a",
   },
   {
     key: "ctacte",
     icon: <MdOutlineContactPage />,
     label: "Cta Corriente",
-    route: "/reportes/ctacte",
+    route: "/gestiones/ctacte",
     color: "#eb2f96",
   },
   {

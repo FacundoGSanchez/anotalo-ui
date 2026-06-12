@@ -37,11 +37,6 @@ const PosHeader = ({ currentStep, tipo, onBack, onClose }) => {
         <Text strong style={{ fontSize: "17px", display: "block" }}>
           {getStepTitle()}
         </Text>
-        {currentStep > STEPS.IMPORTE && currentStep < STEPS.CONFIRMAR && (
-          <Text type="secondary" style={{ fontSize: "12px" }}>
-            Paso {currentStep} de 3
-          </Text>
-        )}
       </div>
 
       {/* 3. Lado Derecho: Botón Cerrar */}

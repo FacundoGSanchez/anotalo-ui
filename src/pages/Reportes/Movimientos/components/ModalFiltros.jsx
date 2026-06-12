@@ -13,7 +13,7 @@ import { MdRestartAlt, MdOutlineLayersClear } from "react-icons/md";
 import {
   MOVIMIENTO_TIPOS,
   NOMBRES_FORMAS_PAGO,
-} from "../../../constants/posConstants";
+} from "../../../../constants/posConstants";
 
 const { Text } = Typography;
 const { CheckableTag } = Tag;
