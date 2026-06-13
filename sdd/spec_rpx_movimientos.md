@@ -14,7 +14,7 @@ Cada reporte tendrá su propia especificación con el prefijo `spec_rpx_`:
 
 | Reporte | Archivo Spec |
 |---------|-------------|
-| Reporte de Caja | `spec_rpx_caja.md` |
+| Reporte de Caja | `spec_admin_Caja.md` |
 | Cuenta Corriente | `spec_rpx_ctacte.md` |
 | Movimientos por Tipo | `spec_rpx_movimientos.md` |
 | (futuros) | `spec_rpx_{modulo}.md` |

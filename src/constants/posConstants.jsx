@@ -100,6 +100,22 @@ export const VISOR_CONFIG = {
   SIZES: { DEFAULT: "48px", MEDIUM: "36px", SMALL: "28px" },
 };
 
+export const FORMAS_PAGO_DEFAULT = [
+  { id: 1, nombre: "Efectivo", sigla: "Efe", requiereEntidad: false, impactaCaja: true, impactaCtaCte: false },
+  { id: 2, nombre: "Cta Corriente", sigla: "CC", requiereEntidad: true, impactaCaja: false, impactaCtaCte: true },
+  { id: 3, nombre: "Tarjeta", sigla: "Tar", requiereEntidad: false, impactaCaja: false, impactaCtaCte: false },
+  { id: 4, nombre: "QR", sigla: "QR", requiereEntidad: false, impactaCaja: false, impactaCtaCte: false },
+  { id: 5, nombre: "Transferencia", sigla: "Tra", requiereEntidad: false, impactaCaja: false, impactaCtaCte: false },
+];
+
+export const RUBROS_DEFAULT = [
+  { id: 1, sigla: "V", nombre: "Varios", grupo: "General" },
+  { id: 2, sigla: "K", nombre: "Kiosco", grupo: "Alimentos" },
+  { id: 3, sigla: "B", nombre: "Bebidas", grupo: "Alimentos" },
+  { id: 4, sigla: "F", nombre: "Fiambrería", grupo: "Alimentos" },
+  { id: 5, sigla: "P", nombre: "Panadería", grupo: "Alimentos" },
+];
+
 export const STEPS = {
   TIPO: 0,
   IMPORTE: 1,

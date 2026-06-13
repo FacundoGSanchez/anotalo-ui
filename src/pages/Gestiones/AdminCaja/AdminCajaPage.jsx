@@ -3,7 +3,7 @@ import {
   Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal, Row, Col,
 } from "antd";
 import {
-  MdArrowBack, MdMoreHoriz, MdDeleteOutline, MdOutlineLock,
+  MdArrowBack, MdDeleteOutline, MdOutlineLock,
   MdOutlineAddCircleOutline, MdOutlineAccountBalanceWallet,
   MdOutlineBackspace, MdClose,
 } from "react-icons/md";
@@ -189,11 +189,6 @@ const AdminCajaPage = () => {
             Admin Caja
           </Text>
         </div>
-        <Button
-          type="text"
-          icon={<MdMoreHoriz size={22} />}
-          style={{ color: "#8c8c8c" }}
-        />
       </div>
 
       {/* Acciones rápidas: Ingreso / Egreso manual */}
@@ -206,8 +201,7 @@ const AdminCajaPage = () => {
       >
         <Button
           block
-          size="large"
-          icon={<MdOutlineAddCircleOutline size={22} />}
+          icon={<MdOutlineAddCircleOutline size={18} />}
           onClick={() => {
             setMovTipoModal(MOVIMIENTO_TIPOS.INGRESO);
             setMovImporte(0);
@@ -215,21 +209,20 @@ const AdminCajaPage = () => {
             setIsModalOpen(true);
           }}
           style={{
-            borderRadius: "12px",
-            height: "52px",
-            fontSize: "14px",
+            borderRadius: "10px",
+            height: "38px",
+            fontSize: "13px",
             fontWeight: 700,
             background: "#52c41a",
             borderColor: "#52c41a",
             color: "#fff",
           }}
         >
-          Ingreso Manual
+          Ingreso
         </Button>
         <Button
           block
-          size="large"
-          icon={<MdOutlineAccountBalanceWallet size={22} />}
+          icon={<MdOutlineAccountBalanceWallet size={18} />}
           onClick={() => {
             setMovTipoModal(MOVIMIENTO_TIPOS.RETIRO);
             setMovImporte(0);
@@ -237,16 +230,16 @@ const AdminCajaPage = () => {
             setIsModalOpen(true);
           }}
           style={{
-            borderRadius: "12px",
-            height: "52px",
-            fontSize: "14px",
+            borderRadius: "10px",
+            height: "38px",
+            fontSize: "13px",
             fontWeight: 700,
             background: "#546e7a",
             borderColor: "#546e7a",
             color: "#fff",
           }}
         >
-          Egreso Manual
+          Retiro
         </Button>
       </div>
 
@@ -355,12 +348,12 @@ const AdminCajaPage = () => {
                                 color="#faad14"
                                 style={{
                                   borderRadius: "4px",
-                                  fontSize: "11px",
+                                  fontSize: "14px",
                                   fontWeight: 700,
                                   border: "none",
                                   margin: 0,
-                                  lineHeight: "18px",
-                                  padding: "0 6px",
+                                  lineHeight: "22px",
+                                  padding: "0 8px",
                                 }}
                               >
                                 C
@@ -456,12 +449,12 @@ const AdminCajaPage = () => {
                               color={POS_COLORS[mov.tipo]}
                               style={{
                                 borderRadius: "4px",
-                                fontSize: "11px",
+                                fontSize: "14px",
                                 fontWeight: 700,
                                 border: "none",
                                 margin: 0,
-                                lineHeight: "18px",
-                                padding: "0 6px",
+                                lineHeight: "22px",
+                                padding: "0 8px",
                               }}
                             >
                               {mov.tipo === MOVIMIENTO_TIPOS.VENTA
@@ -559,7 +552,7 @@ const AdminCajaPage = () => {
         footer={null}
         width={360}
         centered
-        title={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Ingreso Manual" : "Egreso Manual"}
+        title={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Ingreso" : "Retiro"}
         closeIcon={<MdClose size={20} />}
       >
         <div
@@ -667,7 +660,7 @@ const AdminCajaPage = () => {
               borderColor: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a",
             }}
           >
-            Registrar {movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Ingreso" : "Egreso"}
+            Registrar {movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Ingreso" : "Retiro"}
           </Button>
         </div>
       </Modal>

@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Typography, Button, Divider, Tag, message } from "antd";
-import { MdSave, MdPerson, MdWallet, MdInfoOutline } from "react-icons/md";
+import { MdSave, MdPerson, MdWallet, MdInfoOutline, MdExpandMore } from "react-icons/md";
 import { useAuth } from "../../../../context/AuthContext";
 import {
   MOVIMIENTO_TIPOS,
   POS_COLORS,
 } from "../../../../constants/posConstants";
-import { movimientoService } from "../../../../services/movimientoService"; // <--- Importamos servicio
+import { movimientoService } from "../../../../services/movimientoService";
 import { useArgentineDate } from "../../../../hooks/useArgentineDate";
 
 const { Title, Text } = Typography;
@@ -15,6 +15,8 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
   const { user } = useAuth();
   const { getNowISO } = useArgentineDate();
   const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
+  const [expandido, setExpandido] = useState(false);
+  const totalLineItems = movimiento.lineItems?.reduce((acc, item) => acc + Number(item.importe), 0) || 0;
 
   const handleGuardar = () => {
     // Preparamos el objeto final con la fecha argentina
@@ -68,50 +70,94 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
           </Title>
         </div>
 
-        {/* LINE ITEMS */}
+        {/* LINE ITEMS — collapsible */}
         {movimiento.lineItems?.length > 0 && (
           <div
             style={{
               background: "#f8f9fa",
               borderRadius: "12px",
-              padding: "12px 16px",
               marginBottom: "16px",
+              overflow: "hidden",
             }}
           >
-            <Text
-              type="secondary"
+            <div
+              onClick={() => setExpandido((prev) => !prev)}
               style={{
-                fontSize: "10px",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                display: "block",
-                marginBottom: "8px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "12px 16px",
+                cursor: "pointer",
+                userSelect: "none",
               }}
             >
-              DETALLE ({movimiento.lineItems.length} items)
-            </Text>
-            {movimiento.lineItems.map((item, idx) => (
-              <div
-                key={item.id}
+              <Text
+                type="secondary"
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "6px 0",
-                  borderBottom:
-                    idx < movimiento.lineItems.length - 1
-                      ? "1px solid #e8e8e8"
-                      : "none",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
                 }}
               >
-                <Text style={{ fontSize: "13px", color: "#595959" }}>
-                  Item {idx + 1}
-                </Text>
+                DETALLE ({movimiento.lineItems.length} items)
+              </Text>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Text strong style={{ fontSize: "13px" }}>
-                  $ {Number(item.importe).toLocaleString("es-AR")}
+                  $ {totalLineItems.toLocaleString("es-AR")}
                 </Text>
+                <MdExpandMore
+                  size={20}
+                  style={{
+                    color: "#8c8c8c",
+                    transition: "transform 0.2s",
+                    transform: expandido ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
               </div>
-            ))}
+            </div>
+            {expandido && (
+              <div style={{ padding: "0 16px 12px" }}>
+                {movimiento.lineItems.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "6px 0",
+                      borderBottom:
+                        idx < movimiento.lineItems.length - 1
+                          ? "1px solid #e8e8e8"
+                          : "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                      {item.rubro && (
+                        <div style={{
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "8px",
+                          background: `${activeColor}15`,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}>
+                          <span style={{ fontSize: "12px", fontWeight: 800, lineHeight: 1, color: activeColor }}>{item.rubro.sigla}</span>
+                        </div>
+                      )}
+                      <Text style={{ fontSize: "13px", color: "#595959" }}>
+                        {item.rubro?.nombre || `Item ${idx + 1}`}
+                      </Text>
+                    </div>
+                    <Text strong style={{ fontSize: "13px" }}>
+                      $ {Number(item.importe).toLocaleString("es-AR")}
+                    </Text>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

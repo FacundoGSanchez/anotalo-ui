@@ -7,6 +7,9 @@ import {
   MdListAlt,
   MdShoppingCart,
   MdAssignment,
+  MdSettings,
+  MdLabel,
+  MdCreditCard,
 } from "react-icons/md";
 
 export const MODULES = [
@@ -38,6 +41,14 @@ export const MODULES = [
     items: [
       { key: "compras", icon: <MdShoppingCart size={20} />, label: "Compras", route: "/compras" },
       { key: "pedidos", icon: <MdAssignment size={20} />, label: "Pedidos", route: "/pedidos" },
+    ],
+  },
+  {
+    title: "CONFIGURACIONES",
+    items: [
+      { key: "cfg_pos", icon: <MdSettings size={20} />, label: "Config POS", route: "/configuraciones/pos" },
+      { key: "cfg_rubros", icon: <MdLabel size={20} />, label: "Rubros", route: "/configuraciones/rubros" },
+      { key: "cfg_formas_pago", icon: <MdCreditCard size={20} />, label: "Formas de Pago", route: "/configuraciones/formas-pago" },
     ],
   },
 ];

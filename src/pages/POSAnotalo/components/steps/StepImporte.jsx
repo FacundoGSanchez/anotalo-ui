@@ -1,24 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button, Typography, Modal } from "antd";
 import { MdChevronRight, MdKeyboard, MdClose, MdEdit } from "react-icons/md";
 import { VISOR_CONFIG, POS_COLORS } from "../../../../constants/posConstants";
+import { orgService } from "../../../../services/orgService";
+import { useAuth } from "../../../../context/AuthContext";
 import Calculadora from "./components/Calculadora";
 
 const { Title, Text } = Typography;
 
-const RUBROS_MOCK = [
-  { sigla: "V", nombre: "Varios", grupo: "General" },
-  { sigla: "K", nombre: "Kiosco", grupo: "Alimentos" },
-  { sigla: "B", nombre: "Bebidas", grupo: "Alimentos" },
-  { sigla: "F", nombre: "Fiambrería", grupo: "Alimentos" },
-  { sigla: "P", nombre: "Panadería", grupo: "Alimentos" },
-];
-
-const VISIBLE_RUBROS = RUBROS_MOCK.slice(0, 3);
-
-const grupos = [...new Set(RUBROS_MOCK.map((r) => r.grupo))];
+const RUBRO_SIN_RUBRO = { id: 0, sigla: "", nombre: "Sin rubro", grupo: "" };
 
 const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
+  const { session } = useAuth();
+  const orgId = session?.organizaciones?.[0]?.id;
+
+  const configPOS = useMemo(() => orgService.getConfigPOS(orgId), [orgId]);
+  const usaRubro = configPOS.usaRubro !== false;
+
+  const rubros = useMemo(() => orgService.getRubros(orgId), [orgId]);
+  const visibleRubros = rubros.slice(0, 3);
+  const grupos = useMemo(() => [...new Set(rubros.map((r) => r.grupo))], [rubros]);
   const [currentValue, setCurrentValue] = useState(0);
   const [lineItems, setLineItems] = useState(initialLineItems);
   const [showCalc, setShowCalc] = useState(false);
@@ -67,13 +68,29 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
     setRubroModalOpen(false);
   }, [currentValue, desktop]);
 
+  const agregarItemSimple = useCallback(() => {
+    if (currentValue <= 0) return;
+    setLineItems((prev) => [
+      ...prev,
+      { id: Date.now(), importe: currentValue, rubro: RUBRO_SIN_RUBRO },
+    ]);
+    setCurrentValue(0);
+    if (desktop) {
+      inputRef.current?.focus();
+    }
+  }, [currentValue, desktop]);
+
   const handleInputKeyDown = useCallback(
     (e) => {
       if (e.key === "Enter" && currentValue > 0) {
-        agregarItemConRubro(RUBROS_MOCK[0]);
+        if (usaRubro && rubros.length > 0) {
+          agregarItemConRubro(rubros[0]);
+        } else {
+          agregarItemSimple();
+        }
       }
     },
-    [currentValue, agregarItemConRubro],
+    [currentValue, agregarItemConRubro, agregarItemSimple, usaRubro, rubros],
   );
 
   const eliminarItem = useCallback((id) => {
@@ -147,7 +164,7 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
               {grupo}
             </Text>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {RUBROS_MOCK.filter((r) => r.grupo === grupo).map((rubro) => {
+              {rubros.filter((r) => r.grupo === grupo).map((rubro) => {
                 const isSelected = editItemId
                   ? lineItems.find((i) => i.id === editItemId)?.rubro?.sigla === rubro.sigla
                   : false;
@@ -193,14 +210,14 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
       {/* TABS at top */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
         <button onClick={() => setActiveTab("calc")} style={tabStyle(activeTab === "calc")}>Calculadora</button>
-        <button onClick={() => setActiveTab("list")} style={tabStyle(activeTab === "list")}>Listado {lineItems.length > 0 && `(${lineItems.length})`}</button>
+        <button onClick={() => setActiveTab("list")} style={tabStyle(activeTab === "list")}>Resumen {lineItems.length > 0 && `(${lineItems.length})`}</button>
       </div>
 
       {/* TAB CONTENT */}
       {activeTab === "calc" ? (
         <>
           {/* VISOR inside Calculadora tab */}
-          <div style={{ display: "flex", alignItems: "center", background: "#f8f9fa", borderRadius: "16px", marginBottom: "12px", height: desktop ? "80px" : "88px", overflow: "hidden", border: "1px solid #f0f0f0" }}>
+          <div style={{ display: "flex", alignItems: "center", background: "#f8f9fa", borderRadius: "16px", marginBottom: "12px", height: desktop ? "72px" : "80px", overflow: "hidden", border: "1px solid #f0f0f0" }}>
             <div style={{ width: "8px", height: "100%", backgroundColor: activeColor, transition: "background-color 0.3s ease" }} />
             <div style={{ flex: 1, padding: "0 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Text style={{ fontSize: "28px", color: activeColor, fontWeight: "600", marginRight: "10px" }}>$</Text>
@@ -222,28 +239,52 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
               {showCalc ? "Ocultar teclado" : "Mostrar teclado"}
             </Button>
           )}
-          {/* Rubro buttons with text labels + Más */}
-          <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-            {VISIBLE_RUBROS.map((rubro) => (
+          {/* Rubro buttons or single Agregar */}
+          {usaRubro ? (
+            <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+              {visibleRubros.map((rubro) => (
+                <button
+                  key={rubro.sigla}
+                  onClick={() => agregarItemConRubro(rubro)}
+                  disabled={currentValue <= 0}
+                  style={btnBase(currentValue <= 0)}
+                >
+                  <span style={{ fontSize: "15px", fontWeight: 800, lineHeight: 1 }}>{rubro.sigla}</span>
+                  <span style={{ fontSize: "10px", fontWeight: 600, opacity: 0.85 }}>{rubro.nombre}</span>
+                </button>
+              ))}
               <button
-                key={rubro.sigla}
-                onClick={() => agregarItemConRubro(rubro)}
+                onClick={() => { setEditItemId(null); setRubroModalOpen(true); }}
                 disabled={currentValue <= 0}
                 style={btnBase(currentValue <= 0)}
               >
-                <span style={{ fontSize: "15px", fontWeight: 800, lineHeight: 1 }}>{rubro.sigla}</span>
-                <span style={{ fontSize: "10px", fontWeight: 600, opacity: 0.85 }}>{rubro.nombre}</span>
+                <span style={{ fontSize: "18px", fontWeight: 800, lineHeight: 1 }}>+</span>
+                <span style={{ fontSize: "10px", fontWeight: 600, opacity: 0.85 }}>Más</span>
               </button>
-            ))}
-            <button
-              onClick={() => { setEditItemId(null); setRubroModalOpen(true); }}
+            </div>
+          ) : (
+            <Button
+              block
               disabled={currentValue <= 0}
-              style={btnBase(currentValue <= 0)}
+              onClick={agregarItemSimple}
+              style={{
+                marginTop: "12px",
+                height: "56px",
+                borderRadius: "16px",
+                fontSize: "16px",
+                fontWeight: 700,
+                background: currentValue > 0 ? "#8c8c8c" : "#f0f0f0",
+                borderColor: currentValue > 0 ? "#8c8c8c" : "#e8e8e8",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s",
+              }}
             >
-              <span style={{ fontSize: "18px", fontWeight: 800, lineHeight: 1 }}>+</span>
-              <span style={{ fontSize: "10px", fontWeight: 600, opacity: 0.85 }}>Más</span>
-            </button>
-          </div>
+              AGREGAR +
+            </Button>
+          )}
         </>
       ) : (
         <>
@@ -252,25 +293,45 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
               {lineItems.map((item, idx) => (
                 <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: idx < lineItems.length - 1 ? "1px solid #f0f0f0" : "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-                    <div style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "12px",
-                      background: `${activeColor}12`,
-                      color: activeColor,
-                      flexShrink: 0,
-                    }}>
-                      <span style={{ fontSize: "18px", fontWeight: 800, lineHeight: 1 }}>{item.rubro?.sigla || "V"}</span>
-                      <span style={{ fontSize: "8px", fontWeight: 600, lineHeight: 1, opacity: 0.8 }}>{item.rubro?.nombre || "Varios"}</span>
-                    </div>
+                    {usaRubro ? (
+                      <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        background: `${activeColor}12`,
+                        color: activeColor,
+                        flexShrink: 0,
+                      }}>
+                        <span style={{ fontSize: "18px", fontWeight: 800, lineHeight: 1 }}>{item.rubro?.sigla || ""}</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, lineHeight: 1, opacity: 0.8 }}>{item.rubro?.nombre || ""}</span>
+                      </div>
+                    ) : (
+                      <div style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        background: `${activeColor}12`,
+                        color: activeColor,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "20px",
+                        fontWeight: 800,
+                      }}>
+                        $
+                      </div>
+                    )}
                     <Text strong style={{ fontSize: "16px", color: "#262626" }}>$ {item.importe.toLocaleString("es-AR")}</Text>
                   </div>
                   <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                    <Button type="text" size="small" icon={<MdEdit size={15} />} onClick={() => { setEditItemId(item.id); setRubroModalOpen(true); }} style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", color: "#8c8c8c" }} />
+                    {usaRubro && (
+                      <Button type="text" size="small" icon={<MdEdit size={15} />} onClick={() => { setEditItemId(item.id); setRubroModalOpen(true); }} style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", color: "#8c8c8c" }} />
+                    )}
                     <Button type="text" danger size="small" icon={<MdClose size={15} />} onClick={() => eliminarItem(item.id)} style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }} />
                   </div>
                 </div>

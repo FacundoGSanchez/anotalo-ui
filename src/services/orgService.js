@@ -1,5 +1,5 @@
 import React from "react";
-import { FORMAS_PAGO, ICONOS_POS } from "../constants/posConstants";
+import { FORMAS_PAGO, FORMAS_PAGO_DEFAULT, ICONOS_POS, RUBROS_DEFAULT } from "../constants/posConstants";
 
 const getConfigKey = (orgId) => `org_config_${orgId || "default"}`;
 
@@ -18,6 +18,21 @@ const mergeWithDefault = (orgFormas) => {
   return (orgFormas || [])
     .filter((f) => f.enabled !== false)
     .map((f) => {
+      // New format (saved from FormasPagoConfigPage): items have nombre/sigla
+      if (f.nombre) {
+        const defaultOpt = FORMAS_PAGO.find((dp) => dp.key === f.nombre);
+        return {
+          key: f.nombre,
+          label: defaultOpt?.label || f.nombre,
+          color: defaultOpt?.color || "#1890ff",
+          icon: defaultOpt?.icon || null,
+          requiereEntidad: f.requiereEntidad ?? defaultOpt?.requiereEntidad ?? false,
+          impactaCaja: f.impactaCaja ?? defaultOpt?.impactaCaja ?? false,
+          impactaCtaCte: f.impactaCtaCte ?? defaultOpt?.impactaCtaCte ?? false,
+        };
+      }
+
+      // Legacy format: items have key/label/iconKey
       const defaultOpt = FORMAS_PAGO.find((dp) => dp.key === f.key);
       const merged = {
         key: f.key,
@@ -60,6 +75,24 @@ export const orgService = {
     }
   },
 
+  getRubros: (orgId) => {
+    const config = orgService.getConfig(orgId);
+    return config.rubros && config.rubros.length > 0 ? config.rubros : RUBROS_DEFAULT;
+  },
+
+  saveRubros: (orgId, rubros) => {
+    return orgService.saveConfig(orgId, { rubros });
+  },
+
+  getConfigPOS: (orgId) => {
+    const config = orgService.getConfig(orgId);
+    return config.configPOS || { usaRubro: true };
+  },
+
+  saveConfigPOS: (orgId, configPOS) => {
+    return orgService.saveConfig(orgId, { configPOS });
+  },
+
   getFormasPago: (orgId, tipo) => {
     const config = orgService.getConfig(orgId);
     const formasPorTipo = config.formasPago?.[tipo];
@@ -78,7 +111,10 @@ export const orgService = {
       }
     }
 
-    return FORMAS_PAGO;
+    // No config at all: convert FORMAS_PAGO_DEFAULT to legacy format for display
+    return mergeWithDefault(FORMAS_PAGO_DEFAULT);
   },
+
+  getFormasPagoDefault: () => FORMAS_PAGO_DEFAULT,
 
 };

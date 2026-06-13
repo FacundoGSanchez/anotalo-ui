@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Typography, Card, Tag } from "antd";
+import { Typography, Card, Tag, Space } from "antd";
 import {
   MdReceipt,
+  MdPerson,
+  MdWallet,
+  MdShoppingCart,
 } from "react-icons/md";
 
 import { usePosFlow } from "./hooks/usePosFlow";
@@ -192,17 +195,80 @@ const POSAnotaloDesktop = () => {
 
         </div>
 
-        {/* RIGHT — Recent movements */}
+        {/* RIGHT — Transaction summary + Recent movements */}
         <div
           style={{
             width: "300px",
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
+            gap: "12px",
             overflow: "auto",
             flexShrink: 0,
           }}
         >
+          {/* Transaction summary sidebar */}
+          <Card
+            size="small"
+            style={{
+              borderRadius: "12px",
+              border: "1px solid #f0f0f0",
+              flexShrink: 0,
+            }}
+            styles={{ body: { padding: "14px 16px" } }}
+          >
+            <Text
+              style={{
+                fontSize: "10px",
+                fontWeight: 700,
+                color: "#8c8c8c",
+                textTransform: "uppercase",
+                display: "block",
+                marginBottom: "12px",
+              }}
+            >
+              TRANSACCIÓN ACTUAL
+            </Text>
+
+            {movimiento.lineItems.length > 0 || movimiento.formaPago ? (
+              <Space direction="vertical" size={12} style={{ width: "100%" }}>
+                <SidebarRow
+                  icon={<MdShoppingCart size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
+                  label="Tipo"
+                  value={movimiento.tipo}
+                  color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
+                />
+                {(movimiento.lineItems?.length > 0 || movimiento.importe > 0) && (
+                  <SidebarRow
+                    icon={<MdWallet size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
+                    label="Importe"
+                    value={`$ ${Number(movimiento.importe).toLocaleString("es-AR")} (${movimiento.lineItems?.length || 0} items)`}
+                    color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
+                  />
+                )}
+                {movimiento.formaPago && (
+                  <SidebarRow
+                    icon={<MdWallet size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
+                    label="Forma de pago"
+                    value={movimiento.formaPago}
+                    color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
+                  />
+                )}
+                {movimiento.entidad && (
+                  <SidebarRow
+                    icon={<MdPerson size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
+                    label="Entidad"
+                    value={movimiento.entidad.nombre}
+                    color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
+                  />
+                )}
+              </Space>
+            ) : (
+              <Text type="secondary" style={{ fontSize: "12px", textAlign: "center", display: "block" }}>
+                Iniciá una venta para ver el resumen
+              </Text>
+            )}
+          </Card>
+
           {/* Recent movements list */}
           <Card
             size="small"
@@ -324,5 +390,26 @@ const POSAnotaloDesktop = () => {
     </div>
   );
 };
+
+const SidebarRow = ({ icon, label, value, color }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <div style={{
+      width: "32px",
+      height: "32px",
+      borderRadius: "8px",
+      background: `${color}10`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    }}>
+      {icon}
+    </div>
+    <div style={{ minWidth: 0, flex: 1 }}>
+      <Text type="secondary" style={{ fontSize: "10px", display: "block", lineHeight: 1.2 }}>{label}</Text>
+      <Text strong style={{ fontSize: "13px", display: "block", lineHeight: 1.4 }}>{value}</Text>
+    </div>
+  </div>
+);
 
 export default POSAnotaloDesktop;

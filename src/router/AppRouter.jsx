@@ -16,6 +16,9 @@ import AdminComprasPage from "../pages/Gestiones/AdminCompras/AdminComprasPage.j
 import SaldoCtasCtesPage from "../pages/Reportes/SaldoCtasCtes/SaldoCtasCtesPage.jsx";
 import PedidosPage from "../pages/Pedidos/PedidosPage.jsx";
 import ResumenVentasPage from "../pages/Reportes/ResumenVentas/ResumenVentasPage.jsx";
+import ConfigPosPage from "../pages/Configuraciones/ConfigPosPage.jsx";
+import RubrosConfigPage from "../pages/Configuraciones/RubrosConfigPage.jsx";
+import FormasPagoConfigPage from "../pages/Configuraciones/FormasPagoConfigPage.jsx";
 
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -70,6 +73,11 @@ const AppRouter = () => {
         <Route path="pedidos" element={<PedidosPage />} />
         <Route path="reportes/saldo-ctas-ctes" element={<SaldoCtasCtesPage />} />
         <Route path="reportes/resumen-ventas" element={<ResumenVentasPage />} />
+
+        {/* CONFIGURACIONES */}
+        <Route path="configuraciones/pos" element={<ConfigPosPage />} />
+        <Route path="configuraciones/rubros" element={<RubrosConfigPage />} />
+        <Route path="configuraciones/formas-pago" element={<FormasPagoConfigPage />} />
       </Route>
 
       <Route

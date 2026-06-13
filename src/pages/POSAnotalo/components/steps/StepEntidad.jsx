@@ -2,19 +2,23 @@ import React, { useState } from "react";
 import { Typography, Button, Alert, Divider } from "antd";
 import { MdSearch, MdPerson, MdWarning } from "react-icons/md";
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
+import { orgService } from "../../../../services/orgService";
+import { useAuth } from "../../../../context/AuthContext";
 import SelectorEntidadModal from "./components/SelectorEntidadModal";
 
 const { Text } = Typography;
 
 const StepEntidad = ({ tipo, formaPago, onNext }) => {
+  const { session } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const esCliente = tipo === MOVIMIENTO_TIPOS.VENTA || tipo === MOVIMIENTO_TIPOS.COBRO;
-  const esCtaCte = formaPago === "Cta Corriente";
+  const formasPago = orgService.getFormasPago(session?.organizaciones?.[0]?.id, tipo);
+  const formaPagoObj = formasPago.find((f) => f.key === formaPago);
+  const requiereEntidad = formaPagoObj?.requiereEntidad || false;
 
   const tablaDB = esCliente ? "db_clientes" : "db_proveedores";
   const activeColor = esCliente ? "#1890ff" : "#fa8c16";
-  const labelEntidad = esCliente ? "CLIENTE" : "PROVEEDOR";
 
   return (
     <div style={{ animation: "fadeIn 0.3s ease" }}>
@@ -27,7 +31,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
         }}
       >
         {/* 1. PREDETERMINADOS PRIMERO: Consumidor Final */}
-        {esCliente && !esCtaCte && (
+        {esCliente && !requiereEntidad && (
           <Button
             block
             size="large"
@@ -49,7 +53,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
           </Button>
         )}
 
-        {esCliente && !esCtaCte && <Divider style={{ margin: "4px 0" }} />}
+        {esCliente && !requiereEntidad && <Divider style={{ margin: "4px 0" }} />}
 
         {/* 2. ACCIÓN DE BÚSQUEDA PRINCIPAL */}
         <Button
@@ -89,14 +93,14 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
         activeColor={activeColor}
       />
 
-      {/* ADVERTENCIA PROVEEDOR O CTA CTE */}
-      {(!esCliente || esCtaCte) && (
+      {/* ADVERTENCIA SI REQUIERE ENTIDAD */}
+      {(!esCliente || requiereEntidad) && (
         <div style={{ marginTop: "20px" }}>
           <Alert
             message="Identificación requerida"
             description={
-              esCtaCte
-                ? "Las cuentas corrientes requieren un titular."
+              requiereEntidad
+                ? "La forma de pago seleccionada requiere un titular."
                 : "Para gastos o egresos debe identificar al proveedor."
             }
             type="info"

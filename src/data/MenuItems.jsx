@@ -10,6 +10,9 @@ import {
   ShoppingCartOutlined,
   BarChartOutlined,
   AccountBookOutlined,
+  ToolOutlined,
+  CreditCardOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 
 const MenuItems = [
@@ -96,6 +99,28 @@ const MenuItems = [
         key: "/pedidos",
         icon: <DeliveredProcedureOutlined />,
         label: "Pedidos",
+      },
+    ],
+  },
+  {
+    key: "cfg_group",
+    label: "CONFIGURACIONES",
+    type: "group",
+    children: [
+      {
+        key: "/configuraciones/pos",
+        icon: <ToolOutlined />,
+        label: "Config POS",
+      },
+      {
+        key: "/configuraciones/rubros",
+        icon: <TagsOutlined />,
+        label: "Rubros",
+      },
+      {
+        key: "/configuraciones/formas-pago",
+        icon: <CreditCardOutlined />,
+        label: "Formas de Pago",
       },
     ],
   },

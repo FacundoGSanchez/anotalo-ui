@@ -5,12 +5,14 @@ import { STEPS } from "../../../constants/posConstants";
 
 const { Text } = Typography;
 
-const PosHeader = ({ currentStep, tipo, onBack, onClose }) => {
-  const getStepTitle = () => {
-    if (currentStep === STEPS.CONFIRMAR) return "Confirmar Registro";
-    return "Venta";
-  };
+const STEP_TITLES = {
+  [STEPS.IMPORTE]: "Nueva Venta",
+  [STEPS.FORMA_PAGO]: "Forma de Pago",
+  [STEPS.ENTIDAD]: "Cliente",
+  [STEPS.CONFIRMAR]: "Confirmar",
+};
 
+const PosHeader = ({ currentStep, onBack, onClose }) => {
   return (
     <div
       style={{
@@ -20,26 +22,21 @@ const PosHeader = ({ currentStep, tipo, onBack, onClose }) => {
         marginBottom: "0.5rem",
       }}
     >
-      {/* 1. Lado Izquierdo: Botón Volver (Solo si NO es el primer paso) */}
       <div style={{ width: "40px" }}>
-        {currentStep > STEPS.IMPORTE && (
-          <Button
-            type="text"
-            shape="circle"
-            icon={<MdArrowBack size={24} />}
-            onClick={onBack}
-          />
-        )}
+        <Button
+          type="text"
+          shape="circle"
+          icon={<MdArrowBack size={24} />}
+          onClick={onBack}
+        />
       </div>
 
-      {/* 2. Centro: Título y Subtítulo */}
       <div style={{ textAlign: "center", flex: 1 }}>
         <Text strong style={{ fontSize: "17px", display: "block" }}>
-          {getStepTitle()}
+          {STEP_TITLES[currentStep] || "Venta"}
         </Text>
       </div>
 
-      {/* 3. Lado Derecho: Botón Cerrar */}
       <div style={{ width: "40px", textAlign: "right" }}>
         <Button
           type="text"
