@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Typography, Button, Modal, Input, Switch, Popconfirm, message, Divider } from "antd";
-import { MdArrowBack, MdAdd, MdEdit, MdClose } from "react-icons/md";
+import { MdArrowBack, MdAdd, MdRestore, MdChevronRight, MdClose, MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { orgService } from "../../services/orgService";
 import { useAuth } from "../../context/AuthContext";
@@ -102,12 +102,10 @@ const FormasPagoConfigPage = () => {
           <Text strong style={{ fontSize: "18px" }}>Formas de Pago</Text>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
-          <Button size="small" onClick={handleResetDefault} style={{ fontSize: "12px", borderRadius: "8px" }}>
-            Restaurar
-          </Button>
-          <Button type="primary" icon={<MdAdd size={16} />} onClick={openAdd} style={{ borderRadius: "10px", height: "36px", fontSize: "13px", fontWeight: 700 }}>
-            Agregar
-          </Button>
+          <Popconfirm title="¿Restaurar formas de pago por defecto?" onConfirm={handleResetDefault} okText="Sí" cancelText="No">
+            <Button size="small" icon={<MdRestore size={16} />} style={{ borderRadius: "8px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center" }} />
+          </Popconfirm>
+          <Button type="primary" icon={<MdAdd size={18} />} onClick={openAdd} style={{ borderRadius: "10px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center" }} />
         </div>
       </div>
 
@@ -143,9 +141,16 @@ const FormasPagoConfigPage = () => {
           <ToggleRow label="Requiere entidad" value={formReqEnt} onChange={setFormReqEnt} desc="Obliga a seleccionar un cliente" />
           <ToggleRow label="Impacta caja" value={formImpCaja} onChange={setFormImpCaja} desc="Afecta el saldo de caja física" />
           <ToggleRow label="Impacta cta cte" value={formImpCtaCte} onChange={setFormImpCtaCte} desc="Afecta la cuenta corriente" />
-          <Button type="primary" block onClick={handleSave} style={{ marginTop: "8px", height: "48px", borderRadius: "12px", fontSize: "15px", fontWeight: 700 }}>
-            {editItem ? "Guardar cambios" : "Agregar forma de pago"}
-          </Button>
+          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+            {editItem && (
+              <Popconfirm title="¿Eliminar forma de pago?" onConfirm={() => { handleDelete(editItem.id); setModalOpen(false); }} okText="Sí" cancelText="No" okButtonProps={{ danger: true }}>
+                <Button danger icon={<MdDelete size={18} />} style={{ width: "48px", height: "48px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }} />
+              </Popconfirm>
+            )}
+            <Button type="primary" onClick={handleSave} style={{ flex: 1, height: "48px", borderRadius: "12px", fontSize: "15px", fontWeight: 700 }}>
+              {editItem ? "Guardar cambios" : "Agregar forma de pago"}
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
@@ -153,20 +158,17 @@ const FormasPagoConfigPage = () => {
 };
 
 const CardFormaPago = ({ data, onEdit, onDelete, onToggle }) => (
-  <div style={{ background: "#fff", borderRadius: "16px", border: "1px solid #f0f0f0", padding: "16px" }}>
+  <div style={{ background: "#fff", borderRadius: "16px", border: "1px solid #f0f0f0", padding: "16px", cursor: "pointer" }} onClick={onEdit}>
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
       <div>
         <Text strong style={{ fontSize: "15px" }}>{data.nombre}</Text>
         <Text type="secondary" style={{ fontSize: "12px", marginLeft: "8px" }}>({data.sigla})</Text>
       </div>
       <div style={{ display: "flex", gap: "4px" }}>
-        <Button type="text" size="small" icon={<MdEdit size={15} />} onClick={onEdit} style={{ width: "32px", height: "32px", color: "#8c8c8c" }} />
-        <Popconfirm title="¿Eliminar forma de pago?" onConfirm={onDelete} okText="Sí" cancelText="No" okButtonProps={{ danger: true }}>
-          <Button type="text" size="small" danger icon={<MdClose size={15} />} style={{ width: "32px", height: "32px" }} />
-        </Popconfirm>
+        <Button type="text" icon={<MdChevronRight size={20} />} style={{ color: "#8c8c8c", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }} />
       </div>
     </div>
-    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
       <MiniSwitch label="Requiere entidad" value={data.requiereEntidad} onChange={(v) => onToggle("requiereEntidad", v)} />
       <MiniSwitch label="Impacta caja" value={data.impactaCaja} onChange={(v) => onToggle("impactaCaja", v)} />
       <MiniSwitch label="Impacta cta cte" value={data.impactaCtaCte} onChange={(v) => onToggle("impactaCtaCte", v)} />

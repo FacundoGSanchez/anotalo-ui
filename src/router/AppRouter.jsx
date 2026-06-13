@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import { useAuth } from "../context/AuthContext";
 import Home from "../pages/Home";
@@ -20,6 +21,12 @@ import ConfigPosPage from "../pages/Configuraciones/ConfigPosPage.jsx";
 import RubrosConfigPage from "../pages/Configuraciones/RubrosConfigPage.jsx";
 import FormasPagoConfigPage from "../pages/Configuraciones/FormasPagoConfigPage.jsx";
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+};
+
 const AppRouter = () => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -32,7 +39,9 @@ const AppRouter = () => {
   if (loading) return <div>Cargando...</div>;
 
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
@@ -85,6 +94,7 @@ const AppRouter = () => {
         element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />}
       />
     </Routes>
+    </>
   );
 };
 

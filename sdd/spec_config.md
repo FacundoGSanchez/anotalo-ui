@@ -2,7 +2,7 @@
 
 ## Especificación del Módulo de Configuración por Organización
 
-**Versión:** 0.1
+**Versión:** 0.2
 **Fecha:** 13/06/2026
 **Propósito:** Definir las pantallas de configuración de la organización, accesibles desde el menú principal en la sección CONFIGURACIONES.
 
@@ -66,13 +66,13 @@ CRUD de rubros que se muestran en `StepImporte` al agregar items.
 
 ```
 ┌─────────────────────────────────────────────┐
-│  ← Rubros                        [+ Agregar]│
+│  ← Rubros                          [↻] [+] │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  ┌─────────────────────────────────────────┐│
-│  │  V   Varios          General    [✎] [✕] ││
-│  │  K   Kiosco          Alimentos  [✎] [✕] ││
-│  │  B   Bebidas         Alimentos  [✎] [✕] ││
+│  │  V   Varios          General        [›] ││
+│  │  K   Kiosco          Alimentos      [›] ││
+│  │  B   Bebidas         Alimentos      [›] ││
 │  └─────────────────────────────────────────┘│
 │                                             │
 └─────────────────────────────────────────────┘
@@ -80,9 +80,10 @@ CRUD de rubros que se muestran en `StepImporte` al agregar items.
 
 ### Acciones
 
-- **Agregar**: modal con campos sigla, nombre, grupo
-- **Editar**: modal precargado con mismos campos
-- **Eliminar**: confirmación Popconfirm
+- **Agregar**: botón `[+]` en header → modal con campos sigla, nombre, grupo
+- **Editar**: botón `[›]` en registro → modal precargado con mismos campos
+- **Eliminar**: dentro del modal de edición, botón "Eliminar rubro" con confirmación Popconfirm
+- **Restaurar**: botón `[↻]` en header → restaura lista a RUBROS_DEFAULT
 
 ---
 
@@ -110,15 +111,15 @@ CRUD de formas de pago disponibles para el tipo Venta en el POS.
 
 ```
 ┌─────────────────────────────────────────────┐
-│  ← Formas de Pago                [+ Agregar]│
+│  ← Formas de Pago                  [↻] [+] │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  ┌─────────────────────────────────────────┐│
-│  │  Efectivo  Efe                          ││
-│  │  [requiereEntidad] [impactaCaja] [CtaCte]││
+│  │  Efectivo  Efe                      [›] ││
+│  │  [requiereEntidad] [impactaCaja] [CtaCte]│
 │  ├─────────────────────────────────────────┤│
-│  │  Cta Cte   Cta                          ││
-│  │  [requiereEntidad] [impactaCaja] [CtaCte]││
+│  │  Cta Cte   Cta                      [›] ││
+│  │  [requiereEntidad] [impactaCaja] [CtaCte]│
 │  └─────────────────────────────────────────┘│
 │                                             │
 └─────────────────────────────────────────────┘
@@ -126,9 +127,10 @@ CRUD de formas de pago disponibles para el tipo Venta en el POS.
 
 ### Acciones
 
-- **Agregar**: modal con campos nombre, sigla y toggles
-- **Editar**: modal precargado
-- **Eliminar**: Popconfirm
+- **Agregar**: botón `[+]` en header → modal con campos nombre, sigla y toggles
+- **Editar**: botón `[›]` en registro → modal precargado
+- **Eliminar**: dentro del modal de edición, botón "Eliminar forma de pago" con confirmación Popconfirm
+- **Restaurar**: botón `[↻]` en header → restaura lista a FORMAS_PAGO_DEFAULT
 - **Toggles directos** en la lista para `requiereEntidad`, `impactaCaja`, `impactaCtaCte`
 
 ---

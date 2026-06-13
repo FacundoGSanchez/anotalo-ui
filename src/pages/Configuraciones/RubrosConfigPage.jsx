@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Typography, Button, Modal, Input, Popconfirm, message, Divider } from "antd";
-import { MdArrowBack, MdAdd, MdEdit, MdClose } from "react-icons/md";
+import { MdArrowBack, MdAdd, MdRestore, MdChevronRight, MdClose, MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { orgService } from "../../services/orgService";
 import { useAuth } from "../../context/AuthContext";
@@ -84,12 +84,10 @@ const RubrosConfigPage = () => {
           <Text strong style={{ fontSize: "18px" }}>Rubros</Text>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
-          <Button size="small" onClick={handleResetDefault} style={{ fontSize: "12px", borderRadius: "8px" }}>
-            Restaurar
-          </Button>
-          <Button type="primary" icon={<MdAdd size={16} />} onClick={openAdd} style={{ borderRadius: "10px", height: "36px", fontSize: "13px", fontWeight: 700 }}>
-            Agregar
-          </Button>
+          <Popconfirm title="¿Restaurar rubros por defecto?" onConfirm={handleResetDefault} okText="Sí" cancelText="No">
+            <Button size="small" icon={<MdRestore size={16} />} style={{ borderRadius: "8px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center" }} />
+          </Popconfirm>
+          <Button type="primary" icon={<MdAdd size={18} />} onClick={openAdd} style={{ borderRadius: "10px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center" }} />
         </div>
       </div>
 
@@ -100,8 +98,8 @@ const RubrosConfigPage = () => {
           </div>
         ) : (
           rubros.map((r, idx) => (
-            <div key={r.id}>
-              <div style={{ display: "flex", alignItems: "center", padding: "12px 16px" }}>
+              <div key={r.id}>
+                <div style={{ display: "flex", alignItems: "center", padding: "12px 16px", cursor: "pointer" }} onClick={() => openEdit(r)}>
                 <div style={{
                   width: "36px", height: "36px", borderRadius: "10px",
                   background: "#1890ff12", color: "#1890ff",
@@ -114,12 +112,7 @@ const RubrosConfigPage = () => {
                   <Text strong style={{ fontSize: "14px", display: "block" }}>{r.nombre}</Text>
                   <Text type="secondary" style={{ fontSize: "12px" }}>{r.grupo}</Text>
                 </div>
-                <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                  <Button type="text" size="small" icon={<MdEdit size={15} />} onClick={() => openEdit(r)} style={{ width: "32px", height: "32px", color: "#8c8c8c" }} />
-                  <Popconfirm title="¿Eliminar rubro?" onConfirm={() => handleDelete(r.id)} okText="Sí" cancelText="No" okButtonProps={{ danger: true }}>
-                    <Button type="text" size="small" danger icon={<MdClose size={15} />} style={{ width: "32px", height: "32px" }} />
-                  </Popconfirm>
-                </div>
+                <Button type="text" icon={<MdChevronRight size={20} />} style={{ color: "#8c8c8c", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }} />
               </div>
               {idx < rubros.length - 1 && <Divider style={{ margin: "0", borderColor: "#f0f0f0" }} />}
             </div>
@@ -141,9 +134,16 @@ const RubrosConfigPage = () => {
             <Text type="secondary" style={{ fontSize: "11px", fontWeight: 700, display: "block", marginBottom: "4px" }}>GRUPO</Text>
             <Input value={formGrupo} onChange={(e) => setFormGrupo(e.target.value)} placeholder="Ej: General" style={{ borderRadius: "10px", height: "44px" }} />
           </div>
-          <Button type="primary" block onClick={handleSave} style={{ marginTop: "8px", height: "48px", borderRadius: "12px", fontSize: "15px", fontWeight: 700 }}>
-            {editItem ? "Guardar cambios" : "Agregar rubro"}
-          </Button>
+          <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+            {editItem && (
+              <Popconfirm title="¿Eliminar rubro?" onConfirm={() => { handleDelete(editItem.id); setModalOpen(false); }} okText="Sí" cancelText="No" okButtonProps={{ danger: true }}>
+                <Button danger icon={<MdDelete size={18} />} style={{ width: "48px", height: "48px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }} />
+              </Popconfirm>
+            )}
+            <Button type="primary" onClick={handleSave} style={{ flex: 1, height: "48px", borderRadius: "12px", fontSize: "15px", fontWeight: 700 }}>
+              {editItem ? "Guardar cambios" : "Agregar rubro"}
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
