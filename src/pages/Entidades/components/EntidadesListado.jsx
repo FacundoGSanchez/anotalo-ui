@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Table, Button, Typography, Input, Space, Card, Popconfirm, message, Tag } from "antd";
-import { MdArrowBack, MdAdd, MdSearch, MdChevronRight, MdDeleteOutline, MdWarning } from "react-icons/md";
+import { Button, Typography, Input, Divider, Tag } from "antd";
+import { MdArrowBack, MdAdd, MdSearch, MdChevronRight, MdWarning } from "react-icons/md";
 import dayjs from "dayjs";
 import { entidadService } from "../../../services/entidadService";
 import { movimientoService } from "../../../services/movimientoService";
+import EntidadDetalleModal from "./EntidadDetalle/EntidadDetalleContainer";
 
 const { Text } = Typography;
 
@@ -46,16 +47,23 @@ const EntidadesListado = ({ tipo: tipoProp, onBack, simple }) => {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
   const [lista, setLista] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+
+  const isCliente = tipo === "clientes";
+  const colorTema = isCliente ? "#1890ff" : "#fa8c16";
+  const avatarBg = isCliente ? "#1890ff12" : "#fa8c1612";
+
+  const cargar = useCallback(() => {
+    const activos = entidadService.getActivos(tipo);
+    setLista(activos.sort((a, b) => b.id - a.id));
+  }, [tipo]);
 
   useEffect(() => {
-    const cargar = () => {
-      const activos = entidadService.getActivos(tipo);
-      setLista(activos.sort((a, b) => b.id - a.id));
-    };
     cargar();
     window.addEventListener("local-db-update", cargar);
     return () => window.removeEventListener("local-db-update", cargar);
-  }, [tipo]);
+  }, [cargar]);
 
   const datosFiltrados = lista.filter(
     (item) =>
@@ -63,105 +71,15 @@ const EntidadesListado = ({ tipo: tipoProp, onBack, simple }) => {
       item.nro?.toString().includes(busqueda),
   );
 
-  const handleDelete = (record) => {
-    entidadService.softDelete(tipo, record.id);
-    message.success("Entidad eliminada");
-    const activos = entidadService.getActivos(tipo);
-    setLista(activos.sort((a, b) => b.id - a.id));
+  const openNew = () => {
+    setEditId(null);
+    setModalOpen(true);
   };
 
-  const columns = [
-    {
-      render: (_, record) => {
-        const ctaConfig = record.ctaCteConfig || {};
-        const habilitado = ctaConfig.habilitado;
-        let saldo = null;
-        let sobreLimite = false;
-        let plazoVencido = false;
-
-        if (habilitado) {
-          saldo = calcularSaldoEntidad(record.id);
-          if (ctaConfig.importeMaximo) {
-            sobreLimite = Math.abs(saldo) > ctaConfig.importeMaximo;
-          }
-          plazoVencido = verificarPlazoVencido(record.id, ctaConfig.plazoDias);
-        }
-
-        return (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "2px 0",
-            }}
-          >
-            <Space direction="vertical" size={0}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <Text strong style={{ fontSize: "15px" }}>
-                  {record.nombre}
-                </Text>
-                {habilitado && (
-                  <Tag
-                    color="#eb2f96"
-                    style={{
-                      borderRadius: "4px",
-                      fontSize: "9px",
-                      lineHeight: "16px",
-                      padding: "0 5px",
-                      margin: 0,
-                      fontWeight: 700,
-                    }}
-                  >
-                    CTA CTE
-                  </Tag>
-                )}
-                {(sobreLimite || plazoVencido) && (
-                  <MdWarning size={14} color="#faad14" />
-                )}
-              </div>
-              <Text type="secondary" style={{ fontSize: "12px" }}>
-                Código #{record.nro}{" "}
-                {record.telefono && `• Tel: ${record.telefono}`}
-              </Text>
-              {habilitado && (
-                <Space size={8}>
-                  {sobreLimite && (
-                    <Text style={{ fontSize: "11px", color: "#faad14", fontWeight: 600 }}>
-                      Superó límite
-                    </Text>
-                  )}
-                  {plazoVencido && (
-                    <Text style={{ fontSize: "11px", color: "#ff4d4f", fontWeight: 600 }}>
-                      Plazo vencido
-                    </Text>
-                  )}
-                </Space>
-              )}
-            </Space>
-            <Space>
-              <Popconfirm
-                title="¿Eliminar esta entidad?"
-                description="Ya no aparecerá en el listado de activos."
-                onConfirm={() => handleDelete(record)}
-                okText="Eliminar"
-                cancelText="Cancelar"
-                okButtonProps={{ danger: true }}
-              >
-                <Button
-                  type="text"
-                  size="small"
-                  danger
-                  icon={<MdDeleteOutline size={18} />}
-                />
-              </Popconfirm>
-              <MdChevronRight size={22} color="#bfbfbf" />
-            </Space>
-          </div>
-        );
-      },
-    },
-  ];
+  const openEdit = (record) => {
+    setEditId(record.id);
+    setModalOpen(true);
+  };
 
   return (
     <div style={{ padding: simple ? "0" : "16px", maxWidth: "600px", margin: "0 auto" }}>
@@ -173,7 +91,7 @@ const EntidadesListado = ({ tipo: tipoProp, onBack, simple }) => {
           marginBottom: "10px",
         }}
       >
-        <Space>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {!simple && (
             <>
               <Button
@@ -191,13 +109,12 @@ const EntidadesListado = ({ tipo: tipoProp, onBack, simple }) => {
               {tipo}
             </Text>
           )}
-        </Space>
+        </div>
         <Button
           type="primary"
-          shape="circle"
-          icon={<MdAdd size={24} />}
-          onClick={() => navigate(`/entidades/${tipo}/nuevo`)}
-          style={{ boxShadow: "0 4px 10px rgba(24, 144, 255, 0.3)" }}
+          icon={<MdAdd size={18} />}
+          onClick={openNew}
+          style={{ borderRadius: "10px", width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center" }}
         />
       </div>
 
@@ -209,32 +126,100 @@ const EntidadesListado = ({ tipo: tipoProp, onBack, simple }) => {
         style={{ marginBottom: "10px", borderRadius: "10px", padding: "8px 10px" }}
       />
 
-      <Card
-        styles={{ body: { padding: 0 } }}
-        style={{
-          borderRadius: "16px",
-          overflow: "hidden",
-          border: "none",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <Table
-          size="middle"
-          dataSource={datosFiltrados}
-          columns={columns}
-          rowKey="id"
-          showHeader={false}
-          pagination={false}
-          locale={{ emptyText: `No hay ${tipo} activos` }}
-          onRow={(record) => ({
-            onClick: (e) => {
-              if (e.target.closest(".ant-popconfirm") || e.target.closest("button")) return;
-              navigate(`/entidades/${tipo}/edit/${record.id}`);
-            },
-            style: { cursor: "pointer" },
-          })}
-        />
-      </Card>
+      <div style={{ background: "#fff", borderRadius: "16px", border: "1px solid #f0f0f0", overflow: "hidden" }}>
+        {datosFiltrados.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px 20px" }}>
+            <Text type="secondary">No hay {tipo} activos</Text>
+          </div>
+        ) : (
+          datosFiltrados.map((record, idx) => {
+            const ctaConfig = record.ctaCteConfig || {};
+            const habilitado = ctaConfig.habilitado;
+            let saldo = null;
+            let sobreLimite = false;
+            let plazoVencido = false;
+
+            if (habilitado) {
+              saldo = calcularSaldoEntidad(record.id);
+              if (ctaConfig.importeMaximo) {
+                sobreLimite = Math.abs(saldo) > ctaConfig.importeMaximo;
+              }
+              plazoVencido = verificarPlazoVencido(record.id, ctaConfig.plazoDias);
+            }
+
+            return (
+              <div key={record.id}>
+                <div
+                  style={{ display: "flex", alignItems: "center", padding: "12px 16px", cursor: "pointer" }}
+                  onClick={() => openEdit(record)}
+                >
+                  <div style={{
+                    width: "36px", height: "36px", borderRadius: "10px",
+                    background: avatarBg, color: colorTema,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: 800, fontSize: "14px", flexShrink: 0, marginRight: "12px",
+                  }}>
+                    {record.nombre?.charAt(0).toUpperCase() || "?"}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <Text strong style={{ fontSize: "14px", display: "block" }}>
+                        {record.nombre}
+                      </Text>
+                      {habilitado && (
+                        <Tag
+                          color="#eb2f96"
+                          style={{
+                            borderRadius: "4px",
+                            fontSize: "9px",
+                            lineHeight: "16px",
+                            padding: "0 5px",
+                            margin: 0,
+                            fontWeight: 700,
+                          }}
+                        >
+                          CTA CTE
+                        </Tag>
+                      )}
+                      {(sobreLimite || plazoVencido) && (
+                        <MdWarning size={14} color="#faad14" />
+                      )}
+                    </div>
+                    <Text type="secondary" style={{ fontSize: "12px" }}>
+                      Código #{record.nro}
+                      {record.telefono && ` • Tel: ${record.telefono}`}
+                    </Text>
+                    {habilitado && (sobreLimite || plazoVencido) && (
+                      <div style={{ marginTop: "2px" }}>
+                        {sobreLimite && (
+                          <Text style={{ fontSize: "11px", color: "#faad14", fontWeight: 600, marginRight: "8px" }}>
+                            Superó límite
+                          </Text>
+                        )}
+                        {plazoVencido && (
+                          <Text style={{ fontSize: "11px", color: "#ff4d4f", fontWeight: 600 }}>
+                            Plazo vencido
+                          </Text>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <Button type="text" icon={<MdChevronRight size={20} />} style={{ color: "#8c8c8c", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }} />
+                </div>
+                {idx < datosFiltrados.length - 1 && <Divider style={{ margin: "0", borderColor: "#f0f0f0" }} />}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <EntidadDetalleModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        tipo={tipo}
+        editId={editId}
+        onSaved={cargar}
+      />
     </div>
   );
 };

@@ -14,6 +14,8 @@ import { movimientoService } from "../../../services/movimientoService";
 import { cierreService } from "../../../services/cierreService";
 import { orgService } from "../../../services/orgService";
 import { useAuth } from "../../../context/AuthContext";
+import { useCurrentOrg } from "../../../hooks/useCurrentOrg";
+import { useCurrentSucursal } from "../../../hooks/useCurrentSucursal";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
 
 const { Text } = Typography;
@@ -22,8 +24,9 @@ const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"]
 
 const AdminCajaPage = () => {
   const navigate = useNavigate();
-  const { session, user } = useAuth();
-  const orgId = session?.organizaciones?.[0]?.id;
+  const { user } = useAuth();
+  const orgId = useCurrentOrg();
+  const { sucursalId } = useCurrentSucursal();
   const [refreshKey, setRefreshKey] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [movTipoModal, setMovTipoModal] = useState(null);
@@ -50,9 +53,9 @@ const AdminCajaPage = () => {
     if (formasImpactanCaja.length === 0) return [];
     return movimientoService
       .getAll()
-      .filter((m) => formasImpactanCaja.includes(m.formaPago))
+      .filter((m) => formasImpactanCaja.includes(m.formaPago) && (!sucursalId || m.sucursalId === sucursalId))
       .sort((a, b) => a.id - b.id);
-  }, [formasImpactanCaja, refreshKey]);
+  }, [formasImpactanCaja, refreshKey, sucursalId]);
 
   const cierres = useMemo(
     () => cierreService.getAll().sort((a, b) => a.id - b.id),

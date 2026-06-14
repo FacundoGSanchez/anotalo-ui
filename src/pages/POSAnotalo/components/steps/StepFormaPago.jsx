@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { Card, Typography, Space } from "antd";
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
-import { useAuth } from "../../../../context/AuthContext";
 import { orgService } from "../../../../services/orgService";
+import { useCurrentOrg } from "../../../../hooks/useCurrentOrg";
 
 const { Text } = Typography;
 
 const StepFormaPago = ({ tipo, onNext }) => {
-  const { session } = useAuth();
-  const orgId = session?.organizaciones?.[0]?.id;
+  const orgId = useCurrentOrg();
   const containerRef = useRef(null);
 
   const formasPagoOrg = orgService.getFormasPago(orgId, tipo);

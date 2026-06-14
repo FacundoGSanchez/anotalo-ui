@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import { Input, Button, Form, Typography, Layout, message } from "antd";
+import { Input, Button, Form, Typography, message } from "antd";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./components/style.css";
 import AnotaloLogo from "./components/Logo";
 
-const { Title, Link } = Typography;
-const { Footer, Content } = Layout;
-
-const MOCK_USER = "admin";
-const MOCK_PASS = "adminanotalo";
+const { Title } = Typography;
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -30,9 +26,8 @@ const Login = () => {
   };
 
   return (
-    <Layout className="anotalo-login-screen">
-      {/* 2. Formulario y Contenido */}
-      <Content className="anotalo-login-content">
+    <div className="anotalo-login-wrapper">
+      <div className="anotalo-login-content">
         <AnotaloLogo width={"120px"} />
         <Title level={3} className="anotalo-login-header">
           INICIAR SESION
@@ -43,8 +38,8 @@ const Login = () => {
           onFinish={onFinish}
           className="antd-login-form"
           initialValues={{
-            username: MOCK_USER,
-            password: MOCK_PASS,
+            username: "admin",
+            password: "adminanotalo",
           }}
         >
           <Form.Item
@@ -72,12 +67,6 @@ const Login = () => {
             />
           </Form.Item>
 
-          <div className="anotalo-forgot-password-container">
-            <Link href="#" className="anotalo-forgot-password-link" disabled>
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-
           <Form.Item>
             <Button
               type="primary"
@@ -89,14 +78,8 @@ const Login = () => {
             </Button>
           </Form.Item>
         </Form>
-      </Content>
-
-      <Footer className="anotalo-create-account-footer">
-        <Button type="link" className="anotalo-create-account-button" disabled>
-          Crear Cuenta
-        </Button>
-      </Footer>
-    </Layout>
+      </div>
+    </div>
   );
 };
 

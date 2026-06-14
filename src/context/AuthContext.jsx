@@ -49,9 +49,23 @@ export const AuthProvider = ({ children }) => {
     return org;
   }, []);
 
+  const can = useCallback((modulo, formulario, accion = "leer") => {
+    if (!session?.rolesData || !user?.roles?.length) return false;
+    const userRoleIds = user.roles;
+    const matchingPermisos = session.rolesData
+      .filter((r) => userRoleIds.includes(r.id))
+      .flatMap((r) => r.permisos);
+    return matchingPermisos.some(
+      (p) =>
+        (p.modulo === "*" || p.modulo === modulo) &&
+        (p.formulario === "*" || p.formulario === formulario) &&
+        (p.acciones.includes("*") || p.acciones.includes(accion)),
+    );
+  }, [session, user]);
+
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, session, login, logout, getToken, loading, switchOrganization }}
+      value={{ isAuthenticated, user, session, login, logout, getToken, loading, switchOrganization, can }}
     >
       {children}
     </AuthContext.Provider>

@@ -10,6 +10,8 @@ import {
   MdSettings,
   MdLabel,
   MdCreditCard,
+  MdBusiness,
+  MdGroup,
 } from "react-icons/md";
 
 export const MODULES = [
@@ -46,9 +48,11 @@ export const MODULES = [
   {
     title: "CONFIGURACIONES",
     items: [
-      { key: "cfg_pos", icon: <MdSettings size={20} />, label: "Config POS", route: "/configuraciones/pos" },
-      { key: "cfg_rubros", icon: <MdLabel size={20} />, label: "Rubros", route: "/configuraciones/rubros" },
-      { key: "cfg_formas_pago", icon: <MdCreditCard size={20} />, label: "Formas de Pago", route: "/configuraciones/formas-pago" },
+      { key: "cfg_pos", icon: <MdSettings size={20} />, label: "Config POS", route: "/configuraciones/pos", permiso: { modulo: "CONFIG", formulario: "pos" } },
+      { key: "cfg_rubros", icon: <MdLabel size={20} />, label: "Rubros", route: "/configuraciones/rubros", permiso: { modulo: "CONFIG", formulario: "rubros" } },
+      { key: "cfg_formas_pago", icon: <MdCreditCard size={20} />, label: "Formas de Pago", route: "/configuraciones/formas-pago", permiso: { modulo: "CONFIG", formulario: "formas-pago" } },
+      { key: "cfg_sucursales", icon: <MdBusiness size={20} />, label: "Sucursales", route: "/configuraciones/sucursales", permiso: { modulo: "CONFIG", formulario: "sucursales" } },
+      { key: "cfg_usuarios", icon: <MdGroup size={20} />, label: "Usuarios", route: "/configuraciones/usuarios", permiso: { modulo: "CONFIG", formulario: "usuarios" } },
     ],
   },
 ];

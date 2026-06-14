@@ -1,5 +1,6 @@
 import { MOVIMIENTO_TIPOS } from "../constants/posConstants";
 import { entidadService } from "./entidadService";
+import { authService } from "./authService";
 
 const DB_KEY = "movimientos_db";
 
@@ -113,6 +114,7 @@ export const movimientoService = {
         fecha,
         hora,
         usuario: user?.nombre || "Admin",
+        sucursalId: authService.getCurrentSucursalId(),
         formaPago: movimiento.formaPago || "Efectivo",
         entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
         importe: Number(movimiento.importe) || 0,

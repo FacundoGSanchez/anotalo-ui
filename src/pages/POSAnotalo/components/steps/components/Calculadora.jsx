@@ -1,18 +1,20 @@
 import React from "react";
 import { Button, Row, Col } from "antd";
 
-const Calculadora = ({ onPress, onPlus, activeColor, hasValue, height = "64px" }) => {
+const btnStyle = {
+  height: "64px",
+  fontSize: "24px",
+  borderRadius: "12px",
+  background: "#fff",
+  fontWeight: "500",
+  border: "1px solid #f0f0f0",
+  transition: "all 0.1s",
+};
+
+const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height = "64px" }) => {
   const numeros = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-  const btnStyle = {
-    height,
-    fontSize: "24px",
-    borderRadius: "12px",
-    background: "#fff",
-    fontWeight: "500",
-    border: "1px solid #f0f0f0",
-    transition: "all 0.1s",
-  };
+  const mergedBtnStyle = { ...btnStyle, height };
 
   return (
     <Row gutter={[8, 8]}>
@@ -20,7 +22,7 @@ const Calculadora = ({ onPress, onPlus, activeColor, hasValue, height = "64px" }
         <Col span={8} key={btn}>
           <Button
             block
-            style={btnStyle}
+            style={mergedBtnStyle}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => onPress(btn)}
           >
@@ -33,7 +35,7 @@ const Calculadora = ({ onPress, onPlus, activeColor, hasValue, height = "64px" }
       <Col span={8}>
         <Button
           block
-          style={btnStyle}
+          style={mergedBtnStyle}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onPress("00")}
         >
@@ -43,7 +45,7 @@ const Calculadora = ({ onPress, onPlus, activeColor, hasValue, height = "64px" }
       <Col span={8}>
         <Button
           block
-          style={btnStyle}
+          style={mergedBtnStyle}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onPress("0")}
         >
@@ -80,6 +82,6 @@ const Calculadora = ({ onPress, onPlus, activeColor, hasValue, height = "64px" }
       </Col>
     </Row>
   );
-};
+});
 
 export default Calculadora;

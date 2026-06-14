@@ -3,17 +3,17 @@ import { Typography, Button, Alert, Divider } from "antd";
 import { MdSearch, MdPerson, MdWarning } from "react-icons/md";
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
 import { orgService } from "../../../../services/orgService";
-import { useAuth } from "../../../../context/AuthContext";
+import { useCurrentOrg } from "../../../../hooks/useCurrentOrg";
 import SelectorEntidadModal from "./components/SelectorEntidadModal";
 
 const { Text } = Typography;
 
 const StepEntidad = ({ tipo, formaPago, onNext }) => {
-  const { session } = useAuth();
+  const orgId = useCurrentOrg();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const esCliente = tipo === MOVIMIENTO_TIPOS.VENTA || tipo === MOVIMIENTO_TIPOS.COBRO;
-  const formasPago = orgService.getFormasPago(session?.organizaciones?.[0]?.id, tipo);
+  const formasPago = orgService.getFormasPago(orgId, tipo);
   const formaPagoObj = formasPago.find((f) => f.key === formaPago);
   const requiereEntidad = formaPagoObj?.requiereEntidad || false;
 

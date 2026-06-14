@@ -13,6 +13,8 @@ import {
   ToolOutlined,
   CreditCardOutlined,
   TagsOutlined,
+  ApartmentOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 
 const MenuItems = [
@@ -111,16 +113,31 @@ const MenuItems = [
         key: "/configuraciones/pos",
         icon: <ToolOutlined />,
         label: "Config POS",
+        permiso: { modulo: "CONFIG", formulario: "pos" },
       },
       {
         key: "/configuraciones/rubros",
         icon: <TagsOutlined />,
         label: "Rubros",
+        permiso: { modulo: "CONFIG", formulario: "rubros" },
       },
       {
         key: "/configuraciones/formas-pago",
         icon: <CreditCardOutlined />,
         label: "Formas de Pago",
+        permiso: { modulo: "CONFIG", formulario: "formas-pago" },
+      },
+      {
+        key: "/configuraciones/sucursales",
+        icon: <ApartmentOutlined />,
+        label: "Sucursales",
+        permiso: { modulo: "CONFIG", formulario: "sucursales" },
+      },
+      {
+        key: "/configuraciones/usuarios",
+        icon: <TeamOutlined />,
+        label: "Usuarios",
+        permiso: { modulo: "CONFIG", formulario: "usuarios" },
       },
     ],
   },

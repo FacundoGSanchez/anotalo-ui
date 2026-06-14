@@ -3,15 +3,24 @@ import { Typography, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import { MdArrowBack } from "react-icons/md";
 import { MODULES } from "../../data/spec_Menu";
+import { useAuth } from "../../context/AuthContext";
 
 const { Text } = Typography;
 
 const MoreMenuPage = () => {
   const navigate = useNavigate();
+  const { can } = useAuth();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
+
+  const visibleModules = MODULES
+    .map((mod) => ({
+      ...mod,
+      items: mod.items.filter((item) => !item.permiso || can(item.permiso.modulo, item.permiso.formulario)),
+    }))
+    .filter((mod) => mod.items.length > 0);
 
   return (
     <div
@@ -49,7 +58,7 @@ const MoreMenuPage = () => {
           boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
         }}
       >
-        {MODULES.map((mod) => (
+        {visibleModules.map((mod) => (
           <div key={mod.title} style={{ marginBottom: "8px" }}>
             <Text
               type="secondary"

@@ -1,6 +1,8 @@
 .card-user__avatar {
   cursor: pointer;
   background-color: #87d068;
+  border: none;
+  outline: none;
 }
 
 /* CARD */

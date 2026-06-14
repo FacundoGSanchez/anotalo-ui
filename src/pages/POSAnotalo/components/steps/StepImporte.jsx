@@ -3,7 +3,7 @@ import { Button, Typography, Modal } from "antd";
 import { MdChevronRight, MdKeyboard, MdClose, MdEdit, MdOutlineBackspace } from "react-icons/md";
 import { VISOR_CONFIG, POS_COLORS } from "../../../../constants/posConstants";
 import { orgService } from "../../../../services/orgService";
-import { useAuth } from "../../../../context/AuthContext";
+import { useCurrentOrg } from "../../../../hooks/useCurrentOrg";
 import Calculadora from "./components/Calculadora";
 
 const { Title, Text } = Typography;
@@ -11,8 +11,7 @@ const { Title, Text } = Typography;
 const RUBRO_SIN_RUBRO = { id: 0, sigla: "", nombre: "Sin rubro", grupo: "" };
 
 const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
-  const { session } = useAuth();
-  const orgId = session?.organizaciones?.[0]?.id;
+  const orgId = useCurrentOrg();
 
   const configPOS = useMemo(() => orgService.getConfigPOS(orgId), [orgId]);
   const usaRubro = configPOS.usaRubro !== false;
@@ -43,6 +42,10 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
 
   const addDigit = useCallback((val) => {
     setCurrentValue((prev) => {
+      if (val === "00") {
+        if (prev.toString().length >= VISOR_CONFIG.MAX_DIGITOS - 1) return prev;
+        return prev * 100;
+      }
       if (prev.toString().length >= VISOR_CONFIG.MAX_DIGITOS) return prev;
       return prev * 10 + parseInt(val);
     });
@@ -214,7 +217,6 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
 
   return (
     <>
-      <style>{`.visor-cursor{animation:blink 1s step-end infinite;}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
       <div style={{ display: "flex", flexDirection: "column", animation: "fadeIn 0.3s ease" }}>
       {renderRubroModal()}
 
@@ -253,7 +255,7 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [] }) => {
                   <input ref={inputRef} type="text" inputMode="numeric" value={currentValue > 0 ? fmt(currentValue) : ""} onChange={handleInputChange} onKeyDown={handleInputKeyDown} placeholder="0" style={{ flex: 1, border: "none", background: "transparent", fontSize: getFontSize(currentValue), fontWeight: 700, textAlign: "right", outline: "none", color: currentValue > 0 ? "#000" : "#bfbfbf", letterSpacing: "-1px", fontFamily: "inherit", marginLeft: "12px" }} />
                 ) : (
                   <Title level={1} style={{ margin: 0, fontSize: getFontSize(currentValue), letterSpacing: "-1.5px", color: currentValue > 0 ? "#000" : "#bfbfbf", lineHeight: 1, transition: "font-size 0.2s ease-in-out", textAlign: "right", wordBreak: "break-all" }}>
-                    {fmt(currentValue)}<span style={{ fontWeight: 100, fontSize: "inherit" }} className="visor-cursor">│</span>
+                    {fmt(currentValue)}
                   </Title>
                 )}
               </div>

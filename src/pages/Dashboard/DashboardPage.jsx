@@ -5,19 +5,23 @@ import "dayjs/locale/es";
 
 import { movimientoService } from "../../services/movimientoService";
 import { useDevice } from "../../context/DeviceContext";
+import { useCurrentSucursal } from "../../hooks/useCurrentSucursal";
 import ResumenCards from "./components/ResumenCards";
 import AccesoReportes from "./components/AccesoReportes";
 import AccesoReportesNuevo from "./components/AccesoReportesNuevo";
 
 const DashboardPage = () => {
   const { isMobile } = useDevice();
+  const { sucursalId } = useCurrentSucursal();
   const [totales, setTotales] = useState({});
 
   const cargarResumenDelDia = useCallback(() => {
     try {
       const saved = movimientoService.getAll();
       const hoy = dayjs().format("YYYY-MM-DD");
-      const movimientosDeHoy = saved.filter((m) => m.fecha === hoy);
+      const movimientosDeHoy = saved.filter(
+        (m) => m.fecha === hoy && (!sucursalId || m.sucursalId === sucursalId),
+      );
 
       const calculo = movimientosDeHoy.reduce(
         (acc, mov) => {
@@ -33,7 +37,7 @@ const DashboardPage = () => {
     } catch (error) {
       console.error("Error al cargar movimientos:", error);
     }
-  }, []);
+  }, [sucursalId]);
 
   useEffect(() => {
     cargarResumenDelDia();

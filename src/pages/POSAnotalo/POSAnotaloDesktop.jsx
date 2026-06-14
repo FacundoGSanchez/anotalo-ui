@@ -14,6 +14,7 @@ import {
   POS_COLORS,
 } from "../../constants/posConstants";
 import { movimientoService } from "../../services/movimientoService";
+import { useCurrentSucursal } from "../../hooks/useCurrentSucursal";
 
 import StepImporte from "./components/steps/StepImporte";
 import StepFormaPago from "./components/steps/StepFormaPago";
@@ -26,6 +27,7 @@ const POSAnotaloDesktop = () => {
   const locState = useLocation().state;
   const navigate = useNavigate();
   const stepFocusRef = useRef(null);
+  const { sucursalId } = useCurrentSucursal();
 
   const {
     currentStep,
@@ -45,8 +47,9 @@ const POSAnotaloDesktop = () => {
 
   const loadRecent = useCallback(() => {
     const all = movimientoService.getAll() || [];
-    setRecentMovements(all.slice(-10).reverse());
-  }, []);
+    const filtrados = sucursalId ? all.filter((m) => m.sucursalId === sucursalId) : all;
+    setRecentMovements(filtrados.slice(-10).reverse());
+  }, [sucursalId]);
 
   useEffect(() => {
     loadRecent();

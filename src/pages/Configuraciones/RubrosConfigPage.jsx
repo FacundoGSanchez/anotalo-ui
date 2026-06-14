@@ -3,15 +3,14 @@ import { Typography, Button, Modal, Input, Popconfirm, message, Divider } from "
 import { MdArrowBack, MdAdd, MdRestore, MdChevronRight, MdClose, MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { orgService } from "../../services/orgService";
-import { useAuth } from "../../context/AuthContext";
+import { useCurrentOrg } from "../../hooks/useCurrentOrg";
 import { RUBROS_DEFAULT } from "../../constants/posConstants";
 
 const { Text } = Typography;
 
 const RubrosConfigPage = () => {
   const navigate = useNavigate();
-  const { session } = useAuth();
-  const orgId = session?.organizaciones?.[0]?.id;
+  const orgId = useCurrentOrg();
   const [rubros, setRubros] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);

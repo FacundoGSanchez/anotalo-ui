@@ -3,14 +3,13 @@ import { Typography, Button, Switch, Card, message } from "antd";
 import { MdArrowBack } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { orgService } from "../../services/orgService";
-import { useAuth } from "../../context/AuthContext";
+import { useCurrentOrg } from "../../hooks/useCurrentOrg";
 
 const { Text } = Typography;
 
 const ConfigPosPage = () => {
   const navigate = useNavigate();
-  const { session } = useAuth();
-  const orgId = session?.organizaciones?.[0]?.id;
+  const orgId = useCurrentOrg();
   const [configPOS, setConfigPOS] = useState({ usaRubro: true });
 
   useEffect(() => {

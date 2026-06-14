@@ -8,10 +8,14 @@ const { Text } = Typography;
 
 const avatarUrl = `${import.meta.env.BASE_URL}images/AvatarUser.webp`;
 
-const UserCardContent = ({ user, session, onLogout, onSwitchOrg }) => {
+const UserCardContent = ({ user, session, onLogout, onSwitchOrg, onSwitchSucursal }) => {
   const organizaciones = session?.organizaciones || [];
   const currentOrgId = authService.getCurrentOrgId();
   const orgActual = organizaciones.find((o) => o.id === currentOrgId) || organizaciones?.[0];
+
+  const sucursales = session?.sucursales?.filter((s) => s.organizacionId === orgActual?.id) || [];
+  const currentSucursalId = authService.getCurrentSucursalId();
+  const sucursalActual = sucursales.find((s) => s.id === currentSucursalId) || sucursales?.[0];
 
   return (
     <Card className="user-card" styles={{ body: { padding: 10 } }}>
@@ -24,19 +28,17 @@ const UserCardContent = ({ user, session, onLogout, onSwitchOrg }) => {
           <p className="user-card__email">{user?.mail || ""}</p>
         </div>
 
-        {organizaciones.length > 1 && (
-          <>
-            <Divider style={{ margin: "8px 0" }} />
-            <div style={{ width: "100%" }}>
-              <Text style={{ fontSize: "11px", color: "#8c8c8c", fontWeight: 700, display: "block", marginBottom: "8px" }}>
-                ORGANIZACIÓN ACTUAL
-              </Text>
-              <Text strong style={{ fontSize: "13px", color: "#1890ff", display: "block", marginBottom: "8px" }}>
-                {orgActual?.nombre || "Sin organización"}
-              </Text>
-              {organizaciones
-                .filter((o) => o.id !== orgActual?.id)
-                .map((org) => (
+        <Divider style={{ margin: "8px 0" }} />
+        <div style={{ width: "100%" }}>
+          <Text style={{ fontSize: "11px", color: "#8c8c8c", fontWeight: 700, display: "block", marginBottom: "8px" }}>
+            ORGANIZACIÓN ACTUAL
+          </Text>
+          <Text strong style={{ fontSize: "13px", color: "#3f4a6d", display: "block", marginBottom: "8px" }}>
+            {orgActual?.nombre || "Sin organización"}
+          </Text>
+          {user?.roles?.includes(1) && organizaciones.length > 1 && organizaciones
+            .filter((o) => o.id !== orgActual?.id)
+            .map((org) => (
                   <Button
                     key={org.id}
                     type="default"
@@ -56,7 +58,38 @@ const UserCardContent = ({ user, session, onLogout, onSwitchOrg }) => {
                   </Button>
                 ))}
             </div>
-          </>
+
+        {sucursales.length > 1 && (
+          <div style={{ width: "100%" }}>
+            <Divider style={{ margin: "8px 0" }} />
+            <Text style={{ fontSize: "11px", color: "#8c8c8c", fontWeight: 700, display: "block", marginBottom: "8px" }}>
+              SUCURSAL ACTUAL
+            </Text>
+            <Text strong style={{ fontSize: "13px", color: "#3f4a6d", display: "block", marginBottom: "8px" }}>
+              {sucursalActual?.nombre || "Sin sucursal"}
+            </Text>
+            {sucursales
+              .filter((s) => s.id !== sucursalActual?.id)
+              .map((s) => (
+                <Button
+                  key={s.id}
+                  type="default"
+                  block
+                  icon={<SwapOutlined />}
+                  style={{
+                    borderRadius: "8px",
+                    height: "36px",
+                    fontSize: "13px",
+                    borderColor: "#3f4a6d",
+                    color: "#3f4a6d",
+                    marginBottom: "4px",
+                  }}
+                  onClick={() => onSwitchSucursal(s.id)}
+                >
+                  Cambiar a {s.nombre}
+                </Button>
+              ))}
+          </div>
         )}
 
         <Divider style={{ margin: "8px 0" }} />
@@ -91,9 +124,14 @@ const CardUser = () => {
     }
   };
 
+  const handleSwitchSucursal = (sucursalId) => {
+    authService.switchSucursal(sucursalId);
+    message.success("Sucursal cambiada");
+  };
+
   return (
     <Popover
-      content={<UserCardContent user={user} session={session} onLogout={handleLogout} onSwitchOrg={handleSwitchOrg} />}
+      content={<UserCardContent user={user} session={session} onLogout={handleLogout} onSwitchOrg={handleSwitchOrg} onSwitchSucursal={handleSwitchSucursal} />}
       trigger="hover"
       placement="bottomRight"
     >

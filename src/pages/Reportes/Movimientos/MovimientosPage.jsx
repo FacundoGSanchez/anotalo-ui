@@ -8,6 +8,7 @@ import {
   NOMBRES_FORMAS_PAGO,
 } from "../../../constants/posConstants";
 import { movimientoService } from "../../../services/movimientoService";
+import { useCurrentSucursal } from "../../../hooks/useCurrentSucursal";
 
 import HeaderMovimientos from "./components/HeaderMovimientos";
 import ModalFiltros from "./components/ModalFiltros";
@@ -25,6 +26,7 @@ const MovimientosPage = () => {
   const [isFiltroOpen, setIsFiltroOpen] = useState(false);
   const [selectedMov, setSelectedMov] = useState(null);
   const [isDetalleOpen, setIsDetalleOpen] = useState(false);
+  const { sucursalId } = useCurrentSucursal();
 
   useEffect(() => {
     cargarDatosDesdeStorage();
@@ -37,10 +39,15 @@ const MovimientosPage = () => {
 
   // --- LÓGICA DE FILTRADO Y AGRUPACIÓN ---
   const { agrupados, totalVisible } = useMemo(() => {
-    // 1. Filtrar por Tipo, Forma de Pago y Límite de 7 días
+    // 1. Filtrar por sucursal
+    const deSucursal = sucursalId
+      ? originales.filter((m) => m.sucursalId === sucursalId)
+      : originales;
+
+    // 2. Filtrar por Tipo, Forma de Pago y Límite de 7 días
     const fechaLimite = dayjs().subtract(7, "day").startOf("day");
 
-    const filtrados = originales.filter(
+    const filtrados = deSucursal.filter(
       (m) =>
         tipos.includes(m.tipo) &&
         formas.includes(m.formaPago) &&
@@ -67,7 +74,7 @@ const MovimientosPage = () => {
     });
 
     return { agrupados: grupos, totalVisible: filtrados.length };
-  }, [originales, tipos, formas, limit]);
+  }, [originales, tipos, formas, limit, sucursalId]);
 
   const handleCargarMas = () => {
     setLoadingMore(true);

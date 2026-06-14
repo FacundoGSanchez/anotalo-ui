@@ -5,6 +5,7 @@ import { useDevice } from "../../context/DeviceContext";
 import { usePWAInstall } from "../../hooks/usePWAInstall";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
+import { useCurrentSucursal } from "../../hooks/useCurrentSucursal";
 import CardUser from "../CardUser/CardUser";
 import "./index.css";
 
@@ -15,6 +16,7 @@ const AppHeader = () => {
   const { isMobile } = useDevice();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { sucursal } = useCurrentSucursal();
   const currentOrgId = authService.getCurrentOrgId();
   const currentOrg = session?.organizaciones?.find((o) => o.id === currentOrgId);
   const orgName = currentOrg?.nombre || session?.organizaciones?.[0]?.nombre || "ANOTALO";
@@ -42,9 +44,16 @@ const AppHeader = () => {
         />
       </div>
 
-      <Text strong style={{ fontSize: "15px", color: "#001529" }}>
-        {orgName}
-      </Text>
+      <div style={{ textAlign: "center" }}>
+        <Text strong style={{ fontSize: "15px", color: "#3f4a6d", display: "block", lineHeight: 1.2 }}>
+          {orgName}
+        </Text>
+        {sucursal && (
+          <Text style={{ fontSize: "11px", color: "#8c8c8c", display: "block", lineHeight: 1.2 }}>
+            {sucursal.nombre}
+          </Text>
+        )}
+      </div>
 
       <div
         className="app-header__right"

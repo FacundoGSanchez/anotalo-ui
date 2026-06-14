@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Typography, Card } from "antd";
 import { MdPerson, MdGroups } from "react-icons/md";
 import EntidadesListado from "./components/EntidadesListado";
-import EntidadDetalleContainer from "./components/EntidadDetalle/EntidadDetalleContainer";
 
 const { Text, Title } = Typography;
 
@@ -62,14 +61,10 @@ const SelectorEntidad = () => {
 };
 
 const EntidadesPage = () => {
-  const { tipo, action, id } = useParams();
+  const { tipo } = useParams();
 
   if (!tipo) {
     return <SelectorEntidad />;
-  }
-
-  if (action === "nuevo" || action === "edit") {
-    return <EntidadDetalleContainer />;
   }
   return <EntidadesListado />;
 };

@@ -20,6 +20,8 @@ import ResumenVentasPage from "../pages/Reportes/ResumenVentas/ResumenVentasPage
 import ConfigPosPage from "../pages/Configuraciones/ConfigPosPage.jsx";
 import RubrosConfigPage from "../pages/Configuraciones/RubrosConfigPage.jsx";
 import FormasPagoConfigPage from "../pages/Configuraciones/FormasPagoConfigPage.jsx";
+import SucursalesConfigPage from "../pages/Configuraciones/SucursalesConfigPage.jsx";
+import UsuariosConfigPage from "../pages/Configuraciones/UsuariosConfigPage.jsx";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -28,11 +30,16 @@ const ScrollToTop = () => {
 };
 
 const AppRouter = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, can } = useAuth();
 
   const ProtectedRoute = ({ children }) => {
     if (loading) return <div>Cargando...</div>;
     if (!isAuthenticated) return <Navigate to="/login" replace />;
+    return children;
+  };
+
+  const PermissionRoute = ({ modulo, formulario, accion, children }) => {
+    if (!can(modulo, formulario, accion)) return <Navigate to="/" replace />;
     return children;
   };
 
@@ -61,8 +68,6 @@ const AppRouter = () => {
         {/* MODULO ENTIDADES */}
         <Route path="entidades" element={<EntidadesPage />} />
         <Route path="entidades/:tipo" element={<EntidadesPage />} />
-        <Route path="entidades/:tipo/:action" element={<EntidadesPage />} />
-        <Route path="entidades/:tipo/:action/:id" element={<EntidadesPage />} />
 
         {/* MAS OPCIONES */}
         <Route path="more" element={<MoreMenuPage />} />
@@ -84,9 +89,11 @@ const AppRouter = () => {
         <Route path="reportes/resumen-ventas" element={<ResumenVentasPage />} />
 
         {/* CONFIGURACIONES */}
-        <Route path="configuraciones/pos" element={<ConfigPosPage />} />
-        <Route path="configuraciones/rubros" element={<RubrosConfigPage />} />
-        <Route path="configuraciones/formas-pago" element={<FormasPagoConfigPage />} />
+        <Route path="configuraciones/pos" element={<PermissionRoute modulo="CONFIG" formulario="pos"><ConfigPosPage /></PermissionRoute>} />
+        <Route path="configuraciones/rubros" element={<PermissionRoute modulo="CONFIG" formulario="rubros"><RubrosConfigPage /></PermissionRoute>} />
+        <Route path="configuraciones/formas-pago" element={<PermissionRoute modulo="CONFIG" formulario="formas-pago"><FormasPagoConfigPage /></PermissionRoute>} />
+        <Route path="configuraciones/sucursales" element={<PermissionRoute modulo="CONFIG" formulario="sucursales"><SucursalesConfigPage /></PermissionRoute>} />
+        <Route path="configuraciones/usuarios" element={<PermissionRoute modulo="CONFIG" formulario="usuarios"><UsuariosConfigPage /></PermissionRoute>} />
       </Route>
 
       <Route

@@ -1,25 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Form, Card, message, Spin } from "antd";
+import { Form, Modal, message, Spin, Popconfirm } from "antd";
+import { MdClose, MdDelete } from "react-icons/md";
 import { entidadService } from "../../../../services/entidadService";
-import EntidadHeader from "./components/EntidadHeader";
 import EntidadForm from "./components/EntidadForm";
 
-const EntidadDetalleContainer = () => {
-  const { tipo, action, id } = useParams();
-  const navigate = useNavigate();
+const EntidadDetalleModal = ({ open, onClose, tipo, editId, onSaved }) => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const isEdit = action === "edit" && Boolean(id);
+  const isEdit = Boolean(editId);
   const isCliente = tipo === "clientes";
   const colorTema = isCliente ? "#1890ff" : "#fa8c16";
 
   useEffect(() => {
+    if (!open) return;
     setLoading(true);
-
     if (isEdit) {
-      const item = entidadService.getById(tipo, id);
+      const item = entidadService.getById(tipo, editId);
       if (item) {
         form.setFieldsValue({
           ...item,
@@ -29,62 +26,59 @@ const EntidadDetalleContainer = () => {
             plazoDias: null,
           },
         });
-      } else {
-        message.error("No se encontró el registro");
-        navigate(`/entidades/${tipo}`);
       }
     } else {
+      form.resetFields();
       form.setFieldsValue({ activo: true });
     }
     setLoading(false);
-  }, [id, tipo, isEdit, form, navigate]);
+  }, [open, editId, tipo, form, isEdit]);
+
+  const handleDelete = () => {
+    entidadService.softDelete(tipo, editId);
+    message.success("Entidad eliminada");
+    onSaved?.();
+    onClose();
+  };
 
   const onSave = (values) => {
     let result;
-
     if (isEdit) {
-      result = entidadService.update(tipo, id, values);
+      result = entidadService.update(tipo, editId, values);
     } else {
       result = entidadService.create(tipo, values);
     }
-
     if (result.success) {
-      message.success(
-        values.activo === false ? "Entidad eliminada" : "Guardado correctamente",
-      );
-      navigate(`/entidades/${tipo}`);
+      message.success("Guardado correctamente");
+      onSaved?.();
+      onClose();
     } else {
       message.error("Error al guardar");
     }
   };
 
   return (
-    <div style={{ padding: "16px", maxWidth: "500px", margin: "0 auto" }}>
-      <EntidadHeader
-        isEdit={isEdit}
-        isCliente={isCliente}
-        onBack={() => navigate(`/entidades/${tipo}`)}
-      />
-
-      <Card
-        style={{
-          borderRadius: "20px",
-          border: "none",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.06)",
-        }}
-      >
-        <Spin spinning={loading}>
-          <EntidadForm
-            form={form}
-            isEdit={isEdit}
-            colorTema={colorTema}
-            isCliente={isCliente}
-            onFinish={onSave}
-          />
-        </Spin>
-      </Card>
-    </div>
+    <Modal
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      title={isEdit ? `Editar ${isCliente ? "Cliente" : "Proveedor"}` : `Nuevo ${isCliente ? "Cliente" : "Proveedor"}`}
+      centered
+      width={400}
+      closeIcon={<MdClose size={20} />}
+    >
+      <Spin spinning={loading}>
+        <EntidadForm
+          form={form}
+          isEdit={isEdit}
+          colorTema={colorTema}
+          isCliente={isCliente}
+          onFinish={onSave}
+          onDelete={handleDelete}
+        />
+      </Spin>
+    </Modal>
   );
 };
 
-export default EntidadDetalleContainer;
+export default EntidadDetalleModal;

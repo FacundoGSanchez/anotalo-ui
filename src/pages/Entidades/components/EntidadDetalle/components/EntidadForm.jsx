@@ -1,10 +1,10 @@
 import React from "react";
-import { Form, Input, Button, Space, Switch, Typography } from "antd";
-import { MdSave, MdPhone } from "react-icons/md";
+import { Form, Input, Button, Switch, Popconfirm, Typography } from "antd";
+import { MdSave, MdPhone, MdDelete } from "react-icons/md";
 
 const { Text } = Typography;
 
-const EntidadForm = ({ form, isEdit, colorTema, isCliente, onFinish }) => {
+const EntidadForm = ({ form, isEdit, colorTema, isCliente, onFinish, onDelete }) => {
   return (
     <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
       <Form.Item name="nombre" label="Denominación / Nombre"
@@ -53,12 +53,17 @@ const EntidadForm = ({ form, isEdit, colorTema, isCliente, onFinish }) => {
         </div>
       )}
 
-      <Space direction="vertical" style={{ width: "100%", marginTop: "24px" }} size={16}>
+      <div style={{ display: "flex", gap: "8px", marginTop: "24px" }}>
+        {isEdit && (
+          <Popconfirm title="¿Eliminar esta entidad?" description="Ya no aparecerá en el listado de activos." onConfirm={onDelete} okText="Eliminar" cancelText="Cancelar" okButtonProps={{ danger: true }}>
+            <Button danger icon={<MdDelete size={22} />} style={{ width: "54px", height: "54px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }} />
+          </Popconfirm>
+        )}
         <Button type="primary" block size="large" htmlType="submit" icon={<MdSave size={22} />}
           style={{ height: "54px", borderRadius: "12px", backgroundColor: colorTema, borderColor: colorTema, fontWeight: "600", fontSize: "16px" }}>
           Guardar {isCliente ? "Cliente" : "Proveedor"}
         </Button>
-      </Space>
+      </div>
     </Form>
   );
 };
