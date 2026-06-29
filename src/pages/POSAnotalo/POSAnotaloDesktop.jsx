@@ -1,12 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Typography, Card, Tag, Space } from "antd";
-import {
-  MdReceipt,
-  MdPerson,
-  MdWallet,
-  MdShoppingCart,
-} from "react-icons/md";
+﻿import { useState, useEffect, useCallback } from "react";
+
+import { Typography, Card, Tag, Space, Button } from "antd";
+import { MdClose, MdReceipt, MdPerson, MdWallet, MdShoppingCart, MdChevronRight } from "react-icons/md";
 
 import { usePosFlow } from "./hooks/usePosFlow";
 import {
@@ -15,19 +10,19 @@ import {
 } from "../../constants/posConstants";
 import { movimientoService } from "../../services/movimientoService";
 import { useCurrentSucursal } from "../../hooks/useCurrentSucursal";
+import { useMovimientoSession } from "../../context/MovimientoSessionContext";
 
 import StepImporte from "./components/steps/StepImporte";
 import StepFormaPago from "./components/steps/StepFormaPago";
 import StepEntidad from "./components/steps/StepEntidad";
 import StepConfirmar from "./components/steps/StepConfirmar";
+import ModalDetalleMovimiento from "../Reportes/Movimientos/components/ModalDetalleMovimiento";
 
 const { Text, Title } = Typography;
 
 const POSAnotaloDesktop = () => {
-  const locState = useLocation().state;
-  const navigate = useNavigate();
-  const stepFocusRef = useRef(null);
   const { sucursalId } = useCurrentSucursal();
+  const { hasActiveItems, confirmExit, updateItems } = useMovimientoSession();
 
   const {
     currentStep,
@@ -35,15 +30,11 @@ const POSAnotaloDesktop = () => {
     handleNext,
     handleBack,
     closePos,
-    setCurrentStep,
-    setMovimiento,
+    resetMovement,
   } = usePosFlow();
 
-  useEffect(() => {
-    stepFocusRef.current?.focus();
-  }, [currentStep]);
-
   const [recentMovements, setRecentMovements] = useState([]);
+  const [detalleMovimiento, setDetalleMovimiento] = useState(null);
 
   const loadRecent = useCallback(() => {
     const all = movimientoService.getAll() || [];
@@ -61,22 +52,30 @@ const POSAnotaloDesktop = () => {
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
-        if (currentStep > STEPS.IMPORTE) handleBack();
-        else closePos();
+        if (currentStep > STEPS.IMPORTE) {
+          handleBack();
+        } else {
+          confirmExit("/", () => closePos());
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [currentStep, handleBack, closePos]);
+  }, [currentStep, handleBack, closePos, confirmExit]);
+
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (hasActiveItems) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [hasActiveItems]);
 
   const finalizarRegistro = () => {
-    setMovimiento({ tipo: "Venta", importe: 0, lineItems: [], formaPago: null, entidad: null });
-    setCurrentStep(STEPS.IMPORTE);
-    if (locState?.returnPath) {
-      navigate(locState.returnPath);
-    } else {
-      closePos();
-    }
+    resetMovement();
   };
 
   const renderStep = () => {
@@ -88,12 +87,14 @@ const POSAnotaloDesktop = () => {
             tipo={movimiento.tipo}
             initialLineItems={movimiento.lineItems || []}
             onNext={({ importe, lineItems }) => handleNext({ importe, lineItems })}
+            onItemsChange={(items) => updateItems(items.length)}
           />
         );
       case STEPS.FORMA_PAGO:
         return (
           <StepFormaPago
             tipo={movimiento.tipo}
+            onBack={handleBack}
             onNext={(forma) => handleNext({ formaPago: forma })}
           />
         );
@@ -102,6 +103,7 @@ const POSAnotaloDesktop = () => {
           <StepEntidad
             tipo={movimiento.tipo}
             formaPago={movimiento.formaPago}
+            onBack={handleBack}
             onNext={(ent) => handleNext({ entidad: ent })}
           />
         );
@@ -109,6 +111,7 @@ const POSAnotaloDesktop = () => {
         return (
           <StepConfirmar
             movimiento={movimiento}
+            onBack={handleBack}
             onConfirm={finalizarRegistro}
           />
         );
@@ -126,17 +129,34 @@ const POSAnotaloDesktop = () => {
         background: "#f0f2f5",
       }}
     >
+      {/* HEADER with close button */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          padding: "12px 20px 0",
+        }}
+      >
+        <Button
+          type="text"
+          shape="circle"
+          icon={<MdClose size={24} />}
+          onClick={() => confirmExit("/", () => closePos())}
+          style={{ color: "#8c8c8c" }}
+        />
+      </div>
+
       {/* BODY */}
       <div
         style={{
           flex: 1,
           display: "flex",
           gap: "20px",
-          padding: "20px",
+          padding: "12px 20px 20px",
           overflow: "hidden",
         }}
       >
-        {/* LEFT — Step Content + inline summary */}
+        {/* LEFT — Step Content */}
         <div
           style={{
             flex: 1,
@@ -146,7 +166,6 @@ const POSAnotaloDesktop = () => {
             overflow: "auto",
           }}
         >
-          {/* Step card */}
           <div
             style={{
               flex: 1,
@@ -158,7 +177,6 @@ const POSAnotaloDesktop = () => {
               overflow: "hidden",
             }}
           >
-            {/* Step body */}
             <div
               style={{
                 flex: 1,
@@ -178,24 +196,10 @@ const POSAnotaloDesktop = () => {
                   flexDirection: "column",
                 }}
               >
-                {/* Hidden focus anchor for keyboard navigation */}
-                <input
-                  ref={stepFocusRef}
-                  style={{
-                    position: "absolute",
-                    opacity: 0,
-                    height: 0,
-                    width: 0,
-                    pointerEvents: "none",
-                  }}
-                  tabIndex={0}
-                  autoFocus
-                />
                 {renderStep()}
               </div>
             </div>
           </div>
-
         </div>
 
         {/* RIGHT — Transaction summary + Recent movements */}
@@ -209,7 +213,6 @@ const POSAnotaloDesktop = () => {
             flexShrink: 0,
           }}
         >
-          {/* Transaction summary sidebar */}
           <Card
             size="small"
             style={{
@@ -272,7 +275,6 @@ const POSAnotaloDesktop = () => {
             )}
           </Card>
 
-          {/* Recent movements list */}
           <Card
             size="small"
             style={{
@@ -309,25 +311,37 @@ const POSAnotaloDesktop = () => {
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  overflow: "auto",
                 }}
               >
                 {recentMovements.map((m) => (
                   <div
                     key={m.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setDetalleMovimiento(m)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetalleMovimiento(m); } }}
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      padding: "10px 0",
+                      padding: "6px 12px",
+                      margin: "0 -12px",
                       borderBottom: "1px solid #f0f0f0",
+                      cursor: "pointer",
+                      borderRadius: "6px",
+                      transition: "background 0.15s",
+                      outline: "none",
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                    onFocus={(e) => e.currentTarget.style.background = "#f0f0f0"}
+                    onBlur={(e) => e.currentTarget.style.background = "transparent"}
                   >
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
+                        gap: "6px",
                         minWidth: 0,
                         flex: 1,
                       }}
@@ -336,12 +350,12 @@ const POSAnotaloDesktop = () => {
                         color={POS_COLORS[m.tipo] || "#d9d9d9"}
                         style={{
                           borderRadius: "4px",
-                          fontSize: "11px",
+                          fontSize: "10px",
                           fontWeight: 700,
                           border: "none",
                           margin: 0,
-                          lineHeight: "20px",
-                          padding: "0 6px",
+                          lineHeight: "18px",
+                          padding: "0 5px",
                         }}
                       >
                         {m.tipo === "Venta" ? "V" : m.tipo === "Pago" ? "P" : m.tipo === "Cobro" ? "C" : "I"}
@@ -350,32 +364,31 @@ const POSAnotaloDesktop = () => {
                         <Text
                           strong
                           style={{
-                            fontSize: "13px",
+                            fontSize: "12px",
                             color: "#595959",
                             display: "block",
-                            lineHeight: "1.3",
+                            lineHeight: "1.2",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {m.entidad?.nombre || "Caja Interna"}
                         </Text>
                         <Text
                           type="secondary"
-                          style={{ fontSize: "11px", lineHeight: "1.3" }}
+                          style={{ fontSize: "10px", lineHeight: "1.2" }}
                         >
                           {m.formaPago} · {m.fecha}
                         </Text>
                       </div>
                     </div>
-                    <Text
-                      strong
-                      style={{
-                        fontSize: "14px",
-                        flexShrink: 0,
-                        marginLeft: "8px",
-                      }}
-                    >
-                      ${Number(m.importe).toLocaleString("es-AR")}
-                    </Text>
+                    <div style={{ display: "flex", alignItems: "center", gap: "2px", flexShrink: 0, marginLeft: "6px" }}>
+                      <Text strong style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                        ${Number(m.importe).toLocaleString("es-AR")}
+                      </Text>
+                      <MdChevronRight size={16} color="#bfbfbf" />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -390,6 +403,13 @@ const POSAnotaloDesktop = () => {
           </Card>
         </div>
       </div>
+
+      <ModalDetalleMovimiento
+        visible={!!detalleMovimiento}
+        movimiento={detalleMovimiento}
+        onClose={() => setDetalleMovimiento(null)}
+        onUpdateList={loadRecent}
+      />
     </div>
   );
 };
@@ -416,3 +436,5 @@ const SidebarRow = ({ icon, label, value, color }) => (
 );
 
 export default POSAnotaloDesktop;
+
+

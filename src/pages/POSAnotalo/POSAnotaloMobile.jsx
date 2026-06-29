@@ -1,8 +1,9 @@
-import React from "react";
+﻿import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Layout } from "antd";
 
 import { usePosFlow } from "./hooks/usePosFlow";
+import { useMovimientoSession } from "../../context/MovimientoSessionContext";
 import { STEPS } from "../../constants/posConstants";
 
 import PosHeader from "./components/PosHeader";
@@ -16,23 +17,33 @@ const { Content } = Layout;
 const POSAnotaloMobile = () => {
   const locState = useLocation().state;
   const navigate = useNavigate();
+  const { hasActiveItems, confirmExit, updateItems } = useMovimientoSession();
   const {
     currentStep,
     movimiento,
     handleNext,
     handleBack,
     closePos,
-    setCurrentStep,
-    setMovimiento,
+    resetMovement,
   } = usePosFlow();
 
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (hasActiveItems) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [hasActiveItems]);
+
   const finalizarRegistro = () => {
-    setMovimiento({ tipo: "Venta", importe: 0, lineItems: [], formaPago: null, entidad: null });
-    setCurrentStep(STEPS.IMPORTE);
+    resetMovement();
     if (locState?.returnPath) {
       navigate(locState.returnPath);
     } else {
-      closePos();
+      navigate("/");
     }
   };
 
@@ -54,7 +65,7 @@ const POSAnotaloMobile = () => {
             boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
           }}
         >
-          <PosHeader currentStep={currentStep} onBack={handleBack} onClose={closePos} />
+          <PosHeader currentStep={currentStep} onBack={handleBack} onClose={() => confirmExit("/", () => closePos())} />
 
           {currentStep === STEPS.IMPORTE && (
             <StepImporte
@@ -62,12 +73,14 @@ const POSAnotaloMobile = () => {
               tipo={movimiento.tipo}
               initialLineItems={movimiento.lineItems || []}
               onNext={({ importe, lineItems }) => handleNext({ importe, lineItems })}
+              onItemsChange={(items) => updateItems(items.length)}
             />
           )}
 
           {currentStep === STEPS.FORMA_PAGO && (
             <StepFormaPago
               tipo={movimiento.tipo}
+              onBack={handleBack}
               onNext={(forma) => handleNext({ formaPago: forma })}
             />
           )}
@@ -76,6 +89,7 @@ const POSAnotaloMobile = () => {
             <StepEntidad
               tipo={movimiento.tipo}
               formaPago={movimiento.formaPago}
+              onBack={handleBack}
               onNext={(ent) => handleNext({ entidad: ent })}
             />
           )}
@@ -83,6 +97,7 @@ const POSAnotaloMobile = () => {
           {currentStep === STEPS.CONFIRMAR && (
             <StepConfirmar
               movimiento={movimiento}
+              onBack={handleBack}
               onConfirm={finalizarRegistro}
             />
           )}
@@ -93,3 +108,4 @@ const POSAnotaloMobile = () => {
 };
 
 export default POSAnotaloMobile;
+

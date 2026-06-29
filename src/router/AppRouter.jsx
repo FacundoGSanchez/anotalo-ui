@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import { useAuth } from "../context/AuthContext";
+import { MovimientoSessionProvider } from "../context/MovimientoSessionContext";
 import Home from "../pages/Home";
 import Login from "../pages/auth/LoginPage.jsx";
 import POSAnotalo from "../pages/POSAnotalo/POSAnotalo.jsx";
@@ -15,7 +16,6 @@ import DetalleCtaCtePage from "../pages/Gestiones/AdminCtaCte/DetalleCtaCtePage.
 import AdminCajaPage from "../pages/Gestiones/AdminCaja/AdminCajaPage.jsx";
 import AdminComprasPage from "../pages/Gestiones/AdminCompras/AdminComprasPage.jsx";
 import SaldoCtasCtesPage from "../pages/Reportes/SaldoCtasCtes/SaldoCtasCtesPage.jsx";
-import PedidosPage from "../pages/Pedidos/PedidosPage.jsx";
 import ResumenVentasPage from "../pages/Reportes/ResumenVentas/ResumenVentasPage.jsx";
 import ConfigPosPage from "../pages/Configuraciones/ConfigPosPage.jsx";
 import RubrosConfigPage from "../pages/Configuraciones/RubrosConfigPage.jsx";
@@ -46,7 +46,7 @@ const AppRouter = () => {
   if (loading) return <div>Cargando...</div>;
 
   return (
-    <>
+    <MovimientoSessionProvider>
       <ScrollToTop />
       <Routes>
       <Route
@@ -84,7 +84,6 @@ const AppRouter = () => {
 
         {/* COMPRAS */}
         <Route path="compras" element={<AdminComprasPage />} />
-        <Route path="pedidos" element={<PedidosPage />} />
         <Route path="reportes/saldo-ctas-ctes" element={<SaldoCtasCtesPage />} />
         <Route path="reportes/resumen-ventas" element={<ResumenVentasPage />} />
 
@@ -101,8 +100,9 @@ const AppRouter = () => {
         element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />}
       />
     </Routes>
-    </>
+    </MovimientoSessionProvider>
   );
 };
 
 export default AppRouter;
+

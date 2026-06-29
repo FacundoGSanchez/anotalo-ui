@@ -1,5 +1,6 @@
-import { useNavigate, useLocation } from "react-router-dom";
+﻿import { useNavigate, useLocation } from "react-router-dom";
 import { MdHome, MdStore, MdListAlt, MdPeople, MdMoreHoriz } from "react-icons/md";
+import { useMovimientoSession } from "../../context/MovimientoSessionContext";
 import "./index.css";
 
 const NAV_ITEMS = [
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { hasActiveItems, confirmExit } = useMovimientoSession();
 
   const isActive = (route) => {
     if (!route) return false;
@@ -48,10 +50,18 @@ const BottomNav = () => {
 
   const handleNav = (item) => {
     if (item.key === "mas") {
-      navigate("/more");
+      if (hasActiveItems) {
+        confirmExit("/more", navigate);
+      } else {
+        navigate("/more");
+      }
       return;
     }
-    navigate(item.route);
+    if (hasActiveItems) {
+      confirmExit(item.route, navigate);
+    } else {
+      navigate(item.route);
+    }
   };
 
   const activeItem = NAV_ITEMS.find((item) => isActive(item.route));

@@ -1,7 +1,8 @@
-import React from "react";
+﻿import React from "react";
 import { Card, Typography } from "antd";
 import { MdAttachMoney, MdOutlineContactPage, MdShoppingCart } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { useMovimientoSession } from "../../../context/MovimientoSessionContext";
 
 const { Text } = Typography;
 
@@ -31,6 +32,15 @@ const GESTIONES = [
 
 const AccesoReportes = () => {
   const navigate = useNavigate();
+  const { hasActiveItems, confirmExit } = useMovimientoSession();
+
+  const handleNavigate = (route) => {
+    if (hasActiveItems) {
+      confirmExit(route, navigate);
+    } else {
+      navigate(route);
+    }
+  };
 
   return (
     <Card
@@ -54,7 +64,7 @@ const AccesoReportes = () => {
         {GESTIONES.map((item) => (
           <div
             key={item.key}
-            onClick={() => navigate(item.route)}
+            onClick={() => handleNavigate(item.route)}
             style={{
               textAlign: "center",
               cursor: "pointer",

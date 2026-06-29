@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, Typography, Button, Divider, Tag, message } from "antd";
 import { MdSave, MdPerson, MdWallet, MdInfoOutline, MdExpandMore } from "react-icons/md";
 import { useAuth } from "../../../../context/AuthContext";
@@ -11,11 +11,16 @@ import { useArgentineDate } from "../../../../hooks/useArgentineDate";
 
 const { Title, Text } = Typography;
 
-const StepConfirmar = ({ movimiento, onConfirm }) => {
+const StepConfirmar = ({ movimiento, onConfirm, onBack }) => {
   const { user } = useAuth();
   const { getNowISO } = useArgentineDate();
   const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
   const [expandido, setExpandido] = useState(false);
+  const registrarRef = useRef(null);
+
+  useEffect(() => {
+    registrarRef.current?.focus();
+  }, []);
   const totalLineItems = movimiento.lineItems?.reduce((acc, item) => acc + Number(item.importe), 0) || 0;
 
   const handleGuardar = () => {
@@ -183,6 +188,7 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
       </Card>
 
       <Button
+        ref={registrarRef}
         type="primary"
         block
         size="large"
@@ -200,6 +206,31 @@ const StepConfirmar = ({ movimiento, onConfirm }) => {
         <MdSave size={24} style={{ marginRight: 10 }} />
         REGISTRAR {movimiento.tipo?.toUpperCase()}
       </Button>
+
+      {onBack && (
+        <button
+          tabIndex={0}
+          onClick={onBack}
+          onFocus={(e) => { e.currentTarget.style.borderColor = activeColor; e.currentTarget.style.color = activeColor; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "#d9d9d9"; e.currentTarget.style.color = "#8c8c8c"; }}
+          style={{
+            marginTop: "12px",
+            height: "50px",
+            borderRadius: "14px",
+            fontSize: "16px",
+            fontWeight: 600,
+            border: "2px solid #d9d9d9",
+            background: "#fff",
+            color: "#8c8c8c",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            width: "100%",
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          ← VOLVER
+        </button>
+      )}
 
       {/* LEYENDA DESDE SERVICIO */}
       <div

@@ -1,6 +1,5 @@
 import { Layout, Button, theme, Tooltip, Typography } from "antd";
-import { HomeOutlined, CloudDownloadOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useDevice } from "../../context/DeviceContext";
 import { usePWAInstall } from "../../hooks/usePWAInstall";
 import { useAuth } from "../../context/AuthContext";
@@ -14,7 +13,6 @@ const { Header } = Layout;
 
 const AppHeader = () => {
   const { isMobile } = useDevice();
-  const navigate = useNavigate();
   const { session } = useAuth();
   const { sucursal } = useCurrentSucursal();
   const currentOrgId = authService.getCurrentOrgId();
@@ -36,14 +34,6 @@ const AppHeader = () => {
         alignItems: "center",
       }}
     >
-      <div className="app-header__left">
-        <Button
-          type="text"
-          icon={<HomeOutlined style={{ fontSize: "20px" }} />}
-          onClick={() => navigate("/")}
-        />
-      </div>
-
       <div style={{ textAlign: "center" }}>
         <Text strong style={{ fontSize: "15px", color: "#3f4a6d", display: "block", lineHeight: 1.2 }}>
           {orgName}
@@ -62,6 +52,7 @@ const AppHeader = () => {
         {installPrompt && (
           <Tooltip title="Instalar App">
             <Button
+              tabIndex={-1}
               type="default"
               size="middle"
               icon={<CloudDownloadOutlined />}

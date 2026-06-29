@@ -6,7 +6,7 @@ import { useCurrentOrg } from "../../../../hooks/useCurrentOrg";
 
 const { Text } = Typography;
 
-const StepFormaPago = ({ tipo, onNext }) => {
+const StepFormaPago = ({ tipo, onNext, onBack }) => {
   const orgId = useCurrentOrg();
   const containerRef = useRef(null);
 
@@ -29,12 +29,14 @@ const StepFormaPago = ({ tipo, onNext }) => {
       const cardsArr = Array.from(container.querySelectorAll("[data-fp-card]"));
       const currentIndex = cardsArr.findIndex((c) => c === document.activeElement);
       if (e.key === "ArrowDown" || e.key === "Tab") {
+        if (currentIndex === cardsArr.length - 1) return;
         e.preventDefault();
-        const next = (currentIndex + 1) % cardsArr.length;
+        const next = currentIndex + 1;
         cardsArr[next]?.focus();
       } else if (e.key === "ArrowUp") {
+        if (currentIndex <= 0) return;
         e.preventDefault();
-        const prev = (currentIndex - 1 + cardsArr.length) % cardsArr.length;
+        const prev = currentIndex - 1;
         cardsArr[prev]?.focus();
       }
     };
@@ -130,6 +132,31 @@ const StepFormaPago = ({ tipo, onNext }) => {
           ))}
         </Space>
       </div>
+
+      {onBack && (
+        <button
+          tabIndex={0}
+          onClick={onBack}
+          onFocus={(e) => { e.currentTarget.style.borderColor = "#1890ff"; e.currentTarget.style.color = "#1890ff"; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "#d9d9d9"; e.currentTarget.style.color = "#8c8c8c"; }}
+          style={{
+            marginTop: "16px",
+            height: "50px",
+            borderRadius: "14px",
+            fontSize: "16px",
+            fontWeight: 600,
+            border: "2px solid #d9d9d9",
+            background: "#fff",
+            color: "#8c8c8c",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            width: "100%",
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          ← VOLVER
+        </button>
+      )}
     </div>
   );
 };

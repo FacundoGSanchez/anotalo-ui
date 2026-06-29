@@ -1,11 +1,8 @@
-import { Layout, Avatar, Typography } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { Layout } from "antd";
 import MenuList from "../../components/MenuList";
-import CardUser from "../CardUser/CardUser";
 import "./index.css";
 
 const { Sider } = Layout;
-const { Text } = Typography;
 const LOGO_PATH = "/images/Logo.png";
 
 const Sidebar = () => {
@@ -20,10 +17,6 @@ const Sidebar = () => {
 
       <div className="sidebar-menu">
         <MenuList darkTheme />
-      </div>
-
-      <div className="sidebar-footer">
-        <CardUser />
       </div>
     </Sider>
   );

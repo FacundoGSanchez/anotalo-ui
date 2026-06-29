@@ -97,11 +97,6 @@ const MenuItems = [
         icon: <ShoppingCartOutlined />,
         label: "Compras",
       },
-      {
-        key: "/pedidos",
-        icon: <DeliveredProcedureOutlined />,
-        label: "Pedidos",
-      },
     ],
   },
   {

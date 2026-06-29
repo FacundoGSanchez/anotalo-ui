@@ -136,6 +136,7 @@ const CardUser = () => {
       placement="bottomRight"
     >
       <Avatar
+        tabIndex={-1}
         size="large"
         src={avatarUrl}
         icon={<UserOutlined />}

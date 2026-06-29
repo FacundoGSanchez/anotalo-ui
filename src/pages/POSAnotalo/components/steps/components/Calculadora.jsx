@@ -11,7 +11,7 @@ const btnStyle = {
   transition: "all 0.1s",
 };
 
-const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height = "64px" }) => {
+const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height = "64px", btnTabIndex }) => {
   const numeros = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
   const mergedBtnStyle = { ...btnStyle, height };
@@ -22,6 +22,7 @@ const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height
         <Col span={8} key={btn}>
           <Button
             block
+            tabIndex={btnTabIndex ?? 0}
             style={mergedBtnStyle}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => onPress(btn)}
@@ -35,6 +36,7 @@ const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height
       <Col span={8}>
         <Button
           block
+          tabIndex={btnTabIndex ?? 0}
           style={mergedBtnStyle}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onPress("00")}
@@ -45,6 +47,7 @@ const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height
       <Col span={8}>
         <Button
           block
+          tabIndex={btnTabIndex ?? 0}
           style={mergedBtnStyle}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onPress("0")}
@@ -55,6 +58,7 @@ const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height
       <Col span={8}>
         <Button
           block
+          tabIndex={btnTabIndex ?? 0}
           disabled={!hasValue}
           style={{
             height,

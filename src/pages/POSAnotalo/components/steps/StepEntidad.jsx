@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Typography, Button, Alert, Divider } from "antd";
 import { MdSearch, MdPerson, MdWarning } from "react-icons/md";
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
@@ -8,9 +8,16 @@ import SelectorEntidadModal from "./components/SelectorEntidadModal";
 
 const { Text } = Typography;
 
-const StepEntidad = ({ tipo, formaPago, onNext }) => {
+const StepEntidad = ({ tipo, formaPago, onNext, onBack }) => {
   const orgId = useCurrentOrg();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const cfRef = useRef(null);
+  const buscarRef = useRef(null);
+
+  useEffect(() => {
+    const target = cfRef.current || buscarRef.current;
+    target?.focus();
+  }, []);
 
   const esCliente = tipo === MOVIMIENTO_TIPOS.VENTA || tipo === MOVIMIENTO_TIPOS.COBRO;
   const formasPago = orgService.getFormasPago(orgId, tipo);
@@ -33,6 +40,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
         {/* 1. PREDETERMINADOS PRIMERO: Consumidor Final */}
         {esCliente && !requiereEntidad && (
           <Button
+            ref={cfRef}
             block
             size="large"
             type="dashed"
@@ -57,6 +65,7 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
 
         {/* 2. ACCIÓN DE BÚSQUEDA PRINCIPAL */}
         <Button
+          ref={buscarRef}
           block
           size="large"
           icon={<MdSearch size={24} />}
@@ -92,6 +101,31 @@ const StepEntidad = ({ tipo, formaPago, onNext }) => {
         tablaDB={tablaDB}
         activeColor={activeColor}
       />
+
+      {onBack && (
+        <button
+          tabIndex={0}
+          onClick={onBack}
+          onFocus={(e) => { e.currentTarget.style.borderColor = activeColor; e.currentTarget.style.color = activeColor; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "#d9d9d9"; e.currentTarget.style.color = "#8c8c8c"; }}
+          style={{
+            marginTop: "16px",
+            height: "50px",
+            borderRadius: "14px",
+            fontSize: "16px",
+            fontWeight: 600,
+            border: "2px solid #d9d9d9",
+            background: "#fff",
+            color: "#8c8c8c",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            width: "100%",
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          ← VOLVER
+        </button>
+      )}
 
       {/* ADVERTENCIA SI REQUIERE ENTIDAD */}
       {(!esCliente || requiereEntidad) && (

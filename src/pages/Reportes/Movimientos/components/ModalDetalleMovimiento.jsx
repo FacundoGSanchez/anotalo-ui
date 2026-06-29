@@ -8,6 +8,7 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
+import "dayjs/locale/es";
 import {
   MdDeleteOutline,
   MdInfoOutline,
@@ -41,6 +42,7 @@ const ModalDetalleMovimiento = ({
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [rubroModalOpen, setRubroModalOpen] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
+  const [showAllItems, setShowAllItems] = useState(false);
 
   if (!movimiento) return null;
 
@@ -192,117 +194,193 @@ const ModalDetalleMovimiento = ({
         styles={{ body: { padding: "24px 16px" } }}
       >
         <div style={{ padding: "0" }}>
-          {/* IMPORTE TOTAL card with date */}
+          {/* IMPORTE + DATOS MOVIMIENTO row */}
           <div
             style={{
-              textAlign: "center",
-              padding: "20px",
-              background: "#fff",
+              display: "flex",
               borderRadius: "16px",
-              marginBottom: "16px",
               border: "1px solid #f0f0f0",
+              overflow: "hidden",
+              marginBottom: "16px",
             }}
           >
-            <Text
-              type="secondary"
-              style={{ fontSize: "11px", fontWeight: 700, display: "block", letterSpacing: "0.5px" }}
-            >
-              IMPORTE TOTAL
-            </Text>
-            <Text
-              strong
+            {/* Left: Importe */}
+            <div
               style={{
-                fontSize: "32px",
-                color: isVenta ? "#52c41a" : "#ff4d4f",
-                display: "block",
-                lineHeight: 1.2,
-                marginTop: "4px",
+                flex: "0 0 45%",
+                padding: "16px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#fff",
               }}
             >
-              ${" "}
-              {movimiento.importe.toLocaleString("es-AR", {
-                minimumFractionDigits: 2,
-              })}
-            </Text>
-            <Text
-              type="secondary"
-              style={{ fontSize: "11px", marginTop: "6px", display: "block" }}
+              <Text
+                type="secondary"
+                style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.5px" }}
+              >
+                IMPORTE TOTAL
+              </Text>
+              <Text
+                strong
+                style={{
+                  fontSize: "28px",
+                  color: isVenta ? "#52c41a" : "#ff4d4f",
+                  lineHeight: 1.2,
+                  marginTop: "2px",
+                }}
+              >
+                ${" "}
+                {movimiento.importe.toLocaleString("es-AR", {
+                  minimumFractionDigits: 2,
+                })}
+              </Text>
+              <Text
+                type="secondary"
+                style={{ fontSize: "10px", marginTop: "4px" }}
+              >
+                {dayjs(movimiento.fecha).locale("es").format("dddd, DD/MM/YYYY")} {movimiento.hora} hs
+              </Text>
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: "1px", background: "#f0f0f0" }} />
+
+            {/* Right: Datos movimiento */}
+            <div
+              style={{
+                flex: 1,
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                gap: "6px",
+                background: "#fff",
+              }}
             >
-              {dayjs(movimiento.fecha).format("DD/MM/YYYY")} {movimiento.hora} hs
-            </Text>
+              <Text
+                type="secondary"
+                style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.5px", marginBottom: "2px" }}
+              >
+                DATOS MOVIMIENTO
+              </Text>
+              {/* Forma de pago */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <MdWallet size={14} color={activeColor} />
+                <div style={{ lineHeight: 1.2 }}>
+                  <Text type="secondary" style={{ fontSize: "9px", display: "block" }}>Forma de pago</Text>
+                  <Text strong style={{ fontSize: "12px" }}>{movimiento.formaPago}</Text>
+                </div>
+              </div>
+              {/* Entidad */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <MdPerson size={14} color={activeColor} />
+                <div style={{ lineHeight: 1.2 }}>
+                  <Text type="secondary" style={{ fontSize: "9px", display: "block" }}>Entidad</Text>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Text strong style={{ fontSize: "12px" }}>{movimiento.entidad?.nombre || "General"}</Text>
+                    {(movimiento.tipo === MOVIMIENTO_TIPOS.VENTA ||
+                      movimiento.tipo === MOVIMIENTO_TIPOS.PAGO ||
+                      movimiento.tipo === MOVIMIENTO_TIPOS.COBRO) && (
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<MdEdit size={11} />}
+                        onClick={() => setIsSelectorOpen(true)}
+                        style={{ padding: 0, height: "auto", color: "#8c8c8c", minWidth: "auto" }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Usuario */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <MdPerson size={14} color={activeColor} />
+                <div style={{ lineHeight: 1.2 }}>
+                  <Text type="secondary" style={{ fontSize: "9px", display: "block" }}>Usuario</Text>
+                  <Text strong style={{ fontSize: "12px" }}>{movimiento.usuario}</Text>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* DETALLE DE ÍTEMS card */}
           {movimiento.lineItems?.length > 0 && (
-            <div style={{ marginBottom: "16px" }}>
-              <Text
-                type="secondary"
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  display: "block",
-                  marginBottom: "8px",
-                  paddingLeft: "4px",
-                }}
-              >
-                DETALLE DE ÍTEMS
-              </Text>
+            <div
+              style={{
+                border: "1px solid #f0f0f0",
+                borderRadius: "16px",
+                overflow: "hidden",
+                marginBottom: "16px",
+              }}
+            >
               <div
                 style={{
-                  background: "#fff",
-                  borderRadius: "16px",
-                  border: "1px solid #f0f0f0",
-                  overflow: "hidden",
+                  padding: "10px 14px",
+                  borderBottom: "1px solid #f0f0f0",
+                  background: "#fafafa",
                 }}
               >
-                {movimiento.lineItems.map((item, idx) => (
+                <Text
+                  type="secondary"
+                  style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.5px" }}
+                >
+                  DETALLE DE ÍTEMS ({movimiento.lineItems.length})
+                </Text>
+              </div>
+              <div style={{ background: "#fff" }}>
+                {(showAllItems
+                  ? movimiento.lineItems
+                  : movimiento.lineItems.slice(0, 3)
+                ).map((item, idx) => (
                   <div
                     key={item.id || item._id || idx}
                     style={{
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      padding: "12px 16px",
+                      padding: "6px 10px",
                       borderBottom:
                         idx < movimiento.lineItems.length - 1
                           ? "1px solid #f0f0f0"
                           : "none",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <div
                         style={{
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "10px",
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "8px",
                           background: `${activeColor}12`,
                           color: activeColor,
                           flexShrink: 0,
                         }}
                       >
-                        <span style={{ fontSize: "16px", fontWeight: 800, lineHeight: 1 }}>
+                        <span style={{ fontSize: "12px", fontWeight: 800, lineHeight: 1 }}>
                           {item.rubro?.sigla || "V"}
                         </span>
-                        <span style={{ fontSize: "7px", fontWeight: 600, lineHeight: 1, opacity: 0.8 }}>
+                        <span style={{ fontSize: "6px", fontWeight: 600, lineHeight: 1, opacity: 0.8 }}>
                           {item.rubro?.nombre || "Varios"}
                         </span>
                       </div>
-                      <Text strong style={{ fontSize: "15px", color: "#262626" }}>
+                      <Text strong style={{ fontSize: "13px", color: "#262626" }}>
                         $ {item.importe.toLocaleString("es-AR")}
                       </Text>
                     </div>
                     <Button
                       type="text"
                       size="small"
-                      icon={<MdEdit size={15} />}
+                      icon={<MdEdit size={12} />}
                       onClick={() => { setEditItemId(item.id || item._id); setRubroModalOpen(true); }}
                       style={{
-                        width: "32px",
-                        height: "32px",
+                        width: "24px",
+                        height: "24px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -311,147 +389,32 @@ const ModalDetalleMovimiento = ({
                     />
                   </div>
                 ))}
+                {!showAllItems && movimiento.lineItems.length > 3 && (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setShowAllItems(true)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowAllItems(true); } }}
+                    style={{
+                      padding: "8px 10px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      color: activeColor,
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      borderTop: "1px solid #f0f0f0",
+                      outline: "none",
+                      transition: "background 0.15s",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = `${activeColor}08`}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                  >
+                    Ver más ({movimiento.lineItems.length - 3})
+                  </div>
+                )}
               </div>
             </div>
           )}
-
-          {/* DATOS section - no border */}
-          <div>
-            <Text
-              type="secondary"
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                display: "block",
-                marginBottom: "8px",
-                paddingLeft: "4px",
-              }}
-            >
-              DATOS
-            </Text>
-            <div
-              style={{
-                background: "#fff",
-                borderRadius: "16px",
-                border: "1px solid #f0f0f0",
-                overflow: "hidden",
-              }}
-            >
-              {/* Forma de pago */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "12px 16px",
-                  borderBottom: "1px solid #f0f0f0",
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "10px",
-                    background: `${activeColor}10`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: "12px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <MdWallet size={18} color={activeColor} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
-                    Forma de pago
-                  </Text>
-                  <Text strong style={{ fontSize: "14px" }}>
-                    {movimiento.formaPago}
-                  </Text>
-                </div>
-              </div>
-
-              {/* Entidad */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "12px 16px",
-                  borderBottom: "1px solid #f0f0f0",
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "10px",
-                    background: `${activeColor}10`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: "12px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <MdPerson size={18} color={activeColor} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
-                    Entidad
-                  </Text>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <Text strong style={{ fontSize: "14px" }}>
-                      {movimiento.entidad?.nombre || "General"}
-                    </Text>
-                    {(movimiento.tipo === MOVIMIENTO_TIPOS.VENTA ||
-                      movimiento.tipo === MOVIMIENTO_TIPOS.PAGO ||
-                      movimiento.tipo === MOVIMIENTO_TIPOS.COBRO) && (
-                      <Button
-                        type="link"
-                        size="small"
-                        icon={<MdEdit size={14} />}
-                        onClick={() => setIsSelectorOpen(true)}
-                        style={{ padding: 0, height: "auto", color: "#8c8c8c", minWidth: "auto" }}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Usuario */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "12px 16px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "10px",
-                    background: `${activeColor}10`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: "12px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <MdPerson size={18} color={activeColor} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
-                    Usuario
-                  </Text>
-                  <Text strong style={{ fontSize: "14px" }}>
-                    {movimiento.usuario}
-                  </Text>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </Modal>
 

@@ -1,8 +1,9 @@
-import { Menu } from "antd";
+﻿import { Menu } from "antd";
 import { useNavigate } from "react-router-dom";
 import MenuItems from "../data/MenuItems";
 import { useDevice } from "../context/DeviceContext";
 import { useAuth } from "../context/AuthContext";
+import { useMovimientoSession } from "../context/MovimientoSessionContext";
 
 const filterItemsByPermission = (items, can) => {
   return items.reduce((acc, item) => {
@@ -33,6 +34,7 @@ const MenuList = ({ darkTheme }) => {
   const navigate = useNavigate();
   const { isMobile } = useDevice();
   const { can } = useAuth();
+  const { hasActiveItems, confirmExit } = useMovimientoSession();
 
   const visibleItems = filterItemsByPermission(MenuItems, can);
 
@@ -40,11 +42,16 @@ const MenuList = ({ darkTheme }) => {
     const item = findMenuItem(MenuItems, key);
     if (item?.disabled) return;
     const route = item?.meta?.route?.[isMobile ? "mobile" : "desktop"] || key;
-    navigate(route);
+    if (hasActiveItems) {
+      confirmExit(route, navigate);
+    } else {
+      navigate(route);
+    }
   };
 
   return (
     <Menu
+      tabIndex={-1}
       items={visibleItems}
       mode="inline"
       theme={darkTheme ? "dark" : "light"}
