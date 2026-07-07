@@ -1,0 +1,10 @@
+{
+  "id": 1,
+  "username": "admin",
+  "password": "adminanotalo",
+  "nombre": "Admin Anotalo",
+  "sucursales": [
+    { "id": 1, "organizacionId": 1, "nombre": "Sucursal Centro" },
+    { "id": 2, "organizacionId": 1, "nombre": "Sucursal Norte" }
+  ]
+}

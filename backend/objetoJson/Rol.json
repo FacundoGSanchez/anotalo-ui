@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "nombre": "ADMIN",
+  "permisos": [
+    { "modulo": "*", "formulario": "*", "acciones": ["*"] }
+  ]
+}

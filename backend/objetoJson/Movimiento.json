@@ -1,0 +1,28 @@
+{
+  "id": 1719874800000,
+  "tipo": "Venta",
+  "importe": 15000,
+  "lineItems": [
+    {
+      "id": 1719874800001,
+      "importe": 10000,
+      "rubro": { "id": 2, "sigla": "K", "nombre": "Kiosco", "grupo": "Alimentos" }
+    },
+    {
+      "id": 1719874800002,
+      "importe": 5000,
+      "rubro": { "id": 3, "sigla": "B", "nombre": "Bebidas", "grupo": "Alimentos" }
+    }
+  ],
+  "formaPagos": [
+    { "nombre": "Efectivo", "importe": 10000 },
+    { "nombre": "Tarjeta", "importe": 5000 }
+  ],
+  "entidad": { "id": 0, "nombre": "Caja Interna" },
+  "fecha": "2026-07-02",
+  "hora": "14:30",
+  "usuario": "Admin Anotalo",
+  "sucursalId": 1,
+  "saldoCtaCte": null,
+  "observacion": ""
+}

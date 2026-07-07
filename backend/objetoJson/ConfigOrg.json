@@ -1,0 +1,29 @@
+{
+  "formasPago": {
+    "Venta": [
+      { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+      { "id": 2, "nombre": "Transferencia", "sigla": "TF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+      { "id": 3, "nombre": "Tarjeta", "sigla": "TJ", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+      { "id": 4, "nombre": "Cta Corriente", "sigla": "CC", "requiereEntidad": true, "impactaCaja": false, "impactaCtaCte": true },
+      { "id": 5, "nombre": "QR", "sigla": "QR", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+    ],
+    "Pago": [
+      { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+      { "id": 2, "nombre": "Transferencia", "sigla": "TF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+    ],
+    "Cobro": [
+      { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+      { "id": 2, "nombre": "Transferencia", "sigla": "TF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+    ]
+  },
+  "rubros": [
+    { "id": 1, "sigla": "V", "nombre": "Varios", "grupo": "General" },
+    { "id": 2, "sigla": "K", "nombre": "Kiosco", "grupo": "Alimentos" },
+    { "id": 3, "sigla": "B", "nombre": "Bebidas", "grupo": "Alimentos" },
+    { "id": 4, "sigla": "F", "nombre": "Fiambrería", "grupo": "Alimentos" },
+    { "id": 5, "sigla": "P", "nombre": "Panadería", "grupo": "Alimentos" }
+  ],
+  "configPOS": {
+    "usaRubro": true
+  }
+}

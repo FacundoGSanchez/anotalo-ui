@@ -75,7 +75,7 @@ const DetalleCtaCtePage = () => {
       .filter(
         (m) =>
           m.entidad?.id === entidad.id &&
-          (m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO),
+          (movimientoService.tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO),
       )
       .sort((a, b) => b.id - a.id)
       .slice(0, 20);
@@ -118,6 +118,7 @@ const DetalleCtaCtePage = () => {
       tipo: movTipoModal,
       importe: Number(movImporte),
       formaPago,
+      formaPagos: [{ key: formaPago, importe: Number(movImporte) }],
       entidad: { id: entidad.id, nombre: entidad.nombre },
     };
     const result = movimientoService.save(movimientoData, user);

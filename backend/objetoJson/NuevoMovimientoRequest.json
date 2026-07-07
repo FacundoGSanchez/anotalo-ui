@@ -1,0 +1,16 @@
+{
+  "tipo": "Venta",
+  "importe": 15000,
+  "lineItems": [
+    { "importe": 10000, "rubroId": 2 },
+    { "importe": 5000, "rubroId": 3 }
+  ],
+  "formaPagos": [
+    { "nombre": "Efectivo", "importe": 10000 },
+    { "nombre": "Tarjeta", "importe": 5000 }
+  ],
+  "entidadId": 0,
+  "observacion": "",
+  "sucursalId": 1,
+  "usuarioId": 1
+}

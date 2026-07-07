@@ -1,0 +1,5 @@
+{
+  "modulo": "CONFIG",
+  "formulario": "pos",
+  "acciones": ["leer", "escribir", "actualizar", "eliminar"]
+}

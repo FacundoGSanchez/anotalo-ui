@@ -101,7 +101,7 @@ const MovimientoGrupo = ({
                     type="secondary"
                     style={{ fontSize: "11px", marginLeft: "32px" }}
                   >
-                    {mov.formaPago} · {mov.hora || mov.fecha} hs
+                    {(mov.formaPagos ? mov.formaPagos.map(fp => fp.key).join(" + ") : mov.formaPago)} · {mov.hora || mov.fecha} hs
                   </Text>
                 </div>
 

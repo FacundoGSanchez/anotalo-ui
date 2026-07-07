@@ -94,8 +94,9 @@ const POSAnotaloDesktop = () => {
         return (
           <StepFormaPago
             tipo={movimiento.tipo}
+            importe={movimiento.importe}
             onBack={handleBack}
-            onNext={(forma) => handleNext({ formaPago: forma })}
+            onNext={(data) => handleNext(data)}
           />
         );
       case STEPS.ENTIDAD:
@@ -103,6 +104,7 @@ const POSAnotaloDesktop = () => {
           <StepEntidad
             tipo={movimiento.tipo}
             formaPago={movimiento.formaPago}
+            formaPagos={movimiento.formaPagos}
             onBack={handleBack}
             onNext={(ent) => handleNext({ entidad: ent })}
           />
@@ -235,7 +237,7 @@ const POSAnotaloDesktop = () => {
               TRANSACCIÓN ACTUAL
             </Text>
 
-            {movimiento.lineItems.length > 0 || movimiento.formaPago ? (
+            {movimiento.lineItems.length > 0 || movimiento.formaPago || movimiento.formaPagos?.length > 0 ? (
               <Space direction="vertical" size={12} style={{ width: "100%" }}>
                 <SidebarRow
                   icon={<MdShoppingCart size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
@@ -251,14 +253,24 @@ const POSAnotaloDesktop = () => {
                     color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
                   />
                 )}
-                {movimiento.formaPago && (
+                {movimiento.formaPagos?.length > 0 ? (
+                  movimiento.formaPagos.map((fp, i) => (
+                    <SidebarRow
+                      key={fp.key}
+                      icon={<MdWallet size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
+                      label={i === 0 ? "Forma de pago" : ""}
+                      value={`${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`}
+                      color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
+                    />
+                  ))
+                ) : movimiento.formaPago ? (
                   <SidebarRow
                     icon={<MdWallet size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
                     label="Forma de pago"
                     value={movimiento.formaPago}
                     color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
                   />
-                )}
+                ) : null}
                 {movimiento.entidad && (
                   <SidebarRow
                     icon={<MdPerson size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
@@ -379,7 +391,7 @@ const POSAnotaloDesktop = () => {
                           type="secondary"
                           style={{ fontSize: "10px", lineHeight: "1.2" }}
                         >
-                          {m.formaPago} · {m.fecha}
+                          {(m.formaPagos ? m.formaPagos.map(fp => fp.key).join(" + ") : m.formaPago)} · {m.fecha}
                         </Text>
                       </div>
                     </div>

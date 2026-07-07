@@ -11,7 +11,7 @@ const { Text } = Typography;
 
 const calcularSaldos = () => {
   const movs = movimientoService.getAll().filter(
-    (m) => m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO,
+    (m) => movimientoService.tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO,
   );
 
   // Discover entities from movements, regardless of ctaCteConfig

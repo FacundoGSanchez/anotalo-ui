@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "username": "admin",
+  "mail": "admin@anotalo.com",
+  "nombre": "Admin Anotalo",
+  "rol": "Admin",
+  "roles": [1]
+}

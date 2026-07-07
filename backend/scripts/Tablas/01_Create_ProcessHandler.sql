@@ -1,0 +1,6 @@
+CREATE TABLE ProcessHandler (
+  Id INT NOT NULL AUTO_INCREMENT,
+  n_proceso VARCHAR(100) NOT NULL,
+  procedure_name VARCHAR(200) NOT NULL,
+  PRIMARY KEY (Id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

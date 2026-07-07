@@ -170,12 +170,24 @@ const StepConfirmar = ({ movimiento, onConfirm, onBack }) => {
 
         {/* INFO GRID */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <InfoRow
-            icon={<MdWallet size={20} color={activeColor} />}
-            label="MEDIO DE PAGO"
-            value={movimiento.formaPago || "Efectivo"}
-            color={activeColor}
-          />
+          {movimiento.formaPagos?.length > 0 ? (
+            movimiento.formaPagos.map((fp, i) => (
+              <InfoRow
+                key={fp.key}
+                icon={<MdWallet size={20} color={activeColor} />}
+                label={i === 0 ? "MEDIO DE PAGO" : ""}
+                value={`${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`}
+                color={activeColor}
+              />
+            ))
+          ) : (
+            <InfoRow
+              icon={<MdWallet size={20} color={activeColor} />}
+              label="MEDIO DE PAGO"
+              value={movimiento.formaPago || "Efectivo"}
+              color={activeColor}
+            />
+          )}
           <InfoRow
             icon={<MdPerson size={20} color={activeColor} />}
             label={

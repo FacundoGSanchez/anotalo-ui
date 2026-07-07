@@ -161,6 +161,7 @@ const AdminComprasPage = () => {
       tipo: MOVIMIENTO_TIPOS.PAGO,
       importe: Number(movImporte),
       formaPago,
+      formaPagos: [{ key: formaPago, importe: Number(movImporte) }],
       entidad: { id: selectedProveedor.id, nombre: selectedProveedor.nombre },
       observacion: "",
     };
@@ -182,7 +183,10 @@ const AdminComprasPage = () => {
 
   const handleEditFormaPago = (nuevaForma) => {
     if (!selectedMov) return;
-    movimientoService.update(selectedMov.id, { formaPago: nuevaForma });
+    movimientoService.update(selectedMov.id, {
+      formaPago: nuevaForma,
+      formaPagos: [{ key: nuevaForma, importe: Number(selectedMov.importe) || 0 }],
+    });
     message.success("Forma de pago actualizada");
     closeDetailModal();
   };
@@ -288,7 +292,7 @@ const AdminComprasPage = () => {
                       </Text>
                     </div>
                     <Text type="secondary" style={{ fontSize: "11px" }}>
-                      {mov.fecha} · {mov.formaPago}
+                      {mov.fecha} · {(mov.formaPagos ? mov.formaPagos.map(fp => fp.key).join(" + ") : mov.formaPago)}
                     </Text>
                   </div>
 
@@ -927,7 +931,7 @@ const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDele
           </div>
         ) : (
           <Text strong style={{ display: "block", fontSize: "14px" }}>
-            {mov.formaPago}
+            {mov.formaPagos ? mov.formaPagos.map(fp => `${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`).join(" + ") : mov.formaPago}
           </Text>
         )}
       </div>

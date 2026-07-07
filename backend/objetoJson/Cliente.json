@@ -1,0 +1,13 @@
+{
+  "id": 1719874000000,
+  "nro": 1001,
+  "nombre": "Juan Pérez",
+  "telefono": "3411234567",
+  "activo": true,
+  "saldo": 0,
+  "ctaCteConfig": {
+    "habilitado": false,
+    "importeMaximo": null,
+    "plazoDias": null
+  }
+}

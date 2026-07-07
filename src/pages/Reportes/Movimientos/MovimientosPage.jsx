@@ -48,10 +48,14 @@ const MovimientosPage = () => {
     const fechaLimite = dayjs().subtract(7, "day").startOf("day");
 
     const filtrados = deSucursal.filter(
-      (m) =>
-        tipos.includes(m.tipo) &&
-        formas.includes(m.formaPago) &&
-        dayjs(m.fecha).isAfter(fechaLimite.subtract(1, "day")),
+      (m) => {
+        if (!tipos.includes(m.tipo)) return false;
+        const pagaCon = m.formaPagos?.length > 0
+          ? m.formaPagos.some((fp) => formas.includes(fp.key))
+          : formas.includes(m.formaPago);
+        if (!pagaCon) return false;
+        return dayjs(m.fecha).isAfter(fechaLimite.subtract(1, "day"));
+      },
     );
 
     // 2. Aplicar límite (Paginación)

@@ -1,0 +1,70 @@
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "sessionId": "sess_1719874800_a1b2c3",
+  "usuario": {
+    "id": 1,
+    "username": "admin",
+    "mail": "admin@anotalo.com",
+    "nombre": "Admin Anotalo",
+    "rol": "Admin",
+    "roles": [1]
+  },
+  "organizaciones": [
+    {
+      "id": 1,
+      "nombre": "Anotalo S.A.",
+      "sucursalDefault": 1,
+      "FormasPago": {
+        "Venta": [
+          { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+          { "id": 2, "nombre": "Transferencia", "sigla": "TF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+          { "id": 3, "nombre": "Tarjeta", "sigla": "TJ", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+          { "id": 4, "nombre": "Cta Corriente", "sigla": "CC", "requiereEntidad": true, "impactaCaja": false, "impactaCtaCte": true },
+          { "id": 5, "nombre": "QR", "sigla": "QR", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+        ],
+        "Pago": [
+          { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+          { "id": 2, "nombre": "Transferencia", "sigla": "TF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+        ],
+        "Cobro": [
+          { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false },
+          { "id": 2, "nombre": "Transferencia", "sigla": "TF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+        ]
+      },
+      "TiposMovimiento": ["Venta", "Pago", "Cobro", "Ingreso", "Retiro"]
+    }
+  ],
+  "rolesData": [
+    {
+      "id": 1,
+      "nombre": "ADMIN",
+      "permisos": [
+        { "modulo": "*", "formulario": "*", "acciones": ["*"] }
+      ]
+    },
+    {
+      "id": 2,
+      "nombre": "VENDEDOR",
+      "permisos": [
+        { "modulo": "POS", "formulario": "*", "acciones": ["*"] },
+        { "modulo": "MOVIMIENTOS", "formulario": "listado", "acciones": ["leer"] },
+        { "modulo": "GESTIONES", "formulario": "caja", "acciones": ["*"] },
+        { "modulo": "ENTIDADES", "formulario": "*", "acciones": ["leer"] }
+      ]
+    },
+    {
+      "id": 3,
+      "nombre": "RESPONSABLE_SUCURSAL",
+      "permisos": [
+        { "modulo": "*", "formulario": "*", "acciones": ["leer"] },
+        { "modulo": "POS", "formulario": "*", "acciones": ["*"] },
+        { "modulo": "CONFIG", "formulario": "*", "acciones": ["*"] },
+        { "modulo": "REPORTES", "formulario": "*", "acciones": ["*"] }
+      ]
+    }
+  ],
+  "sucursales": [
+    { "id": 1, "organizacionId": 1, "nombre": "Sucursal Centro" },
+    { "id": 2, "organizacionId": 1, "nombre": "Sucursal Norte" }
+  ]
+}

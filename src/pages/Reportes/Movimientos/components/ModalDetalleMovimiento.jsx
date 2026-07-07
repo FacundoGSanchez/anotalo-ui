@@ -270,7 +270,7 @@ const ModalDetalleMovimiento = ({
                 <MdWallet size={14} color={activeColor} />
                 <div style={{ lineHeight: 1.2 }}>
                   <Text type="secondary" style={{ fontSize: "9px", display: "block" }}>Forma de pago</Text>
-                  <Text strong style={{ fontSize: "12px" }}>{movimiento.formaPago}</Text>
+                  <Text strong style={{ fontSize: "12px" }}>{movimiento.formaPagos ? movimiento.formaPagos.map(fp => `${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`).join(" + ") : movimiento.formaPago}</Text>
                 </div>
               </div>
               {/* Entidad */}

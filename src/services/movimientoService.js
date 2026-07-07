@@ -23,6 +23,21 @@ const getTipoEntidadFromMovimiento = (movimiento) => {
   return null;
 };
 
+const tieneCtaCte = (mov) => {
+  if (mov.formaPagos?.length > 0) {
+    return mov.formaPagos.some((p) => p.key === "Cta Corriente");
+  }
+  return mov.formaPago === "Cta Corriente";
+};
+
+const getCtaCteImporte = (mov) => {
+  if (mov.formaPagos?.length > 0) {
+    const fp = mov.formaPagos.find((p) => p.key === "Cta Corriente");
+    return fp ? Number(fp.importe) || 0 : 0;
+  }
+  return mov.formaPago === "Cta Corriente" ? (Number(mov.importe) || 0) : 0;
+};
+
 const recalcularSaldoEntidad = (entidadId, movimiento) => {
   const tipo = getTipoEntidadFromMovimiento(movimiento);
   if (!tipo || !entidadId) return;
@@ -30,12 +45,14 @@ const recalcularSaldoEntidad = (entidadId, movimiento) => {
   const movs = movimientoService.getAll().filter(
     (m) =>
       m.entidad?.id === entidadId &&
-      (m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO),
+      (tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO),
   );
 
   let saldo = 0;
   movs.forEach((m) => {
-    const importe = Number(m.importe) || 0;
+    const importe = m.tipo === MOVIMIENTO_TIPOS.COBRO
+      ? (Number(m.importe) || 0)
+      : getCtaCteImporte(m);
     if (m.tipo === MOVIMIENTO_TIPOS.VENTA) {
       saldo += importe;
     } else if (m.tipo === MOVIMIENTO_TIPOS.COBRO || m.tipo === MOVIMIENTO_TIPOS.PAGO) {
@@ -80,8 +97,12 @@ export const movimientoService = {
       });
 
       const esCtaCte =
-        movimiento.formaPago === "Cta Corriente" ||
+        tieneCtaCte(movimiento) ||
         (movimiento.entidad?.id && movimiento.tipo === MOVIMIENTO_TIPOS.COBRO);
+
+      const formaPagoFinal = movimiento.formaPagos?.length > 0
+        ? movimiento.formaPagos[0].key
+        : (movimiento.formaPago || "Efectivo");
 
       let saldoCtaCte = null;
       if (esCtaCte && movimiento.entidad?.id) {
@@ -89,14 +110,14 @@ export const movimientoService = {
           .filter(
             (m) =>
               m.entidad?.id === movimiento.entidad.id &&
-              (m.formaPago === "Cta Corriente" || m.tipo === MOVIMIENTO_TIPOS.COBRO),
+              (tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO),
           )
           .sort((a, b) => a.id - b.id);
         const ultimoConSaldo = [...movsEntidad]
           .reverse()
           .find((m) => m.saldoCtaCte != null);
         const saldoAnterior = ultimoConSaldo ? ultimoConSaldo.saldoCtaCte : 0;
-        const importeNum = Number(movimiento.importe) || 0;
+        const importeNum = getCtaCteImporte(movimiento) || Number(movimiento.importe) || 0;
         if (movimiento.tipo === MOVIMIENTO_TIPOS.VENTA) {
           saldoCtaCte = saldoAnterior + importeNum;
         } else if (movimiento.tipo === MOVIMIENTO_TIPOS.PAGO) {
@@ -110,12 +131,17 @@ export const movimientoService = {
 
       const nuevoRegistro = {
         ...movimiento,
+        formaPagos: movimiento.formaPagos?.length > 0
+          ? movimiento.formaPagos
+          : (movimiento.formaPago
+            ? [{ key: movimiento.formaPago, importe: Number(movimiento.importe) || 0 }]
+            : []),
         id: Date.now(),
         fecha,
         hora,
         usuario: user?.nombre || "Admin",
         sucursalId: authService.getCurrentSucursalId(),
-        formaPago: movimiento.formaPago || "Efectivo",
+        formaPago: formaPagoFinal,
         entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
         importe: Number(movimiento.importe) || 0,
         observacion: movimiento.observacion || "",
@@ -165,7 +191,7 @@ export const movimientoService = {
       if (
         eliminado &&
         eliminado.entidad?.id &&
-        (eliminado.formaPago === "Cta Corriente" || eliminado.tipo === MOVIMIENTO_TIPOS.COBRO)
+        (tieneCtaCte(eliminado) || eliminado.tipo === MOVIMIENTO_TIPOS.COBRO)
       ) {
         recalcularSaldoEntidad(eliminado.entidad.id, eliminado);
       }
@@ -179,9 +205,23 @@ export const movimientoService = {
     }
   },
 
+  tieneCtaCte: (mov) => tieneCtaCte(mov),
+
+  getCtaCteImporte: (mov) => getCtaCteImporte(mov),
+
   getLeyendaInformativa: (movimiento, tipos) => {
-    const { tipo, formaPago } = movimiento;
-    const esEfectivo = formaPago === "Efectivo";
+    const { tipo, formaPago, formaPagos } = movimiento;
+
+    if (formaPagos?.length > 1) {
+      const partes = formaPagos.map((fp) => {
+        const fmt = Number(fp.importe).toLocaleString("es-AR");
+        return `${fp.key}: $${fmt}`;
+      });
+      return `Pago dividido en ${formaPagos.length} formas: ${partes.join(", ")}.`;
+    }
+
+    const fp = formaPagos?.[0]?.key || formaPago;
+    const esEfectivo = fp === "Efectivo";
     const esSalida = tipo === tipos.PAGO || tipo === tipos.RETIRO || tipo === tipos.COBRO;
 
     if (esEfectivo) {
@@ -191,8 +231,8 @@ export const movimientoService = {
     }
 
     const leyendasDigitales = {
-      Transferencia: `Se registrará como un entrada en tu cuenta de ${formaPago}.`,
-      QR: `Se registrará como un entrada en tu cuenta de ${formaPago}.`,
+      Transferencia: `Se registrará como un entrada en tu cuenta de ${fp}.`,
+      QR: `Se registrará como un entrada en tu cuenta de ${fp}.`,
       Debito: "El importe impactará a través de la terminal de tarjetas.",
       Credito: "El importe impactará a través de la terminal de tarjetas.",
       "Cta Corriente":
@@ -200,7 +240,7 @@ export const movimientoService = {
     };
 
     return (
-      leyendasDigitales[formaPago] ||
+      leyendasDigitales[fp] ||
       "Se registrará el movimiento bajo la forma de pago seleccionada."
     );
   },

@@ -13,11 +13,13 @@ const calcularSaldoEntidad = (entidadId) => {
   const movs = movimientoService.getAll().filter(
     (m) =>
       m.entidad?.id === entidadId &&
-      (m.formaPago === "Cta Corriente" || m.tipo === "Cobro"),
+      (movimientoService.tieneCtaCte(m) || m.tipo === "Cobro"),
   );
   let saldo = 0;
   movs.forEach((m) => {
-    const importe = Number(m.importe) || 0;
+    const importe = m.tipo === "Cobro"
+      ? (Number(m.importe) || 0)
+      : movimientoService.getCtaCteImporte(m);
     if (m.tipo === "Venta") {
       saldo += importe;
     } else if (m.tipo === "Cobro" || m.tipo === "Pago") {
@@ -32,7 +34,7 @@ const verificarPlazoVencido = (entidadId, plazoDias) => {
   const movs = movimientoService.getAll().filter(
     (m) =>
       m.entidad?.id === entidadId &&
-      (m.formaPago === "Cta Corriente" || m.tipo === "Cobro"),
+      (movimientoService.tieneCtaCte(m) || m.tipo === "Cobro"),
   );
   if (movs.length === 0) return false;
   const fechas = movs.map((m) => dayjs(m.fecha));

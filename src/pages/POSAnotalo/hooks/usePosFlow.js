@@ -14,6 +14,7 @@ export const usePosFlow = () => {
     importe: 0,
     lineItems: [],
     formaPago: null,
+    formaPagos: [],
     entidad: null,
   });
 
@@ -44,7 +45,7 @@ export const usePosFlow = () => {
     } else if (currentStep === STEPS.CONFIRMAR) {
       if (movimiento.entidad) {
         setCurrentStep(STEPS.ENTIDAD);
-      } else if (movimiento.formaPago) {
+    } else if (movimiento.formaPago || movimiento.formaPagos?.length > 0) {
         setCurrentStep(STEPS.FORMA_PAGO);
       } else {
         setCurrentStep(STEPS.IMPORTE);
@@ -63,7 +64,7 @@ export const usePosFlow = () => {
   };
 
   const resetMovement = () => {
-    setMovimiento({ tipo: "Venta", importe: 0, lineItems: [], formaPago: null, entidad: null });
+    setMovimiento({ tipo: "Venta", importe: 0, lineItems: [], formaPago: null, formaPagos: [], entidad: null });
     setCurrentStep(STEPS.IMPORTE);
     endMovement();
   };

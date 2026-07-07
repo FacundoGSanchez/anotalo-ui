@@ -53,7 +53,12 @@ const AdminCajaPage = () => {
     if (formasImpactanCaja.length === 0) return [];
     return movimientoService
       .getAll()
-      .filter((m) => formasImpactanCaja.includes(m.formaPago) && (!sucursalId || m.sucursalId === sucursalId))
+      .filter((m) => {
+        if (m.formaPagos?.length > 0) {
+          return m.formaPagos.some((fp) => formasImpactanCaja.includes(fp.key)) && (!sucursalId || m.sucursalId === sucursalId);
+        }
+        return formasImpactanCaja.includes(m.formaPago) && (!sucursalId || m.sucursalId === sucursalId);
+      })
       .sort((a, b) => a.id - b.id);
   }, [formasImpactanCaja, refreshKey, sucursalId]);
 
@@ -133,6 +138,7 @@ const AdminCajaPage = () => {
       tipo: movTipoModal,
       importe: Number(movImporte),
       formaPago: "Efectivo",
+      formaPagos: [{ key: "Efectivo", importe: Number(movImporte) }],
       entidad: { id: 0, nombre: "Caja Interna" },
       observacion: movObservacion,
     };
@@ -480,7 +486,7 @@ const AdminCajaPage = () => {
                               type="secondary"
                               style={{ fontSize: "11px" }}
                             >
-                              · {mov.formaPago}
+                              · {(mov.formaPagos ? mov.formaPagos.map(fp => fp.key).join(" + ") : mov.formaPago)}
                             </Text>
                           </div>
                           <Text

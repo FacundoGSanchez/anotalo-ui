@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Typography, Button, Alert, Divider } from "antd";
 import { MdSearch, MdPerson, MdWarning } from "react-icons/md";
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
@@ -8,7 +8,7 @@ import SelectorEntidadModal from "./components/SelectorEntidadModal";
 
 const { Text } = Typography;
 
-const StepEntidad = ({ tipo, formaPago, onNext, onBack }) => {
+const StepEntidad = ({ tipo, formaPago, formaPagos, onNext, onBack }) => {
   const orgId = useCurrentOrg();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const cfRef = useRef(null);
@@ -21,8 +21,17 @@ const StepEntidad = ({ tipo, formaPago, onNext, onBack }) => {
 
   const esCliente = tipo === MOVIMIENTO_TIPOS.VENTA || tipo === MOVIMIENTO_TIPOS.COBRO;
   const formasPago = orgService.getFormasPago(orgId, tipo);
-  const formaPagoObj = formasPago.find((f) => f.key === formaPago);
-  const requiereEntidad = formaPagoObj?.requiereEntidad || false;
+
+  const requiereEntidad = useMemo(() => {
+    if (formaPagos?.length > 0) {
+      return formaPagos.some((fp) => {
+        const obj = formasPago.find((f) => f.key === fp.key);
+        return obj?.requiereEntidad || false;
+      });
+    }
+    const formaPagoObj = formasPago.find((f) => f.key === formaPago);
+    return formaPagoObj?.requiereEntidad || false;
+  }, [formaPagos, formaPago, formasPago]);
 
   const tablaDB = esCliente ? "db_clientes" : "db_proveedores";
   const activeColor = esCliente ? "#1890ff" : "#fa8c16";

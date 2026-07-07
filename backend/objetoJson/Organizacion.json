@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "nombre": "Anotalo S.A.",
+  "sucursalDefault": 1,
+  "FormasPago": {
+    "Venta": [
+      { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+    ],
+    "Pago": [
+      { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+    ],
+    "Cobro": [
+      { "id": 1, "nombre": "Efectivo", "sigla": "EF", "requiereEntidad": false, "impactaCaja": true, "impactaCtaCte": false }
+    ]
+  },
+  "TiposMovimiento": ["Venta", "Pago", "Cobro", "Ingreso", "Retiro"]
+}
