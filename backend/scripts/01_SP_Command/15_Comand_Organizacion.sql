@@ -11,8 +11,6 @@ CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpOrganizacionRegistrar`(
 BEGIN
     DECLARE v_id INT;
     DECLARE v_nombre VARCHAR(150);
-    DECLARE v_sucursalDefault INT;
-    DECLARE v_tiposMovimiento JSON;
     DECLARE v_activo TINYINT;
     DECLARE v_existe INT DEFAULT 0;
 
@@ -23,29 +21,26 @@ BEGIN
         SET p_json_result = JSON_OBJECT('success', FALSE, 'error', p_mensaje);
     END;
 
-    SET v_id                = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pId'));
-    SET v_nombre            = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNombre'));
-    SET v_sucursalDefault   = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pSucursalDefault'));
-    SET v_tiposMovimiento   = JSON_EXTRACT(p_parametros, '$.pTiposMovimiento');
-    SET v_activo            = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pActivo'));
+    SET v_id      = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pId'));
+    SET v_nombre  = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNombre'));
+    SET v_activo  = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pActivo'));
 
     IF v_activo IS NULL THEN SET v_activo = 1; END IF;
 
     IF v_id IS NOT NULL AND v_id > 0 THEN
-        SELECT COUNT(1) INTO v_existe FROM Organizacion WHERE Id = v_id;
+        SELECT COUNT(1) INTO v_existe FROM Organizaciones WHERE Id = v_id;
     END IF;
 
     IF v_existe > 0 THEN
-        UPDATE Organizacion
-        SET Nombre = v_nombre, SucursalDefault = v_sucursalDefault,
-            TiposMovimiento = v_tiposMovimiento, Activo = v_activo
+        UPDATE Organizaciones
+        SET Nombre = v_nombre, Activo = v_activo
         WHERE Id = v_id;
 
         SET p_mensaje = 'Organización actualizada con éxito';
         SET p_json_result = JSON_OBJECT('id', v_id);
     ELSE
-        INSERT INTO Organizacion (Nombre, SucursalDefault, TiposMovimiento, Activo)
-        VALUES (v_nombre, v_sucursalDefault, v_tiposMovimiento, v_activo);
+        INSERT INTO Organizaciones (Nombre, Activo)
+        VALUES (v_nombre, v_activo);
 
         SET v_id = LAST_INSERT_ID();
         SET p_mensaje = 'Organización creada con éxito';

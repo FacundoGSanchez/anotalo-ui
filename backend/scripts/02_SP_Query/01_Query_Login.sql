@@ -31,7 +31,7 @@ BEGIN
 
     SELECT u.Id, u.Nombre, u.Mail, u.Username
     INTO v_usuario_id, v_usuario_nombre, v_usuario_mail, v_usuario_username
-    FROM UsuarioSistema u
+    FROM Usuarios u
     WHERE u.Username = v_username AND u.Password = v_password AND u.Activo = 1;
 
     IF v_usuario_id IS NULL THEN
@@ -44,7 +44,7 @@ BEGIN
 
         SELECT r.Nombre INTO v_rol_nombre
         FROM UsuarioRol ur
-        INNER JOIN Rol r ON r.Id = ur.RolId
+        INNER JOIN Roles r ON r.Id = ur.RolId
         WHERE ur.UsuarioId = v_usuario_id
         LIMIT 1;
 
@@ -68,7 +68,7 @@ BEGIN
                     JSON_OBJECT(
                         'id', o.Id,
                         'nombre', o.Nombre,
-                        'sucursalDefault', o.SucursalDefault,
+                        'sucursalDefault', uo.OrganizacionDefault,
                         'FormasPago', JSON_OBJECT(
                             'Venta', COALESCE((
                                 SELECT JSON_ARRAYAGG(
@@ -109,10 +109,11 @@ BEGIN
                                 ) FROM FormaPago fp
                                 WHERE fp.OrganizacionId = o.Id AND fp.Tipo = 'Cobro' AND fp.Activo = 1
                             ), JSON_ARRAY())
-                        ),
-                        'TiposMovimiento', o.TiposMovimiento
+                        )
                     )
-                ) FROM Organizacion o WHERE o.Activo = 1
+                ) FROM UsuarioOrganizacion uo
+                INNER JOIN Organizaciones o ON o.Id = uo.OrganizacionId AND o.Activo = 1
+                WHERE uo.UsuarioId = v_usuario_id
             ), JSON_ARRAY()),
             'rolesData', COALESCE((
                 SELECT JSON_ARRAYAGG(
@@ -126,10 +127,10 @@ BEGIN
                                     'formulario', p.Formulario,
                                     'acciones', p.Acciones
                                 )
-                            ) FROM Permiso p WHERE p.RolId = r.Id
+                            ) FROM RolPermisos p WHERE p.RolId = r.Id
                         ), JSON_ARRAY())
                     )
-                ) FROM Rol r WHERE r.Activo = 1
+                ) FROM Roles r WHERE r.Activo = 1
             ), JSON_ARRAY()),
             'sucursales', COALESCE((
                 SELECT JSON_ARRAYAGG(
@@ -138,7 +139,7 @@ BEGIN
                         'organizacionId', s.OrganizacionId,
                         'nombre', s.Nombre
                     )
-                ) FROM Sucursal s WHERE s.Activo = 1
+                ) FROM Sucursales s WHERE s.Activo = 1
             ), JSON_ARRAY())
         );
 

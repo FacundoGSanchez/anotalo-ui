@@ -9,12 +9,11 @@ CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpClienteRegistrar`(
     OUT p_mensaje VARCHAR(500)
 )
 BEGIN
-    DECLARE v_id BIGINT;
-    DECLARE v_nro INT;
+    DECLARE v_id INT;
     DECLARE v_nombre VARCHAR(150);
     DECLARE v_telefono VARCHAR(50);
+    DECLARE v_mail VARCHAR(150);
     DECLARE v_activo TINYINT;
-    DECLARE v_saldo DECIMAL(12,2);
     DECLARE v_ctaCteHabilitado TINYINT;
     DECLARE v_ctaCteImporteMaximo DECIMAL(12,2);
     DECLARE v_ctaCtePlazoDias INT;
@@ -27,27 +26,25 @@ BEGIN
         SET p_json_result = JSON_OBJECT('success', FALSE, 'error', p_mensaje);
     END;
 
-    SET v_id               = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pId'));
-    SET v_nro              = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNro'));
-    SET v_nombre           = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNombre'));
-    SET v_telefono         = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pTelefono'));
-    SET v_activo           = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pActivo'));
-    SET v_saldo            = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pSaldo'));
-    SET v_ctaCteHabilitado = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pCtaCteHabilitado'));
-    SET v_ctaCteImporteMaximo = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pCtaCteImporteMaximo'));
-    SET v_ctaCtePlazoDias  = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pCtaCtePlazoDias'));
+    SET v_id                   = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pId'));
+    SET v_nombre               = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNombre'));
+    SET v_telefono             = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pTelefono'));
+    SET v_mail                 = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pMail'));
+    SET v_activo               = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pActivo'));
+    SET v_ctaCteHabilitado     = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pCtaCteHabilitado'));
+    SET v_ctaCteImporteMaximo  = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pCtaCteImporteMaximo'));
+    SET v_ctaCtePlazoDias      = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pCtaCtePlazoDias'));
 
     IF v_activo IS NULL THEN SET v_activo = 1; END IF;
-    IF v_saldo IS NULL THEN SET v_saldo = 0; END IF;
 
     IF v_id IS NOT NULL AND v_id > 0 THEN
-        SELECT COUNT(1) INTO v_existe FROM Cliente WHERE Id = v_id;
+        SELECT COUNT(1) INTO v_existe FROM Clientees WHERE Id = v_id;
     END IF;
 
     IF v_existe > 0 THEN
-        UPDATE Cliente
-        SET Nro = v_nro, Nombre = v_nombre, Telefono = v_telefono,
-            Activo = v_activo, Saldo = v_saldo,
+        UPDATE Clientees
+        SET Nombre = v_nombre, Telefono = v_telefono, Mail = v_mail,
+            Activo = v_activo,
             CtaCteHabilitado = IFNULL(v_ctaCteHabilitado, 0),
             CtaCteImporteMaximo = v_ctaCteImporteMaximo,
             CtaCtePlazoDias = v_ctaCtePlazoDias
@@ -60,9 +57,9 @@ BEGIN
             SET v_id = UNIX_TIMESTAMP() * 1000 + FLOOR(RAND() * 1000);
         END IF;
 
-        INSERT INTO Cliente (Id, Nro, Nombre, Telefono, Activo, Saldo,
-                             CtaCteHabilitado, CtaCteImporteMaximo, CtaCtePlazoDias)
-        VALUES (v_id, v_nro, v_nombre, v_telefono, v_activo, v_saldo,
+        INSERT INTO Clientees (Id, Nombre, Telefono, Mail, Activo,
+                               CtaCteHabilitado, CtaCteImporteMaximo, CtaCtePlazoDias)
+        VALUES (v_id, v_nombre, v_telefono, v_mail, v_activo,
                 IFNULL(v_ctaCteHabilitado, 0), v_ctaCteImporteMaximo, v_ctaCtePlazoDias);
 
         SET p_mensaje = 'Cliente creado con éxito';

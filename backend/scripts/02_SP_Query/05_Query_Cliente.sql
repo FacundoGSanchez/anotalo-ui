@@ -1,29 +1,33 @@
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS `SpProveedorObtener`$$
+DROP PROCEDURE IF EXISTS `SpClienteObtener`$$
 
-CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpProveedorObtener`(
+CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpClienteObtener`(
     IN p_parametros JSON,
     OUT p_json_result JSON,
     OUT p_result INT,
     OUT p_mensaje VARCHAR(500)
 )
 BEGIN
-    DECLARE v_id BIGINT;
-    DECLARE v_nro INT;
+    DECLARE v_id INT;
     DECLARE v_nombre VARCHAR(150);
     DECLARE v_telefono VARCHAR(50);
+    DECLARE v_mail VARCHAR(150);
     DECLARE v_activo TINYINT;
-    DECLARE v_saldo DECIMAL(12,2);
+    DECLARE v_ctaCteSaldo DECIMAL(12,2);
+    DECLARE v_ctaCteHabilitado TINYINT;
+    DECLARE v_ctaCteImporteMaximo DECIMAL(12,2);
+    DECLARE v_ctaCtePlazoDias INT;
     DECLARE v_fecha TIMESTAMP;
     DECLARE v_done INT DEFAULT FALSE;
 
-    DECLARE v_filtroId BIGINT;
+    DECLARE v_filtroId INT;
     DECLARE v_filtroActivo INT;
 
     DECLARE cur CURSOR FOR
-        SELECT Id, Nro, Nombre, Telefono, Activo, Saldo, FechaRegistro
-        FROM Proveedor
+        SELECT Id, Nombre, Telefono, Mail, Activo,
+               CtaCteSaldo, CtaCteHabilitado, CtaCteImporteMaximo, CtaCtePlazoDias, FechaRegistro
+        FROM Clientees
         WHERE (v_filtroId IS NULL OR Id = v_filtroId)
           AND (v_filtroActivo IS NULL OR Activo = v_filtroActivo)
         ORDER BY Nombre;
@@ -43,7 +47,8 @@ BEGIN
 
     OPEN cur;
     read_loop: LOOP
-        FETCH cur INTO v_id, v_nro, v_nombre, v_telefono, v_activo, v_saldo, v_fecha;
+        FETCH cur INTO v_id, v_nombre, v_telefono, v_mail, v_activo,
+                       v_ctaCteSaldo, v_ctaCteHabilitado, v_ctaCteImporteMaximo, v_ctaCtePlazoDias, v_fecha;
         IF v_done THEN
             LEAVE read_loop;
         END IF;
@@ -51,11 +56,16 @@ BEGIN
         SET p_json_result = JSON_ARRAY_APPEND(p_json_result, '$',
             JSON_OBJECT(
                 'id', v_id,
-                'nro', v_nro,
                 'nombre', v_nombre,
                 'telefono', v_telefono,
+                'mail', v_mail,
                 'activo', v_activo,
-                'saldo', v_saldo,
+                'ctaCteSaldo', v_ctaCteSaldo,
+                'ctaCteConfig', JSON_OBJECT(
+                    'habilitado', v_ctaCteHabilitado,
+                    'importeMaximo', v_ctaCteImporteMaximo,
+                    'plazoDias', v_ctaCtePlazoDias
+                ),
                 'fechaRegistro', v_fecha
             )
         );
@@ -63,7 +73,7 @@ BEGIN
     CLOSE cur;
 
     SET p_result = 1;
-    SET p_mensaje = 'Proveedores obtenidos correctamente';
+    SET p_mensaje = 'Clientes obtenidos correctamente';
 END$$
 
 DELIMITER ;

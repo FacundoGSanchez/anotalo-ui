@@ -9,26 +9,25 @@ CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpCierreObtener`(
     OUT p_mensaje VARCHAR(500)
 )
 BEGIN
-    DECLARE v_id BIGINT;
-    DECLARE v_fecha DATE;
-    DECLARE v_hora VARCHAR(10);
+    DECLARE v_id INT;
+    DECLARE v_fechaReg TIMESTAMP;
     DECLARE v_saldo DECIMAL(12,2);
     DECLARE v_usuarioId INT;
     DECLARE v_sucursalId INT;
-    DECLARE v_fechaReg TIMESTAMP;
+    DECLARE v_organizacionId INT;
     DECLARE v_done INT DEFAULT FALSE;
 
-    DECLARE v_filtroId BIGINT;
+    DECLARE v_filtroId INT;
     DECLARE v_filtroSucursalId INT;
     DECLARE v_filtroFecha DATE;
 
     DECLARE cur CURSOR FOR
-        SELECT c.Id, c.Fecha, c.Hora, c.Saldo, c.UsuarioId, c.SucursalId, c.FechaRegistro
-        FROM Cierre c
+        SELECT c.Id, c.FechaRegistro, c.Saldo, c.UsuarioId, c.SucursalId, c.OrganizacionId
+        FROM AdminCajaCierre c
         WHERE (v_filtroId IS NULL OR c.Id = v_filtroId)
           AND (v_filtroSucursalId IS NULL OR c.SucursalId = v_filtroSucursalId)
-          AND (v_filtroFecha IS NULL OR c.Fecha = v_filtroFecha)
-        ORDER BY c.Fecha DESC;
+          AND (v_filtroFecha IS NULL OR DATE(c.FechaRegistro) = v_filtroFecha)
+        ORDER BY c.FechaRegistro DESC;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = TRUE;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -46,7 +45,7 @@ BEGIN
 
     OPEN cur;
     read_loop: LOOP
-        FETCH cur INTO v_id, v_fecha, v_hora, v_saldo, v_usuarioId, v_sucursalId, v_fechaReg;
+        FETCH cur INTO v_id, v_fechaReg, v_saldo, v_usuarioId, v_sucursalId, v_organizacionId;
         IF v_done THEN
             LEAVE read_loop;
         END IF;
@@ -54,12 +53,11 @@ BEGIN
         SET p_json_result = JSON_ARRAY_APPEND(p_json_result, '$',
             JSON_OBJECT(
                 'id', v_id,
-                'fecha', v_fecha,
-                'hora', v_hora,
+                'fechaRegistro', v_fechaReg,
                 'saldo', v_saldo,
                 'usuarioId', v_usuarioId,
                 'sucursalId', v_sucursalId,
-                'fechaRegistro', v_fechaReg
+                'organizacionId', v_organizacionId
             )
         );
     END LOOP;

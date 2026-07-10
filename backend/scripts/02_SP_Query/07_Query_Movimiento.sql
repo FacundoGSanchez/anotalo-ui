@@ -9,36 +9,34 @@ CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpMovimientoObtener`(
     OUT p_mensaje VARCHAR(500)
 )
 BEGIN
-    DECLARE v_id BIGINT;
+    DECLARE v_id INT;
     DECLARE v_tipo VARCHAR(20);
     DECLARE v_importe DECIMAL(12,2);
-    DECLARE v_entidadId BIGINT;
+    DECLARE v_entidadId INT;
     DECLARE v_entidadNombre VARCHAR(150);
-    DECLARE v_fecha DATE;
-    DECLARE v_hora VARCHAR(10);
+    DECLARE v_fechaReg TIMESTAMP;
     DECLARE v_usuarioId INT;
     DECLARE v_sucursalId INT;
-    DECLARE v_saldoCtaCte DECIMAL(12,2);
+    DECLARE v_organizacionId INT;
     DECLARE v_observacion TEXT;
-    DECLARE v_fechaReg TIMESTAMP;
     DECLARE v_done INT DEFAULT FALSE;
 
-    DECLARE v_filtroId BIGINT;
+    DECLARE v_filtroId INT;
     DECLARE v_filtroSucursalId INT;
     DECLARE v_filtroTipo VARCHAR(20);
     DECLARE v_filtroFechaDesde DATE;
     DECLARE v_filtroFechaHasta DATE;
 
     DECLARE cur CURSOR FOR
-        SELECT m.Id, m.Tipo, m.Importe, m.EntidadId, m.EntidadNombre,
-               m.Fecha, m.Hora, m.UsuarioId, m.SucursalId, m.SaldoCtaCte, m.Observacion, m.FechaRegistro
-        FROM Movimiento m
+        SELECT m.Id, m.Tipo, m.ImporteTotal, m.EntidadId, m.EntidadNombre,
+               m.FechaRegistro, m.UsuarioId, m.SucursalId, m.OrganizacionId, m.Observacion
+        FROM Movimientos m
         WHERE (v_filtroId IS NULL OR m.Id = v_filtroId)
           AND (v_filtroSucursalId IS NULL OR m.SucursalId = v_filtroSucursalId)
           AND (v_filtroTipo IS NULL OR m.Tipo = v_filtroTipo)
-          AND (v_filtroFechaDesde IS NULL OR m.Fecha >= v_filtroFechaDesde)
-          AND (v_filtroFechaHasta IS NULL OR m.Fecha <= v_filtroFechaHasta)
-        ORDER BY m.Fecha DESC, m.Id DESC;
+          AND (v_filtroFechaDesde IS NULL OR DATE(m.FechaRegistro) >= v_filtroFechaDesde)
+          AND (v_filtroFechaHasta IS NULL OR DATE(m.FechaRegistro) <= v_filtroFechaHasta)
+        ORDER BY m.FechaRegistro DESC, m.Id DESC;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = TRUE;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -59,7 +57,7 @@ BEGIN
     OPEN cur;
     read_loop: LOOP
         FETCH cur INTO v_id, v_tipo, v_importe, v_entidadId, v_entidadNombre,
-                       v_fecha, v_hora, v_usuarioId, v_sucursalId, v_saldoCtaCte, v_observacion, v_fechaReg;
+                       v_fechaReg, v_usuarioId, v_sucursalId, v_organizacionId, v_observacion;
         IF v_done THEN
             LEAVE read_loop;
         END IF;
@@ -72,39 +70,33 @@ BEGIN
                 'lineItems', COALESCE((
                     SELECT JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'id', li.Id,
-                            'importe', li.Importe,
-                            'rubro', JSON_OBJECT(
-                                'id', r.Id,
-                                'sigla', r.Sigla,
-                                'nombre', r.Nombre,
-                                'grupo', r.Grupo
-                            )
+                            'id', md.Id,
+                            'importe', md.Importe,
+                            'itemId', md.ItemId,
+                            'itemDetalle', md.ItemDetalle
                         )
-                    ) FROM LineItem li
-                    LEFT JOIN Rubro r ON r.Id = li.RubroId
-                    WHERE li.MovimientoId = v_id
+                    ) FROM MovimientoDetalle md
+                    WHERE md.MovimientoId = v_id
                 ), JSON_ARRAY()),
                 'formaPagos', COALESCE((
                     SELECT JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'nombre', mfp.Nombre,
+                            'nombre', fp.Nombre,
                             'importe', mfp.Importe
                         )
                     ) FROM MovimientoFormaPago mfp
+                    INNER JOIN FormaPago fp ON fp.Id = mfp.FormaPagoId
                     WHERE mfp.MovimientoId = v_id
                 ), JSON_ARRAY()),
                 'entidad', JSON_OBJECT(
                     'id', v_entidadId,
                     'nombre', v_entidadNombre
                 ),
-                'fecha', v_fecha,
-                'hora', v_hora,
+                'fechaRegistro', v_fechaReg,
                 'usuarioId', v_usuarioId,
                 'sucursalId', v_sucursalId,
-                'saldoCtaCte', v_saldoCtaCte,
-                'observacion', v_observacion,
-                'fechaRegistro', v_fechaReg
+                'organizacionId', v_organizacionId,
+                'observacion', v_observacion
             )
         );
     END LOOP;

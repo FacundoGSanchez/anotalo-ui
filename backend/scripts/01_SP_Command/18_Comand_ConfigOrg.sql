@@ -13,7 +13,7 @@ BEGIN
     DECLARE v_organizacionId INT;
     DECLARE v_tipo VARCHAR(20);
     DECLARE v_nombre VARCHAR(100);
-    DECLARE v_sigla VARCHAR(10);
+    DECLARE v_sigla VARCHAR(2);
     DECLARE v_requiereEntidad TINYINT;
     DECLARE v_impactaCaja TINYINT;
     DECLARE v_impactaCtaCte TINYINT;
@@ -80,7 +80,6 @@ BEGIN
     DECLARE v_organizacionId INT;
     DECLARE v_sigla VARCHAR(10);
     DECLARE v_nombre VARCHAR(100);
-    DECLARE v_grupo VARCHAR(100);
     DECLARE v_activo TINYINT;
     DECLARE v_existe INT DEFAULT 0;
 
@@ -95,26 +94,24 @@ BEGIN
     SET v_organizacionId  = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pOrganizacionId'));
     SET v_sigla           = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pSigla'));
     SET v_nombre          = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNombre'));
-    SET v_grupo           = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pGrupo'));
     SET v_activo          = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pActivo'));
 
     IF v_activo IS NULL THEN SET v_activo = 1; END IF;
 
     IF v_id IS NOT NULL AND v_id > 0 THEN
-        SELECT COUNT(1) INTO v_existe FROM Rubro WHERE Id = v_id;
+        SELECT COUNT(1) INTO v_existe FROM Rubros WHERE Id = v_id;
     END IF;
 
     IF v_existe > 0 THEN
-        UPDATE Rubro
-        SET OrganizacionId = v_organizacionId, Sigla = v_sigla, Nombre = v_nombre,
-            Grupo = v_grupo, Activo = v_activo
+        UPDATE Rubros
+        SET OrganizacionId = v_organizacionId, Sigla = v_sigla, Nombre = v_nombre, Activo = v_activo
         WHERE Id = v_id;
 
         SET p_mensaje = 'Rubro actualizado con éxito';
         SET p_json_result = JSON_OBJECT('id', v_id);
     ELSE
-        INSERT INTO Rubro (OrganizacionId, Sigla, Nombre, Grupo, Activo)
-        VALUES (v_organizacionId, v_sigla, v_nombre, v_grupo, v_activo);
+        INSERT INTO Rubros (OrganizacionId, Sigla, Nombre, Activo)
+        VALUES (v_organizacionId, v_sigla, v_nombre, v_activo);
 
         SET v_id = LAST_INSERT_ID();
         SET p_mensaje = 'Rubro creado con éxito';

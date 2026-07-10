@@ -42,16 +42,16 @@ BEGIN
     IF v_activo IS NULL THEN SET v_activo = 1; END IF;
 
     IF v_id IS NOT NULL AND v_id > 0 THEN
-        SELECT COUNT(1) INTO v_existe FROM UsuarioSistema WHERE Id = v_id;
+        SELECT COUNT(1) INTO v_existe FROM Usuarios WHERE Id = v_id;
     END IF;
 
     IF v_existe > 0 THEN
-        UPDATE UsuarioSistema
+        UPDATE Usuarios
         SET Username = v_username, Mail = v_mail, Nombre = v_nombre, Activo = v_activo
         WHERE Id = v_id;
 
         IF v_password IS NOT NULL AND v_password != '' THEN
-            UPDATE UsuarioSistema SET Password = v_password WHERE Id = v_id;
+            UPDATE Usuarios SET Password = v_password WHERE Id = v_id;
         END IF;
 
         DELETE FROM UsuarioRol WHERE UsuarioId = v_id;
@@ -59,7 +59,7 @@ BEGIN
 
         SET p_mensaje = 'Usuario actualizado con éxito';
     ELSE
-        INSERT INTO UsuarioSistema (Username, Password, Mail, Nombre, Activo)
+        INSERT INTO Usuarios (Username, Password, Mail, Nombre, Activo)
         VALUES (v_username, v_password, v_mail, v_nombre, v_activo);
 
         SET v_id = LAST_INSERT_ID();

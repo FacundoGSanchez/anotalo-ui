@@ -30,18 +30,18 @@ BEGIN
     IF v_activo IS NULL THEN SET v_activo = 1; END IF;
 
     IF v_id IS NOT NULL AND v_id > 0 THEN
-        SELECT COUNT(1) INTO v_existe FROM Sucursal WHERE Id = v_id;
+        SELECT COUNT(1) INTO v_existe FROM Sucursales WHERE Id = v_id;
     END IF;
 
     IF v_existe > 0 THEN
-        UPDATE Sucursal
+        UPDATE Sucursales
         SET OrganizacionId = v_organizacionId, Nombre = v_nombre, Activo = v_activo
         WHERE Id = v_id;
 
         SET p_mensaje = 'Sucursal actualizada con éxito';
         SET p_json_result = JSON_OBJECT('id', v_id);
     ELSE
-        INSERT INTO Sucursal (OrganizacionId, Nombre, Activo)
+        INSERT INTO Sucursales (OrganizacionId, Nombre, Activo)
         VALUES (v_organizacionId, v_nombre, v_activo);
 
         SET v_id = LAST_INSERT_ID();

@@ -22,7 +22,7 @@ BEGIN
 
     DECLARE cur CURSOR FOR
         SELECT u.Id, u.Username, u.Mail, u.Nombre, u.Activo, u.FechaRegistro
-        FROM UsuarioSistema u
+        FROM Usuarios u
         WHERE (v_filtroId IS NULL OR u.Id = v_filtroId)
           AND (v_filtroActivo IS NULL OR u.Activo = v_filtroActivo)
         ORDER BY u.Nombre;
@@ -67,7 +67,7 @@ BEGIN
                             'nombre', s.Nombre
                         )
                     ) FROM UsuarioSucursal us
-                    INNER JOIN Sucursal s ON s.Id = us.SucursalId
+                    INNER JOIN Sucursales s ON s.Id = us.SucursalId
                     WHERE us.UsuarioId = v_id
                 ), JSON_ARRAY()),
                 'fechaRegistro', v_fecha
@@ -99,7 +99,7 @@ BEGIN
 
     DECLARE cur CURSOR FOR
         SELECT r.Id, r.Nombre, r.Activo, r.FechaRegistro
-        FROM Rol r
+        FROM Roles r
         WHERE (v_filtroId IS NULL OR r.Id = v_filtroId)
         ORDER BY r.Nombre;
 
@@ -134,7 +134,7 @@ BEGIN
                             'formulario', p.Formulario,
                             'acciones', p.Acciones
                         )
-                    ) FROM Permiso p WHERE p.RolId = v_id
+                    ) FROM RolPermisos p WHERE p.RolId = v_id
                 ), JSON_ARRAY()),
                 'fechaRegistro', v_fecha
             )

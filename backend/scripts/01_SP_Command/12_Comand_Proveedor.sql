@@ -9,12 +9,11 @@ CREATE DEFINER=`anotalo_user`@`%` PROCEDURE `SpProveedorRegistrar`(
     OUT p_mensaje VARCHAR(500)
 )
 BEGIN
-    DECLARE v_id BIGINT;
-    DECLARE v_nro INT;
+    DECLARE v_id INT;
     DECLARE v_nombre VARCHAR(150);
     DECLARE v_telefono VARCHAR(50);
+    DECLARE v_mail VARCHAR(150);
     DECLARE v_activo TINYINT;
-    DECLARE v_saldo DECIMAL(12,2);
     DECLARE v_existe INT DEFAULT 0;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -25,23 +24,20 @@ BEGIN
     END;
 
     SET v_id       = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pId'));
-    SET v_nro      = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNro'));
     SET v_nombre   = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pNombre'));
     SET v_telefono = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pTelefono'));
+    SET v_mail     = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pMail'));
     SET v_activo   = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pActivo'));
-    SET v_saldo    = JSON_UNQUOTE(JSON_EXTRACT(p_parametros, '$.pSaldo'));
 
     IF v_activo IS NULL THEN SET v_activo = 1; END IF;
-    IF v_saldo IS NULL THEN SET v_saldo = 0; END IF;
 
     IF v_id IS NOT NULL AND v_id > 0 THEN
-        SELECT COUNT(1) INTO v_existe FROM Proveedor WHERE Id = v_id;
+        SELECT COUNT(1) INTO v_existe FROM Proveedores WHERE Id = v_id;
     END IF;
 
     IF v_existe > 0 THEN
-        UPDATE Proveedor
-        SET Nro = v_nro, Nombre = v_nombre, Telefono = v_telefono,
-            Activo = v_activo, Saldo = v_saldo
+        UPDATE Proveedores
+        SET Nombre = v_nombre, Telefono = v_telefono, Mail = v_mail, Activo = v_activo
         WHERE Id = v_id;
 
         SET p_mensaje = 'Proveedor actualizado con éxito';
@@ -51,8 +47,8 @@ BEGIN
             SET v_id = UNIX_TIMESTAMP() * 1000 + FLOOR(RAND() * 1000);
         END IF;
 
-        INSERT INTO Proveedor (Id, Nro, Nombre, Telefono, Activo, Saldo)
-        VALUES (v_id, v_nro, v_nombre, v_telefono, v_activo, v_saldo);
+        INSERT INTO Proveedores (Id, Nombre, Telefono, Mail, Activo)
+        VALUES (v_id, v_nombre, v_telefono, v_mail, v_activo);
 
         SET p_mensaje = 'Proveedor creado con éxito';
         SET p_json_result = JSON_OBJECT('id', v_id);

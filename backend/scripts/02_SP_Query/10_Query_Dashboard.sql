@@ -35,43 +35,43 @@ BEGIN
         SET v_fecha = CURDATE();
     END IF;
 
-    SELECT COALESCE(SUM(Importe), 0) INTO v_totalVentas
-    FROM Movimiento
+    SELECT COALESCE(SUM(ImporteTotal), 0) INTO v_totalVentas
+    FROM Movimientos
     WHERE Tipo = 'Venta'
       AND (v_sucursalId IS NULL OR SucursalId = v_sucursalId)
-      AND Fecha = v_fecha;
+      AND DATE(FechaRegistro) = v_fecha;
 
-    SELECT COALESCE(SUM(Importe), 0) INTO v_totalPagos
-    FROM Movimiento
+    SELECT COALESCE(SUM(ImporteTotal), 0) INTO v_totalPagos
+    FROM Movimientos
     WHERE Tipo = 'Pago'
       AND (v_sucursalId IS NULL OR SucursalId = v_sucursalId)
-      AND Fecha = v_fecha;
+      AND DATE(FechaRegistro) = v_fecha;
 
-    SELECT COALESCE(SUM(Importe), 0) INTO v_totalCobros
-    FROM Movimiento
+    SELECT COALESCE(SUM(ImporteTotal), 0) INTO v_totalCobros
+    FROM Movimientos
     WHERE Tipo = 'Cobro'
       AND (v_sucursalId IS NULL OR SucursalId = v_sucursalId)
-      AND Fecha = v_fecha;
+      AND DATE(FechaRegistro) = v_fecha;
 
-    SELECT COALESCE(SUM(Importe), 0) INTO v_totalIngresos
-    FROM Movimiento
+    SELECT COALESCE(SUM(ImporteTotal), 0) INTO v_totalIngresos
+    FROM Movimientos
     WHERE Tipo = 'Ingreso'
       AND (v_sucursalId IS NULL OR SucursalId = v_sucursalId)
-      AND Fecha = v_fecha;
+      AND DATE(FechaRegistro) = v_fecha;
 
-    SELECT COALESCE(SUM(Importe), 0) INTO v_totalRetiros
-    FROM Movimiento
+    SELECT COALESCE(SUM(ImporteTotal), 0) INTO v_totalRetiros
+    FROM Movimientos
     WHERE Tipo = 'Retiro'
       AND (v_sucursalId IS NULL OR SucursalId = v_sucursalId)
-      AND Fecha = v_fecha;
+      AND DATE(FechaRegistro) = v_fecha;
 
     SELECT COUNT(1) INTO v_cantMovimientos
-    FROM Movimiento
+    FROM Movimientos
     WHERE (v_sucursalId IS NULL OR SucursalId = v_sucursalId)
-      AND Fecha = v_fecha;
+      AND DATE(FechaRegistro) = v_fecha;
 
-    SELECT COUNT(1) INTO v_cantClientes FROM Cliente WHERE Activo = 1;
-    SELECT COUNT(1) INTO v_cantProveedores FROM Proveedor WHERE Activo = 1;
+    SELECT COUNT(1) INTO v_cantClientes FROM Clientees WHERE Activo = 1;
+    SELECT COUNT(1) INTO v_cantProveedores FROM Proveedores WHERE Activo = 1;
 
     SET p_json_result = JSON_OBJECT(
         'resumen', JSON_OBJECT(
