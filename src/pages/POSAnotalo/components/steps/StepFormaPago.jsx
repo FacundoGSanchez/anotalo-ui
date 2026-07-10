@@ -1,25 +1,37 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Typography, Space, Switch, InputNumber } from "antd";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+import { Typography, Space, Switch } from "antd";
 import { MdCheckCircle, MdRadioButtonUnchecked } from "react-icons/md";
 import { MOVIMIENTO_TIPOS } from "../../../../constants/posConstants";
 import { orgService } from "../../../../services/orgService";
 import { useCurrentOrg } from "../../../../hooks/useCurrentOrg";
+import CalcMultipleFormaPago from "./components/CalcMultipleFormaPago";
 
 const { Text } = Typography;
 
-const formatMoney = (v) =>
-  `$ ${Number(v || 0).toLocaleString("es-AR")}`;
+const formatMoney = (v) => `$ ${Number(v || 0).toLocaleString("es-AR")}`;
 
-const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
+const StepFormaPago = ({ tipo, importe = 0, onNext }) => {
   const orgId = useCurrentOrg();
   const containerRef = useRef(null);
   const [multiPago, setMultiPago] = useState(false);
   const [selected, setSelected] = useState({});
+  const [modalKey, setModalKey] = useState(null);
+  const isNewCheckRef = useRef(false);
 
   const formasPagoOrg = orgService.getFormasPago(orgId, tipo);
+  const modalForma = formasPagoOrg.find((f) => f.key === modalKey);
 
   const opcionesFiltradas = formasPagoOrg.filter((opt) => {
-    if ((tipo === MOVIMIENTO_TIPOS.PAGO || tipo === MOVIMIENTO_TIPOS.COBRO) && opt.key === "Cta Corriente")
+    if (
+      (tipo === MOVIMIENTO_TIPOS.PAGO || tipo === MOVIMIENTO_TIPOS.COBRO) &&
+      opt.key === "Cta Corriente"
+    )
       return false;
     return true;
   });
@@ -38,7 +50,9 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
     if (cards.length > 0) cards[0].focus();
     const handleKeyDown = (e) => {
       const cardsArr = Array.from(container.querySelectorAll("[data-fp-card]"));
-      const currentIndex = cardsArr.findIndex((c) => c === document.activeElement);
+      const currentIndex = cardsArr.findIndex(
+        (c) => c === document.activeElement,
+      );
       if (e.key === "ArrowDown" || e.key === "Tab") {
         if (currentIndex === cardsArr.length - 1) return;
         e.preventDefault();
@@ -58,49 +72,72 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
     if (!checked) setSelected({});
   }, []);
 
-  const handleCheck = useCallback((key, checked) => {
-    if (checked) {
+  const handleCheck = useCallback(
+    (key, checked) => {
+      if (checked) {
+        isNewCheckRef.current = true;
+        setSelected((prev) => ({ ...prev, [key]: 0 }));
+        setModalKey(key);
+      } else {
+        setSelected((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        if (modalKey === key) setModalKey(null);
+      }
+    },
+    [modalKey],
+  );
+
+  const getInitialForModal = useCallback(
+    (key) => {
+      if (selected[key] !== undefined) return selected[key];
+      return 0;
+    },
+    [selected],
+  );
+
+  const handleConfirmImporte = useCallback(
+    (key, value) => {
       setSelected((prev) => {
-        const keys = Object.keys(prev);
-        if (keys.length === 0) {
-          return { [key]: importe };
-        }
-        const currentSum = Object.values(prev).reduce((s, v) => s + (Number(v) || 0), 0);
-        const resto = importe - currentSum;
-        return { ...prev, [key]: Math.max(0, resto) };
+        const otrosSum = Object.entries(prev)
+          .filter(([k]) => k !== key)
+          .reduce((s, [, v]) => s + (Number(v) || 0), 0);
+        const maxPosible = Math.max(0, importe - otrosSum);
+        return { ...prev, [key]: Math.min(value, maxPosible) };
       });
-    } else {
+      setModalKey(null);
+    },
+    [importe],
+  );
+
+  const handleCancelImporte = useCallback(() => {
+    if (isNewCheckRef.current && modalKey) {
       setSelected((prev) => {
+        if (prev[modalKey] === undefined) return prev;
         const next = { ...prev };
-        delete next[key];
-        const keys = Object.keys(next);
-        if (keys.length === 1) {
-          next[keys[0]] = importe;
-        }
+        delete next[modalKey];
         return next;
       });
     }
-  }, [importe]);
+    setModalKey(null);
+  }, [modalKey]);
 
-  const handleImporteChange = useCallback((key, value) => {
-    const numVal = Number(value) || 0;
-    setSelected((prev) => {
-      const otrosSum = Object.entries(prev)
-        .filter(([k]) => k !== key)
-        .reduce((s, [, v]) => s + (Number(v) || 0), 0);
-      const maxPosible = Math.max(0, importe - otrosSum);
-      return { ...prev, [key]: Math.min(numVal, maxPosible) };
-    });
-  }, [importe]);
-
-  const handleSingleSelect = useCallback((key) => {
-    onNext({ formaPago: key, formaPagos: [{ key, importe }] });
-  }, [importe, onNext]);
+  const handleSingleSelect = useCallback(
+    (key) => {
+      onNext({ formaPago: key, formaPagos: [{ key, importe }] });
+    },
+    [importe, onNext],
+  );
 
   const handleContinue = useCallback(() => {
     const entries = Object.entries(selected).filter(([, v]) => Number(v) > 0);
     if (entries.length === 0) return;
-    const formaPagos = entries.map(([key, importe]) => ({ key, importe: Number(importe) }));
+    const formaPagos = entries.map(([key, importe]) => ({
+      key,
+      importe: Number(importe),
+    }));
     onNext({ formaPago: entries[0][0], formaPagos });
   }, [selected, onNext]);
 
@@ -148,11 +185,7 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
         >
           PAGO MÚLTIPLE
         </Text>
-        <Switch
-          checked={multiPago}
-          onChange={handleToggleMulti}
-          size="small"
-        />
+        <Switch checked={multiPago} onChange={handleToggleMulti} size="small" />
       </div>
 
       {/* CARDS */}
@@ -186,7 +219,8 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
                 onMouseLeave={(e) => {
                   if (!multiPago) {
                     e.currentTarget.style.borderColor = "#f0f0f0";
-                    e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 6px rgba(0,0,0,0.02)";
                   }
                 }}
                 onFocus={(e) => {
@@ -198,7 +232,8 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
                 onBlur={(e) => {
                   if (!multiPago) {
                     e.currentTarget.style.borderColor = "#f0f0f0";
-                    e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.02)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 6px rgba(0,0,0,0.02)";
                   }
                 }}
               >
@@ -246,7 +281,11 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
                         e.currentTarget.style.background = "transparent";
                       }}
                     >
-                      {isChecked ? <MdCheckCircle /> : <MdRadioButtonUnchecked />}
+                      {isChecked ? (
+                        <MdCheckCircle />
+                      ) : (
+                        <MdRadioButtonUnchecked />
+                      )}
                     </div>
 
                     {/* LABEL + ICON */}
@@ -290,22 +329,42 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
                       </Text>
                     </div>
 
-                    {/* INPUT IMPORTE */}
-                    <InputNumber
-                      value={isChecked ? selected[opt.key] : 0}
-                      disabled={!isChecked}
-                      onChange={(val) => handleImporteChange(opt.key, val)}
-                      min={0}
-                      max={importe}
-                      formatter={(v) => `$ ${v}`}
-                      parser={(v) => v.replace(/[^0-9]/g, "")}
-                      style={{
-                        width: "120px",
-                        borderRadius: "10px",
-                        flexShrink: 0,
+                    {/* IMPORTE TEXT — click opens calculator */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isChecked) {
+                          isNewCheckRef.current = false;
+                          setModalKey(opt.key);
+                        } else {
+                          handleCheck(opt.key, true);
+                        }
                       }}
-                      size="small"
-                    />
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: "8px",
+                        background: isChecked
+                          ? `${opt.color}12`
+                          : "transparent",
+                        border: `1px solid ${isChecked ? opt.color : "transparent"}`,
+                        cursor: "pointer",
+                        flexShrink: 0,
+                        minWidth: "90px",
+                        textAlign: "right",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "14px",
+                          color: isChecked ? opt.color : "#d9d9d9",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {isChecked ? formatMoney(selected[opt.key]) : "$ 0"}
+                      </Text>
+                    </div>
                   </div>
                 ) : (
                   <div
@@ -353,19 +412,31 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
       {multiPago && (
         <div
           style={{
-            background: saldo === 0 ? "#f6ffed" : "#fffbe6",
+            background: "#f8f9fa",
             borderRadius: "12px",
             padding: "10px 14px",
-            border: `1px solid ${saldo === 0 ? "#b7eb8f" : "#ffe58f"}`,
+            border: "1px solid #f0f0f0",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "8px",
+            }}
+          >
             <div>
               <Text
-                style={{ fontSize: "11px", color: "#8c8c8c", display: "block", fontWeight: 600 }}
+                style={{
+                  fontSize: "11px",
+                  color: "#8c8c8c",
+                  display: "block",
+                  fontWeight: 600,
+                }}
               >
                 TOTAL
               </Text>
@@ -373,9 +444,14 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
                 {formatMoney(importe)}
               </Text>
             </div>
-            <div>
+            <div style={{ textAlign: "center" }}>
               <Text
-                style={{ fontSize: "11px", color: "#8c8c8c", display: "block", fontWeight: 600 }}
+                style={{
+                  fontSize: "11px",
+                  color: "#8c8c8c",
+                  display: "block",
+                  fontWeight: 600,
+                }}
               >
                 ASIGNADO
               </Text>
@@ -383,9 +459,14 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
                 {formatMoney(asignado)}
               </Text>
             </div>
-            <div>
+            <div style={{ textAlign: "right" }}>
               <Text
-                style={{ fontSize: "11px", color: "#8c8c8c", display: "block", fontWeight: 600 }}
+                style={{
+                  fontSize: "11px",
+                  color: "#8c8c8c",
+                  display: "block",
+                  fontWeight: 600,
+                }}
               >
                 SALDO
               </Text>
@@ -400,9 +481,6 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
               </Text>
             </div>
           </div>
-          {saldo === 0 && selectedCount > 0 && (
-            <MdCheckCircle size={22} color="#52c41a" />
-          )}
         </div>
       )}
 
@@ -417,44 +495,35 @@ const StepFormaPago = ({ tipo, importe = 0, onNext, onBack }) => {
             fontSize: "16px",
             fontWeight: 700,
             border: "none",
-            background: saldo === 0 && selectedCount > 0 ? "#52c41a" : "#d9d9d9",
+            background:
+              saldo === 0 && selectedCount > 0 ? "#52c41a" : "#d9d9d9",
             color: saldo === 0 && selectedCount > 0 ? "#fff" : "#a6a6a6",
-            cursor: saldo === 0 && selectedCount > 0 ? "pointer" : "not-allowed",
+            cursor:
+              saldo === 0 && selectedCount > 0 ? "pointer" : "not-allowed",
             transition: "all 0.15s",
             width: "100%",
             letterSpacing: "0.5px",
           }}
           onMouseDown={(e) => e.preventDefault()}
         >
-          {saldo !== 0
-            ? `CONTINUAR (${formatMoney(saldo)} pendiente)`
-            : "CONTINUAR"}
+          CONTINUAR
         </button>
       )}
 
-      {/* VOLVER */}
-      {onBack && (
-        <button
-          tabIndex={0}
-          onClick={onBack}
-          onFocus={(e) => { e.currentTarget.style.borderColor = "#1890ff"; e.currentTarget.style.color = "#1890ff"; }}
-          onBlur={(e) => { e.currentTarget.style.borderColor = "#d9d9d9"; e.currentTarget.style.color = "#8c8c8c"; }}
-          style={{
-            height: "50px",
-            borderRadius: "14px",
-            fontSize: "16px",
-            fontWeight: 600,
-            border: "2px solid #d9d9d9",
-            background: "#fff",
-            color: "#8c8c8c",
-            cursor: "pointer",
-            transition: "all 0.15s",
-            width: "100%",
+      {/* Modal calculadora multi-pago */}
+      {modalForma && (
+        <CalcMultipleFormaPago
+          open={!!modalKey}
+          formaLabel={modalForma.label}
+          formaColor={modalForma.color}
+          initialValue={selected[modalKey] ?? getInitialForModal(modalKey)}
+          importe={importe}
+          saldo={saldo}
+          onConfirm={(value) => {
+            handleConfirmImporte(modalKey, value);
           }}
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          ← VOLVER
-        </button>
+          onCancel={handleCancelImporte}
+        />
       )}
     </div>
   );

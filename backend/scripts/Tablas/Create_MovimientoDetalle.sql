@@ -1,0 +1,8 @@
+CREATE TABLE MovimientoDetalle (
+  Id INT NOT NULL AUTO_INCREMENT,
+  MovimientoId INT NOT NULL,
+  ItemId INT DEFAULT NULL,
+  ItemDetalle VARCHAR(255) DEFAULT NULL,
+  Importe DECIMAL(12,2) NOT NULL,
+  PRIMARY KEY (Id)
+);

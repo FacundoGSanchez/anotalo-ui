@@ -44,10 +44,6 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
 
   const addDigit = useCallback((val) => {
     setCurrentValue((prev) => {
-      if (val === "00") {
-        if (prev.toString().length >= VISOR_CONFIG.MAX_DIGITOS - 1) return prev;
-        return prev * 100;
-      }
       if (prev.toString().length >= VISOR_CONFIG.MAX_DIGITOS) return prev;
       return prev * 10 + parseInt(val);
     });
@@ -318,6 +314,7 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
               btnTabIndex={-1}
               onPress={addDigit}
               onPlus={handlePlus}
+              onBackspace={deleteDigit}
               activeColor={activeColor}
               hasValue={currentValue > 0}
             />

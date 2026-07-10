@@ -1,0 +1,7 @@
+CREATE TABLE MovimientoFormaPago (
+  Id INT NOT NULL AUTO_INCREMENT,
+  MovimientoId INT NOT NULL,
+  FormaPagoId INT NOT NULL,
+  Importe DECIMAL(12,2) NOT NULL,
+  PRIMARY KEY (Id)
+);

@@ -81,7 +81,6 @@ const POSAnotaloMobile = () => {
             <StepFormaPago
               tipo={movimiento.tipo}
               importe={movimiento.importe}
-              onBack={handleBack}
               onNext={(data) => handleNext(data)}
             />
           )}
@@ -91,7 +90,6 @@ const POSAnotaloMobile = () => {
               tipo={movimiento.tipo}
               formaPago={movimiento.formaPago}
               formaPagos={movimiento.formaPagos}
-              onBack={handleBack}
               onNext={(ent) => handleNext({ entidad: ent })}
             />
           )}
@@ -99,7 +97,6 @@ const POSAnotaloMobile = () => {
           {currentStep === STEPS.CONFIRMAR && (
             <StepConfirmar
               movimiento={movimiento}
-              onBack={handleBack}
               onConfirm={finalizarRegistro}
             />
           )}

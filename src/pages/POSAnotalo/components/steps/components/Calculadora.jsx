@@ -11,10 +11,12 @@ const btnStyle = {
   transition: "all 0.1s",
 };
 
-const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height = "64px", btnTabIndex }) => {
+
+
+const Calculadora = React.memo(({ onPress, onPlus, onClear, onUndo, activeColor, hasValue, height = "64px", btnTabIndex }) => {
   const numeros = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-  const mergedBtnStyle = { ...btnStyle, height };
+  const mergedBtnStyle = { height, ...btnStyle };
 
   return (
     <Row gutter={[8, 8]}>
@@ -32,17 +34,29 @@ const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height
         </Col>
       ))}
 
-      {/* Last row: 00 0 + */}
+      {/* Last row: DESHACER 0 C (multi-pago) or 00 0 + (StepImporte) */}
       <Col span={8}>
-        <Button
-          block
-          tabIndex={btnTabIndex ?? 0}
-          style={mergedBtnStyle}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => onPress("00")}
-        >
-          00
-        </Button>
+        {onUndo ? (
+          <Button
+            block
+            tabIndex={btnTabIndex ?? 0}
+            style={{ ...mergedBtnStyle, fontSize: "13px", fontWeight: 600 }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onUndo}
+          >
+            DESHACER
+          </Button>
+        ) : (
+          <Button
+            block
+            tabIndex={btnTabIndex ?? 0}
+            style={mergedBtnStyle}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => onPress("00")}
+          >
+            00
+          </Button>
+        )}
       </Col>
       <Col span={8}>
         <Button
@@ -56,33 +70,54 @@ const Calculadora = React.memo(({ onPress, onPlus, activeColor, hasValue, height
         </Button>
       </Col>
       <Col span={8}>
-        <Button
-          block
-          tabIndex={btnTabIndex ?? 0}
-          disabled={!hasValue}
-          style={{
-            height,
-            borderRadius: "12px",
-            fontSize: "24px",
-            fontWeight: "700",
-            border: hasValue ? `2px solid ${activeColor}` : "1px solid #e8e8e8",
-            background: hasValue ? activeColor : "#f5f5f5",
-            color: "#fff",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            lineHeight: 1.2,
-            gap: 0,
-            transition: "all 0.15s",
-            cursor: hasValue ? "pointer" : "default",
-          }}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={onPlus}
-        >
-          <span style={{ fontSize: "22px", lineHeight: 1 }}>+</span>
-          <span style={{ fontSize: "9px", fontWeight: 600, opacity: 0.9, lineHeight: 1 }}>AGREGAR</span>
-        </Button>
+        {onClear && !onPlus ? (
+          <Button
+            block
+            tabIndex={btnTabIndex ?? 0}
+            style={{
+              height,
+              borderRadius: "12px",
+              fontSize: "24px",
+              fontWeight: "700",
+              border: `2px solid ${activeColor}`,
+              background: activeColor,
+              color: "#fff",
+              transition: "all 0.15s",
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onClear}
+          >
+            C
+          </Button>
+        ) : (
+          <Button
+            block
+            tabIndex={btnTabIndex ?? 0}
+            disabled={!hasValue}
+            style={{
+              height,
+              borderRadius: "12px",
+              fontSize: "24px",
+              fontWeight: "700",
+              border: hasValue ? `2px solid ${activeColor}` : "1px solid #e8e8e8",
+              background: hasValue ? activeColor : "#f5f5f5",
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1.2,
+              gap: 0,
+              transition: "all 0.15s",
+              cursor: hasValue ? "pointer" : "default",
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onPlus}
+          >
+            <span style={{ fontSize: "22px", lineHeight: 1 }}>+</span>
+            <span style={{ fontSize: "9px", fontWeight: 600, opacity: 0.9, lineHeight: 1 }}>AGREGAR</span>
+          </Button>
+        )}
       </Col>
     </Row>
   );

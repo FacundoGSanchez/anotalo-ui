@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal, Row, Col,
+  Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal, Row, Col, InputNumber,
 } from "antd";
 import {
   MdArrowBack, MdDeleteOutline, MdOutlineLock,
   MdOutlineAddCircleOutline, MdOutlineAccountBalanceWallet,
-  MdOutlineBackspace, MdClose,
+  MdClose,
 } from "react-icons/md";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
@@ -17,10 +17,11 @@ import { useAuth } from "../../../context/AuthContext";
 import { useCurrentOrg } from "../../../hooks/useCurrentOrg";
 import { useCurrentSucursal } from "../../../hooks/useCurrentSucursal";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
+import { useDevice } from "../../../context/DeviceContext";
 
 const { Text } = Typography;
 
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"];
+const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "0", "\u232b"];
 
 const AdminCajaPage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const AdminCajaPage = () => {
   const [movTipoModal, setMovTipoModal] = useState(null);
   const [movImporte, setMovImporte] = useState(0);
   const [movObservacion, setMovObservacion] = useState("");
+  const { isDesktop } = useDevice();
 
   const incrementRefresh = useCallback(
     () => setRefreshKey((k) => k + 1),
@@ -112,21 +114,51 @@ const AdminCajaPage = () => {
     }
   };
 
+  const handleCierreClick = () => {
+    Modal.confirm({
+      title: "Confirmar Cierre de Caja",
+      content: (
+        <div style={{ textAlign: "center", padding: "12px 0" }}>
+          <Text style={{ fontSize: "12px", color: "#8c8c8c", display: "block" }}>
+            Saldo actual
+          </Text>
+          <Text
+            strong
+            style={{
+              fontSize: "24px",
+              color: saldoActual >= 0 ? "#52c41a" : "#ff4d4f",
+            }}
+          >
+            ${" "}
+            {Math.abs(saldoActual).toLocaleString("es-AR", {
+              minimumFractionDigits: 2,
+            })}
+          </Text>
+        </div>
+      ),
+      centered: true,
+      okText: "Confirmar",
+      cancelText: "Cancelar",
+      onOk: handleCierre,
+    });
+  };
+
   const handleDeleteCierre = (id) => {
     cierreService.deleteById(id);
     message.success("Cierre eliminado");
   };
 
   const handlePressTecla = (val) => {
+    if (val === "\u232b") {
+      setMovImporte((prev) => Math.floor(prev / 10));
+      return;
+    }
+    if (val === "C") {
+      setMovImporte(0);
+      return;
+    }
     if (movImporte.toString().length >= 12) return;
-    setMovImporte((prev) => {
-      if (val === "00") return prev * 100;
-      return prev * 10 + parseInt(val, 10);
-    });
-  };
-
-  const handleDeleteTecla = () => {
-    setMovImporte((prev) => Math.floor(prev / 10));
+    setMovImporte((prev) => prev * 10 + parseInt(val, 10));
   };
 
   const handleRegistrarMov = () => {
@@ -179,7 +211,7 @@ const AdminCajaPage = () => {
         background: "#f8f9fa",
       }}
     >
-      {/* Header */}
+      {/* Header + acciones */}
       <div
         style={{
           display: "flex",
@@ -198,69 +230,47 @@ const AdminCajaPage = () => {
             Admin Caja
           </Text>
         </div>
+        <div style={{ display: "flex", gap: "4px" }}>
+          <Button
+            type="text"
+            icon={<MdOutlineAddCircleOutline size={24} />}
+            style={{ color: "#52c41a", display: "flex", alignItems: "center", justifyContent: "center" }}
+            onClick={() => {
+              setMovTipoModal(MOVIMIENTO_TIPOS.INGRESO);
+              setMovImporte(0);
+              setMovObservacion("");
+              setIsModalOpen(true);
+            }}
+          />
+          <Button
+            type="text"
+            icon={<MdOutlineAccountBalanceWallet size={24} />}
+            style={{ color: "#546e7a", display: "flex", alignItems: "center", justifyContent: "center" }}
+            onClick={() => {
+              setMovTipoModal(MOVIMIENTO_TIPOS.RETIRO);
+              setMovImporte(0);
+              setMovObservacion("");
+              setIsModalOpen(true);
+            }}
+          />
+          <Button
+            type="text"
+            icon={<MdOutlineLock size={24} />}
+            style={{ color: "#faad14", display: "flex", alignItems: "center", justifyContent: "center" }}
+            onClick={handleCierreClick}
+          />
+        </div>
       </div>
 
-      {/* Acciones rápidas: Ingreso / Egreso manual */}
+      {/* Card saldo */}
       <div
         style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          block
-          icon={<MdOutlineAddCircleOutline size={18} />}
-          onClick={() => {
-            setMovTipoModal(MOVIMIENTO_TIPOS.INGRESO);
-            setMovImporte(0);
-            setMovObservacion("");
-            setIsModalOpen(true);
-          }}
-          style={{
-            borderRadius: "10px",
-            height: "38px",
-            fontSize: "13px",
-            fontWeight: 700,
-            background: "#52c41a",
-            borderColor: "#52c41a",
-            color: "#fff",
-          }}
-        >
-          Ingreso
-        </Button>
-        <Button
-          block
-          icon={<MdOutlineAccountBalanceWallet size={18} />}
-          onClick={() => {
-            setMovTipoModal(MOVIMIENTO_TIPOS.RETIRO);
-            setMovImporte(0);
-            setMovObservacion("");
-            setIsModalOpen(true);
-          }}
-          style={{
-            borderRadius: "10px",
-            height: "38px",
-            fontSize: "13px",
-            fontWeight: 700,
-            background: "#546e7a",
-            borderColor: "#546e7a",
-            color: "#fff",
-          }}
-        >
-          Retiro
-        </Button>
-      </div>
-
-      {/* Saldo actual + botón cierre */}
-      <div
-        style={{
-          textAlign: "center",
-          padding: "20px",
           background: "#fff",
           borderRadius: "16px",
           marginBottom: "16px",
           border: "1px solid #f0f0f0",
+          textAlign: "center",
+          padding: "20px",
         }}
       >
         <Text type="secondary" style={{ fontSize: "12px", display: "block" }}>
@@ -278,23 +288,6 @@ const AdminCajaPage = () => {
             minimumFractionDigits: 2,
           })}
         </Text>
-        <Button
-          type="primary"
-          block
-          icon={<MdOutlineLock size={16} />}
-          onClick={handleCierre}
-          style={{
-            marginTop: "12px",
-            borderRadius: "10px",
-            height: "38px",
-            fontSize: "13px",
-            fontWeight: 700,
-            background: "#52c41a",
-            borderColor: "#52c41a",
-          }}
-        >
-          Registrar Cierre
-        </Button>
       </div>
 
       {/* Entries */}
@@ -577,12 +570,17 @@ const AdminCajaPage = () => {
             style={{
               textAlign: "center",
               padding: "8px",
-              background: "#f6ffed",
+              background: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#f6ffed" : "#eceff1",
               borderRadius: "8px",
-              border: "1px solid #b7eb8f",
+              border: `1px solid ${movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#b7eb8f" : "#cfd8dc"}`,
             }}
           >
-            <Text style={{ fontSize: "12px", color: "#52c41a" }}>
+            <Text
+              style={{
+                fontSize: "12px",
+                color: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a",
+              }}
+            >
               Saldo actual: ${saldoActual.toLocaleString("es-AR")}
             </Text>
           </div>
@@ -612,45 +610,46 @@ const AdminCajaPage = () => {
             </Text>
           </div>
 
-          {/* Teclado numérico */}
-          <Row gutter={[6, 6]}>
-            {BOTONES_TECLADO.map((btn) => (
-              <Col span={8} key={btn}>
-                <Button
-                  block
-                  style={{
-                    height: "48px",
-                    fontSize: "22px",
-                    borderRadius: "12px",
-                    background: "#fff",
-                    fontWeight: 500,
-                    border: "1px solid #f0f0f0",
-                  }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => handlePressTecla(btn)}
-                >
-                  {btn}
-                </Button>
-              </Col>
-            ))}
-            <Col span={8}>
-              <Button
-                block
-                type="text"
-                danger
-                style={{
-                  height: "48px",
-                  fontSize: "24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onClick={handleDeleteTecla}
-              >
-                <MdOutlineBackspace />
-              </Button>
-            </Col>
-          </Row>
+          {/* Teclado numérico / Input según device */}
+          {isDesktop ? (
+            <InputNumber
+              value={movImporte}
+              onChange={(val) => setMovImporte(val || 0)}
+              style={{
+                width: "100%",
+                height: "48px",
+                borderRadius: "12px",
+                fontSize: "18px",
+              }}
+              formatter={(value) => `$ ${value}`}
+              parser={(value) => value.replace(/[$\s]/g, "")}
+              min={0}
+              max={999999999999}
+              autoFocus
+            />
+          ) : (
+            <Row gutter={[6, 6]}>
+              {BOTONES_TECLADO.map((btn) => (
+                <Col span={8} key={btn}>
+                  <Button
+                    block
+                    style={{
+                      height: "48px",
+                      fontSize: "22px",
+                      borderRadius: "12px",
+                      background: "#fff",
+                      fontWeight: 500,
+                      border: "1px solid #f0f0f0",
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handlePressTecla(btn)}
+                  >
+                    {btn}
+                  </Button>
+                </Col>
+              ))}
+            </Row>
+          )}
 
           {/* Botón registrar */}
           <Button

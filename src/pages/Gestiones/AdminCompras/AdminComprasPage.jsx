@@ -15,7 +15,6 @@ import {
 import {
   MdArrowBack,
   MdDeleteOutline,
-  MdOutlineBackspace,
   MdClose,
   MdChevronRight,
   MdShoppingCart,
@@ -31,7 +30,7 @@ import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
 
 const { Text } = Typography;
 
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"];
+const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "\u232b", "0"];
 const PAGE_SIZE = 15;
 
 const AdminComprasPage = () => {
@@ -133,15 +132,16 @@ const AdminComprasPage = () => {
   };
 
   const handlePressTecla = (val) => {
+    if (val === "\u232b") {
+      setMovImporte((prev) => Math.floor(prev / 10));
+      return;
+    }
     if (movImporte.toString().length >= 12) return;
-    setMovImporte((prev) => {
-      if (val === "00") return prev * 100;
-      return prev * 10 + parseInt(val, 10);
-    });
+    setMovImporte((prev) => prev * 10 + parseInt(val, 10));
   };
 
-  const handleDeleteTecla = () => {
-    setMovImporte((prev) => Math.floor(prev / 10));
+  const handleResetTecla = () => {
+    setMovImporte(0);
   };
 
   const handleContinuarImporte = () => {
@@ -592,18 +592,18 @@ const AdminComprasPage = () => {
               <Col span={8}>
                 <Button
                   block
-                  type="text"
-                  danger
                   style={{
                     height: "48px",
-                    fontSize: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    fontSize: "22px",
+                    borderRadius: "12px",
+                    background: "#fff",
+                    fontWeight: 500,
+                    border: "1px solid #f0f0f0",
                   }}
-                  onClick={handleDeleteTecla}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleResetTecla}
                 >
-                  <MdOutlineBackspace />
+                  C
                 </Button>
               </Col>
             </Row>
@@ -758,15 +758,16 @@ const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDele
   };
 
   const handlePressTeclaEdit = (val) => {
+    if (val === "\u232b") {
+      setImporteBuffer((prev) => Math.floor(prev / 10));
+      return;
+    }
     if (importeBuffer.toString().length >= 12) return;
-    setImporteBuffer((prev) => {
-      if (val === "00") return prev * 100;
-      return prev * 10 + parseInt(val, 10);
-    });
+    setImporteBuffer((prev) => prev * 10 + parseInt(val, 10));
   };
 
-  const handleDeleteTeclaEdit = () => {
-    setImporteBuffer((prev) => Math.floor(prev / 10));
+  const handleResetTeclaEdit = () => {
+    setImporteBuffer(0);
   };
 
   const handleSaveImporte = () => {
@@ -846,12 +847,11 @@ const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDele
               <Col span={8}>
                 <Button
                   block
-                  type="text"
-                  danger
-                  style={{ height: "38px", fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center" }}
-                  onClick={handleDeleteTeclaEdit}
+                  style={{ height: "38px", fontSize: "18px", borderRadius: "8px", background: "#fff", fontWeight: 500, border: "1px solid #f0f0f0" }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleResetTeclaEdit}
                 >
-                  <MdOutlineBackspace />
+                  C
                 </Button>
               </Col>
             </Row>

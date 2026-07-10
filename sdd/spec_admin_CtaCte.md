@@ -1,4 +1,4 @@
-# SDD - Admin Cta Cte Clientes
+# SDD - Cuentas Corrientes
 
 ## Especificación del Módulo de Cuenta Corriente para Clientes
 
@@ -84,10 +84,13 @@ Ruta: `/gestiones/ctacte`
 
 ```
 ┌─────────────────────────────────────┐
-│  ← Admin Cta Cte Clientes           │
+│  ← Cuentas Corrientes               │
 ├─────────────────────────────────────┤
+│                                      │
+│  Solo pendientes  ○───────────────── │
+│                                      │
 │  🔍 Buscar por nombre...            │
-│                                     │
+│                                      │
 │  ┌─────────────────────────────────┐│
 │  │ Juan Pérez       Superó límite  ││
 │  │              +$15,000           ││
@@ -98,19 +101,21 @@ Ruta: `/gestiones/ctacte`
 │  │ Carlos López    Plazo vencido   ││
 │  │              +$3,500            ││
 │  └─────────────────────────────────┘│
-│                                     │
+│                                      │
 │  Click en fila → Página detalle     │
 └─────────────────────────────────────┘
 ```
 
-| Elemento   | Descripción                                                                    |
-| ---------- | ------------------------------------------------------------------------------ |
-| Título     | "Admin Cta Cte Clientes"                                                       |
-| Listado    | Clientes con movimientos Cta Corriente (con o sin config habilitada)           |
-| Búsqueda   | Input que filtra por nombre del cliente                                        |
-| Saldo      | Signo + verde (a favor), signo - rojo (nos debe)                               |
-| Alertas    | "Configurar cuenta" (rojo), "Superó límite" (amarillo), "Plazo vencido" (rojo) |
-| Click fila | Navega a `/gestiones/ctacte/clientes/{id}` (detalle + cobro + config)          |
+| Elemento        | Descripción                                                                    |
+| --------------- | ------------------------------------------------------------------------------ |
+| Título          | "Cuentas Corrientes"                                                           |
+| Switch          | "Solo pendientes" — filtra clientes con saldo > 0 (nos deben)                  |
+| Listado         | Clientes con movimientos Cta Corriente (con o sin config habilitada)           |
+| Orden           | Por saldo descendente (mayor deuda primero)                                    |
+| Búsqueda        | Input que filtra por nombre del cliente                                        |
+| Saldo           | Signo + verde (a favor), signo - rojo (nos debe)                               |
+| Alertas         | "Configurar cuenta" (rojo), "Superó límite" (amarillo), "Plazo vencido" (rojo) |
+| Click fila      | Navega a `/gestiones/ctacte/clientes/{id}` (detalle + cobro + config)          |
 
 Nota: No se muestran Tope ni Plazo en la card del listado. Esa información se ve en la página de detalle.
 
@@ -141,13 +146,13 @@ Ruta: `/gestiones/ctacte/clientes/{id}`
 
 | Elemento          | Descripción                                                            |
 | ----------------- | ---------------------------------------------------------------------- |
-| Header            | Nombre del cliente + botón ⚙️ (config) + botón 💰 (cobro)              |
+| Header            | Nombre del cliente + botón ⚙️ size=24 (config) + botón 💰 size=24 (cobro)              |
 | Saldo actual      | Visible y destacado con leyenda "Nos debe" / "A favor"                 |
 | Tope / Plazo      | Mostrado siempre debajo del saldo (0/0 si no hay config)               |
 | Botón Config ⚙️   | Abre modal inline para editar Tope (importeMaximo) y Plazo (plazoDias) |
 | Botón Cobro 💰    | Abre modal de 2 pasos: importe → forma de pago                        |
 | Lista movimientos | Últimos 20 movimientos del cliente (Cta Cte + Cobros)                  |
-| Cada movimiento   | Tipo (tag), Importe, Fecha, Hora                                       |
+| Cada movimiento   | Tipo (tag), Importe (Cta Cte si es parcial, con referencia al total), Fecha, Hora |
 | Botón eliminar    | Delete de cada movimiento individual                                   |
 
 #### 4.2.1 Modal de Configuración (⚙️)
@@ -209,7 +214,16 @@ Ruta: `/gestiones/ctacte/clientes/{id}`
 
 ### 4.3 Filtros
 
-No hay filtros por ahora. La página muestra todos los clientes con movimientos Cta Corriente.
+### 4.3 Filtros
+
+| Filtro            | Tipo     | Descripción                                                    |
+| ----------------- | -------- | -------------------------------------------------------------- |
+| Búsqueda          | Input    | Filtra clientes por nombre (case-insensitive)                  |
+| Solo pendientes   | Switch   | Cuando está activo, muestra solo clientes con `saldo > 0` (nos deben) |
+
+- El listado siempre trae **todos los clientes que alguna vez usaron Cta Corriente**, independientemente de su saldo actual.
+- El switch "Solo pendientes" oculta los clientes con saldo `<= 0`.
+- El orden por defecto es **saldo descendente** (mayor deuda al inicio).
 
 ---
 

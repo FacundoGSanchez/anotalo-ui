@@ -18,7 +18,6 @@ import {
   MdArrowBack,
   MdDeleteOutline,
   MdPayment,
-  MdOutlineBackspace,
   MdClose,
   MdSettings,
 } from "react-icons/md";
@@ -34,7 +33,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 const { Text } = Typography;
 
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0"];
+const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "\u232b", "0"];
 
 const DetalleCtaCtePage = () => {
   const { id } = useParams();
@@ -98,15 +97,16 @@ const DetalleCtaCtePage = () => {
   }, [incrementRefresh]);
 
   const handlePressTecla = (val) => {
+    if (val === "\u232b") {
+      setMovImporte((prev) => Math.floor(prev / 10));
+      return;
+    }
     if (movImporte.toString().length >= 12) return;
-    setMovImporte((prev) => {
-      if (val === "00") return prev * 100;
-      return prev * 10 + parseInt(val, 10);
-    });
+    setMovImporte((prev) => prev * 10 + parseInt(val, 10));
   };
 
-  const handleDeleteTecla = () => {
-    setMovImporte((prev) => Math.floor(prev / 10));
+  const handleResetTecla = () => {
+    setMovImporte(0);
   };
 
   const handleRegistrarConForma = (formaPago) => {
@@ -230,14 +230,14 @@ const DetalleCtaCtePage = () => {
         <div style={{ display: "flex", gap: "4px" }}>
           <Button
             type="text"
-            icon={<MdSettings size={20} />}
+            icon={<MdSettings size={24} />}
             style={{ color: "#8c8c8c" }}
             onClick={abrirConfigModal}
           />
           <Button
             type="text"
-            icon={<MdPayment size={20} />}
-            style={{ color: "#52c41a", fontSize: "20px" }}
+            icon={<MdPayment size={24} />}
+            style={{ color: "#52c41a" }}
             onClick={() =>
               abrirModal(MOVIMIENTO_TIPOS.COBRO)
             }
@@ -394,16 +394,35 @@ const DetalleCtaCtePage = () => {
                       gap: "8px",
                     }}
                   >
-                    <Text
-                      strong
-                      style={{
-                        fontSize: "15px",
-                        color: esPositivo(mov) ? "#52c41a" : "#ff4d4f",
-                      }}
-                    >
-                      {esPositivo(mov) ? "+" : "-"}$
-                      {Number(mov.importe).toLocaleString("es-AR")}
-                    </Text>
+                    <div style={{ textAlign: "right" }}>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: "15px",
+                          color: esPositivo(mov) ? "#52c41a" : "#ff4d4f",
+                        }}
+                      >
+                        {esPositivo(mov) ? "+" : "-"}$
+                        {(() => {
+                          const ctaCteImporte = movimientoService.getCtaCteImporte(mov);
+                          return (ctaCteImporte > 0
+                            ? Number(ctaCteImporte)
+                            : Number(mov.importe)
+                          ).toLocaleString("es-AR");
+                        })()}
+                      </Text>
+                      {movimientoService.tieneCtaCte(mov) &&
+                        (() => {
+                          const ctaCteImporte = movimientoService.getCtaCteImporte(mov);
+                          return ctaCteImporte > 0 && Number(ctaCteImporte) !== Number(mov.importe);
+                        })() && (
+                          <div style={{ marginTop: "2px" }}>
+                            <Text type="secondary" style={{ fontSize: "11px", lineHeight: 1 }}>
+                              (Total ${Number(mov.importe).toLocaleString("es-AR")})
+                            </Text>
+                          </div>
+                        )}
+                    </div>
                     <Popconfirm
                       title="¿Eliminar movimiento?"
                       onConfirm={() => {
@@ -504,18 +523,18 @@ const DetalleCtaCtePage = () => {
               <Col span={8}>
                 <Button
                   block
-                  type="text"
-                  danger
                   style={{
                     height: "48px",
-                    fontSize: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    fontSize: "22px",
+                    borderRadius: "12px",
+                    background: "#fff",
+                    fontWeight: 500,
+                    border: "1px solid #f0f0f0",
                   }}
-                  onClick={handleDeleteTecla}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleResetTecla}
                 >
-                  <MdOutlineBackspace />
+                  C
                 </Button>
               </Col>
             </Row>

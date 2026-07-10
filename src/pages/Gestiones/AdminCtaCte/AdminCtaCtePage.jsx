@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Typography, Card, Input, Empty, Button } from "antd";
+import { Typography, Card, Input, Empty, Button, Switch } from "antd";
 import { MdArrowBack, MdSearch, MdWarning } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -53,12 +53,13 @@ const calcularSaldos = () => {
         return dayjs().diff(masAntigua, "day") > plazo;
       })(),
     }))
-    .sort((a, b) => a.entidad.nombre.localeCompare(b.entidad.nombre));
+    .sort((a, b) => b.saldo - a.saldo);
 };
 
 const AdminCtaCtePage = () => {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
+  const [soloPendientes, setSoloPendientes] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -70,12 +71,14 @@ const AdminCtaCtePage = () => {
   const saldos = useMemo(() => calcularSaldos(), [refreshKey]);
 
   const filtrados = useMemo(() => {
-    if (!busqueda.trim()) return saldos;
+    let base = saldos;
+    if (soloPendientes) base = base.filter((s) => s.saldo > 0);
+    if (!busqueda.trim()) return base;
     const q = busqueda.trim().toLowerCase();
-    return saldos.filter((s) =>
+    return base.filter((s) =>
       s.entidad.nombre.toLowerCase().includes(q),
     );
-  }, [saldos, busqueda]);
+  }, [saldos, busqueda, soloPendientes]);
 
   return (
     <div
@@ -100,8 +103,25 @@ const AdminCtaCtePage = () => {
           onClick={() => navigate("/")}
         />
         <Text strong style={{ fontSize: "18px" }}>
-          Admin Cta Cte Clientes
+          Cuentas Corrientes
         </Text>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "12px",
+        }}
+      >
+        <Text type="secondary" style={{ fontSize: "13px" }}>
+          Solo pendientes
+        </Text>
+        <Switch
+          checked={soloPendientes}
+          onChange={(v) => setSoloPendientes(v)}
+        />
       </div>
 
       <Input
