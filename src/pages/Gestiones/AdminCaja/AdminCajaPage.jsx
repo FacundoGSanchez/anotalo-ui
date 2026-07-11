@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal, Row, Col, InputNumber,
+  Typography, Button, Divider, Tag, Empty, Popconfirm, message, Modal,
 } from "antd";
 import {
   MdArrowBack, MdDeleteOutline, MdOutlineLock,
@@ -17,11 +17,9 @@ import { useAuth } from "../../../context/AuthContext";
 import { useCurrentOrg } from "../../../hooks/useCurrentOrg";
 import { useCurrentSucursal } from "../../../hooks/useCurrentSucursal";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
-import { useDevice } from "../../../context/DeviceContext";
+import CalculadoraGestion from "../../../components/CalculadoraGestion";
 
 const { Text } = Typography;
-
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "0", "\u232b"];
 
 const AdminCajaPage = () => {
   const navigate = useNavigate();
@@ -33,7 +31,6 @@ const AdminCajaPage = () => {
   const [movTipoModal, setMovTipoModal] = useState(null);
   const [movImporte, setMovImporte] = useState(0);
   const [movObservacion, setMovObservacion] = useState("");
-  const { isDesktop } = useDevice();
 
   const incrementRefresh = useCallback(
     () => setRefreshKey((k) => k + 1),
@@ -148,22 +145,13 @@ const AdminCajaPage = () => {
     message.success("Cierre eliminado");
   };
 
-  const handlePressTecla = (val) => {
-    if (val === "\u232b") {
-      setMovImporte((prev) => Math.floor(prev / 10));
-      return;
-    }
-    if (val === "C") {
-      setMovImporte(0);
-      return;
-    }
-    if (movImporte.toString().length >= 12) return;
-    setMovImporte((prev) => prev * 10 + parseInt(val, 10));
-  };
-
   const handleRegistrarMov = () => {
     if (movImporte <= 0) {
       message.warning("Ingrese un importe válido");
+      return;
+    }
+    if (movTipoModal === MOVIMIENTO_TIPOS.RETIRO && movImporte > saldoActual) {
+      message.warning("El retiro no puede superar el saldo actual de caja");
       return;
     }
     const movimientoData = {
@@ -557,120 +545,26 @@ const AdminCajaPage = () => {
         title={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Ingreso" : "Retiro"}
         closeIcon={<MdClose size={20} />}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            marginTop: "8px",
-          }}
-        >
-          {/* Saldo actual */}
-          <div
-            style={{
-              textAlign: "center",
-              padding: "8px",
-              background: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#f6ffed" : "#eceff1",
-              borderRadius: "8px",
-              border: `1px solid ${movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#b7eb8f" : "#cfd8dc"}`,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: "12px",
-                color: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a",
-              }}
-            >
-              Saldo actual: ${saldoActual.toLocaleString("es-AR")}
-            </Text>
-          </div>
-
-          {/* Visor importe */}
-          <div
-            style={{
-              background: "#f8f9fa",
-              borderRadius: "12px",
-              padding: "8px 16px",
-              height: "56px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              border: "1px solid #f0f0f0",
-            }}
-          >
-            <Text
-              strong
-              style={{
-                fontSize: movImporte > 0 ? "28px" : "22px",
-                color: movImporte > 0 ? "#262626" : "#bfbfbf",
-                letterSpacing: "-1px",
-              }}
-            >
-              $ {movImporte.toLocaleString("es-AR")}
-            </Text>
-          </div>
-
-          {/* Teclado numérico / Input según device */}
-          {isDesktop ? (
-            <InputNumber
-              value={movImporte}
-              onChange={(val) => setMovImporte(val || 0)}
-              style={{
-                width: "100%",
-                height: "48px",
-                borderRadius: "12px",
-                fontSize: "18px",
-              }}
-              formatter={(value) => `$ ${value}`}
-              parser={(value) => value.replace(/[$\s]/g, "")}
-              min={0}
-              max={999999999999}
-              autoFocus
-            />
-          ) : (
-            <Row gutter={[6, 6]}>
-              {BOTONES_TECLADO.map((btn) => (
-                <Col span={8} key={btn}>
-                  <Button
-                    block
-                    style={{
-                      height: "48px",
-                      fontSize: "22px",
-                      borderRadius: "12px",
-                      background: "#fff",
-                      fontWeight: 500,
-                      border: "1px solid #f0f0f0",
-                    }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handlePressTecla(btn)}
-                  >
-                    {btn}
-                  </Button>
-                </Col>
-              ))}
-            </Row>
-          )}
-
-          {/* Botón registrar */}
-          <Button
-            type="primary"
-            block
-            size="large"
-            disabled={movImporte <= 0}
-            onClick={handleRegistrarMov}
-            style={{
-              marginTop: "4px",
-              height: "48px",
-              borderRadius: "12px",
-              fontSize: "15px",
-              fontWeight: 700,
-              background: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a",
-              borderColor: movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a",
-            }}
-          >
-            Registrar {movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Ingreso" : "Retiro"}
-          </Button>
-        </div>
+        <CalculadoraGestion
+          value={movImporte}
+          onChange={setMovImporte}
+          accentColor={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a"}
+          title={`Saldo actual: $${saldoActual.toLocaleString("es-AR")}`}
+          titleColor={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#52c41a" : "#546e7a"}
+          titleBg={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#f6ffed" : "#eceff1"}
+          titleBorder={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "#b7eb8f" : "#cfd8dc"}
+          buttonLabel={movTipoModal === MOVIMIENTO_TIPOS.INGRESO ? "Registrar Ingreso" : "Registrar Retiro"}
+          onConfirm={handleRegistrarMov}
+          disabled={movTipoModal === MOVIMIENTO_TIPOS.RETIRO ? (movImporte <= 0 || movImporte > saldoActual) : undefined}
+          showObservacion
+          observacion={movObservacion}
+          onObservacionChange={setMovObservacion}
+        />
+        {movTipoModal === MOVIMIENTO_TIPOS.RETIRO && movImporte > saldoActual && (
+          <Text style={{ display: "block", textAlign: "center", marginTop: "8px", fontSize: "12px", color: "#ff4d4f", fontWeight: 600 }}>
+            Supera el saldo disponible en caja
+          </Text>
+        )}
       </Modal>
     </div>
   );

@@ -7,8 +7,6 @@ import {
   Popconfirm,
   message,
   Modal,
-  Row,
-  Col,
   Input,
   Tabs,
 } from "antd";
@@ -27,10 +25,10 @@ import { orgService } from "../../../services/orgService";
 import { useAuth } from "../../../context/AuthContext";
 import { useCurrentOrg } from "../../../hooks/useCurrentOrg";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../constants/posConstants";
+import CalculadoraGestion from "../../../components/CalculadoraGestion";
 
 const { Text } = Typography;
 
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "\u232b", "0"];
 const PAGE_SIZE = 15;
 
 const AdminComprasPage = () => {
@@ -129,19 +127,6 @@ const AdminComprasPage = () => {
   const handleSelectProveedor = (prov) => {
     setSelectedProveedor(prov);
     setRegisterStep("importe");
-  };
-
-  const handlePressTecla = (val) => {
-    if (val === "\u232b") {
-      setMovImporte((prev) => Math.floor(prev / 10));
-      return;
-    }
-    if (movImporte.toString().length >= 12) return;
-    setMovImporte((prev) => prev * 10 + parseInt(val, 10));
-  };
-
-  const handleResetTecla = () => {
-    setMovImporte(0);
   };
 
   const handleContinuarImporte = () => {
@@ -520,114 +505,17 @@ const AdminComprasPage = () => {
         )}
 
         {registerStep === "importe" && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              marginTop: "8px",
-            }}
-          >
-            {/* Proveedor seleccionado */}
-            <div
-              style={{
-                textAlign: "center",
-                padding: "8px",
-                background: "#fff7e6",
-                borderRadius: "8px",
-                border: "1px solid #ffd591",
-              }}
-            >
-              <Text style={{ fontSize: "12px", color: "#d46b08" }}>
-                {selectedProveedor?.nombre}
-              </Text>
-            </div>
-
-            {/* Visor importe */}
-            <div
-              style={{
-                background: "#f8f9fa",
-                borderRadius: "12px",
-                padding: "8px 16px",
-                height: "56px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                border: "1px solid #f0f0f0",
-              }}
-            >
-              <Text
-                strong
-                style={{
-                  fontSize: movImporte > 0 ? "28px" : "22px",
-                  color: movImporte > 0 ? "#262626" : "#bfbfbf",
-                  letterSpacing: "-1px",
-                }}
-              >
-                $ {movImporte.toLocaleString("es-AR")}
-              </Text>
-            </div>
-
-            {/* Teclado numérico */}
-            <Row gutter={[6, 6]}>
-              {BOTONES_TECLADO.map((btn) => (
-                <Col span={8} key={btn}>
-                  <Button
-                    block
-                    style={{
-                      height: "48px",
-                      fontSize: "22px",
-                      borderRadius: "12px",
-                      background: "#fff",
-                      fontWeight: 500,
-                      border: "1px solid #f0f0f0",
-                    }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handlePressTecla(btn)}
-                  >
-                    {btn}
-                  </Button>
-                </Col>
-              ))}
-              <Col span={8}>
-                <Button
-                  block
-                  style={{
-                    height: "48px",
-                    fontSize: "22px",
-                    borderRadius: "12px",
-                    background: "#fff",
-                    fontWeight: 500,
-                    border: "1px solid #f0f0f0",
-                  }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={handleResetTecla}
-                >
-                  C
-                </Button>
-              </Col>
-            </Row>
-
-            {/* Botón continuar */}
-            <Button
-              type="primary"
-              block
-              size="large"
-              disabled={movImporte <= 0}
-              onClick={handleContinuarImporte}
-              style={{
-                marginTop: "4px",
-                height: "48px",
-                borderRadius: "12px",
-                fontSize: "15px",
-                fontWeight: 700,
-                background: "#fa8c16",
-                borderColor: "#fa8c16",
-              }}
-            >
-              Continuar
-            </Button>
-          </div>
+          <CalculadoraGestion
+            value={movImporte}
+            onChange={setMovImporte}
+            accentColor="#fa8c16"
+            title={selectedProveedor?.nombre}
+            titleColor="#d46b08"
+            titleBg="#fff7e6"
+            titleBorder="#ffd591"
+            buttonLabel="Continuar"
+            onConfirm={handleContinuarImporte}
+          />
         )}
 
         {registerStep === "formaPago" && (
@@ -746,37 +634,8 @@ const AdminComprasPage = () => {
 };
 
 const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDelete }) => {
-  const [editing, setEditing] = useState(false);
-  const [editField, setEditField] = useState(null);
+  const [editingFormaPago, setEditingFormaPago] = useState(false);
   const [editImporte, setEditImporte] = useState(Number(mov.importe) || 0);
-  const [importeBuffer, setImporteBuffer] = useState(0);
-
-  const handleStartEditImporte = () => {
-    setImporteBuffer(0);
-    setEditImporte(Number(mov.importe) || 0);
-    setEditField("importe");
-  };
-
-  const handlePressTeclaEdit = (val) => {
-    if (val === "\u232b") {
-      setImporteBuffer((prev) => Math.floor(prev / 10));
-      return;
-    }
-    if (importeBuffer.toString().length >= 12) return;
-    setImporteBuffer((prev) => prev * 10 + parseInt(val, 10));
-  };
-
-  const handleResetTeclaEdit = () => {
-    setImporteBuffer(0);
-  };
-
-  const handleSaveImporte = () => {
-    if (importeBuffer <= 0) {
-      message.warning("Ingrese un importe válido");
-      return;
-    }
-    onEditImporte(importeBuffer);
-  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "8px" }}>
@@ -800,111 +659,41 @@ const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDele
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Text type="secondary" style={{ fontSize: "11px" }}>Importe</Text>
-          {!editing && (
-            <Button type="link" size="small" onClick={handleStartEditImporte} style={{ padding: 0, height: "auto", fontSize: "12px" }}>
-              Editar
-            </Button>
-          )}
         </div>
-        {editField === "importe" ? (
-          <div style={{ marginTop: "4px" }}>
-            <div
-              style={{
-                background: "#f8f9fa",
-                borderRadius: "12px",
-                padding: "4px 12px",
-                height: "44px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                border: "1px solid #f0f0f0",
-                marginBottom: "6px",
-              }}
-            >
-              <Text
-                strong
-                style={{
-                  fontSize: importeBuffer > 0 ? "24px" : "18px",
-                  color: importeBuffer > 0 ? "#262626" : "#bfbfbf",
-                }}
-              >
-                $ {(importeBuffer > 0 ? importeBuffer : editImporte).toLocaleString("es-AR")}
-              </Text>
-            </div>
-            <Row gutter={[4, 4]}>
-              {BOTONES_TECLADO.map((btn) => (
-                <Col span={8} key={btn}>
-                  <Button
-                    block
-                    style={{ height: "38px", fontSize: "18px", borderRadius: "8px", background: "#fff", border: "1px solid #f0f0f0" }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handlePressTeclaEdit(btn)}
-                  >
-                    {btn}
-                  </Button>
-                </Col>
-              ))}
-              <Col span={8}>
-                <Button
-                  block
-                  style={{ height: "38px", fontSize: "18px", borderRadius: "8px", background: "#fff", fontWeight: 500, border: "1px solid #f0f0f0" }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={handleResetTeclaEdit}
-                >
-                  C
-                </Button>
-              </Col>
-            </Row>
-            <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-              <Button
-                type="primary"
-                size="small"
-                disabled={importeBuffer <= 0}
-                onClick={handleSaveImporte}
-                style={{ flex: 1, borderRadius: "8px", fontSize: "12px", fontWeight: 700, background: "#fa8c16", borderColor: "#fa8c16" }}
-              >
-                Guardar
-              </Button>
-              <Button
-                size="small"
-                onClick={() => setEditField(null)}
-                style={{ flex: 1, borderRadius: "8px", fontSize: "12px" }}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <Text strong style={{ display: "block", fontSize: "18px", color: "#ff4d4f" }}>
-            -${editImporte.toLocaleString("es-AR")}
-          </Text>
-        )}
+        <CalculadoraGestion
+          compact
+          value={editImporte}
+          onChange={(val) => {
+            setEditImporte(val);
+            onEditImporte(val);
+          }}
+          accentColor="#fa8c16"
+        />
       </div>
 
       {/* Forma de pago */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Text type="secondary" style={{ fontSize: "11px" }}>Forma de pago</Text>
-          {!editing && (
-            <Button type="link" size="small" onClick={() => { setEditing(true); setEditField("formaPago"); }} style={{ padding: 0, height: "auto", fontSize: "12px" }}>
+          {!editingFormaPago && (
+            <Button type="link" size="small" onClick={() => setEditingFormaPago(true)} style={{ padding: 0, height: "auto", fontSize: "12px" }}>
               Editar
             </Button>
           )}
         </div>
-        {editField === "formaPago" ? (
+        {editingFormaPago ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
             {formasPago.map((fp) => (
               <div
                 key={fp.key}
                 role="button"
                 tabIndex={0}
-                onClick={() => { onEditFormaPago(fp.key); setEditField(null); setEditing(false); }}
+                onClick={() => { onEditFormaPago(fp.key); setEditingFormaPago(false); }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     onEditFormaPago(fp.key);
-                    setEditField(null);
-                    setEditing(false);
+                    setEditingFormaPago(false);
                   }
                 }}
                 style={{
@@ -925,7 +714,7 @@ const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDele
                 <div style={{ fontSize: "20px", color: fp.color }}>{fp.icon}</div>
               </div>
             ))}
-            <Button size="small" onClick={() => { setEditField(null); setEditing(false); }} style={{ borderRadius: "8px", fontSize: "12px" }}>
+            <Button size="small" onClick={() => setEditingFormaPago(false)} style={{ borderRadius: "8px", fontSize: "12px" }}>
               Cancelar
             </Button>
           </div>

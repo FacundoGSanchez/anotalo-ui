@@ -9,8 +9,6 @@ import {
   Popconfirm,
   message,
   Modal,
-  Row,
-  Col,
   Form,
   Input,
 } from "antd";
@@ -30,10 +28,9 @@ import {
   POS_COLORS,
 } from "../../../constants/posConstants";
 import { useAuth } from "../../../context/AuthContext";
+import CalculadoraGestion from "../../../components/CalculadoraGestion";
 
 const { Text } = Typography;
-
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "\u232b", "0"];
 
 const DetalleCtaCtePage = () => {
   const { id } = useParams();
@@ -95,19 +92,6 @@ const DetalleCtaCtePage = () => {
     window.addEventListener("local-db-update", handler);
     return () => window.removeEventListener("local-db-update", handler);
   }, [incrementRefresh]);
-
-  const handlePressTecla = (val) => {
-    if (val === "\u232b") {
-      setMovImporte((prev) => Math.floor(prev / 10));
-      return;
-    }
-    if (movImporte.toString().length >= 12) return;
-    setMovImporte((prev) => prev * 10 + parseInt(val, 10));
-  };
-
-  const handleResetTecla = () => {
-    setMovImporte(0);
-  };
 
   const handleRegistrarConForma = (formaPago) => {
     if (movImporte <= 0) {
@@ -466,99 +450,17 @@ const DetalleCtaCtePage = () => {
         closeIcon={<MdClose size={20} />}
       >
         {modalStep === "amount" ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              marginTop: "8px",
-            }}
-          >
-            {/* Visor importe */}
-            <div
-              style={{
-                background: "#f8f9fa",
-                borderRadius: "12px",
-                padding: "8px 16px",
-                height: "56px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                border: "1px solid #f0f0f0",
-              }}
-            >
-              <Text
-                strong
-                style={{
-                  fontSize: movImporte > 0 ? "28px" : "22px",
-                  color: movImporte > 0 ? "#262626" : "#bfbfbf",
-                  letterSpacing: "-1px",
-                }}
-              >
-                $ {movImporte.toLocaleString("es-AR")}
-              </Text>
-            </div>
-
-            {/* Teclado numérico */}
-            <Row gutter={[6, 6]}>
-              {BOTONES_TECLADO.map((btn) => (
-                <Col span={8} key={btn}>
-                  <Button
-                    block
-                    style={{
-                      height: "48px",
-                      fontSize: "22px",
-                      borderRadius: "12px",
-                      background: "#fff",
-                      fontWeight: 500,
-                      border: "1px solid #f0f0f0",
-                    }}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handlePressTecla(btn)}
-                  >
-                    {btn}
-                  </Button>
-                </Col>
-              ))}
-              <Col span={8}>
-                <Button
-                  block
-                  style={{
-                    height: "48px",
-                    fontSize: "22px",
-                    borderRadius: "12px",
-                    background: "#fff",
-                    fontWeight: 500,
-                    border: "1px solid #f0f0f0",
-                  }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={handleResetTecla}
-                >
-                  C
-                </Button>
-              </Col>
-            </Row>
-
-            {/* Botón continuar */}
-            <Button
-              type="primary"
-              block
-              size="large"
-              disabled={movImporte <= 0}
-              onClick={handleRegistrarMov}
-              style={{
-                marginTop: "4px",
-                height: "48px",
-                borderRadius: "12px",
-                fontSize: "15px",
-                fontWeight: 700,
-                background: "#52c41a",
-                borderColor: "#52c41a",
-              }}
-            >
-              Continuar
-            </Button>
-          </div>
+          <CalculadoraGestion
+            value={movImporte}
+            onChange={setMovImporte}
+            accentColor="#52c41a"
+            title={`Saldo cta cte: $${saldo.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`}
+            titleColor={saldo >= 0 ? "#ff4d4f" : "#52c41a"}
+            titleBg={saldo >= 0 ? "#fff2f0" : "#f6ffed"}
+            titleBorder={saldo >= 0 ? "#ffccc7" : "#b7eb8f"}
+            buttonLabel="Continuar"
+            onConfirm={handleRegistrarMov}
+          />
         ) : (
           <div
             style={{
