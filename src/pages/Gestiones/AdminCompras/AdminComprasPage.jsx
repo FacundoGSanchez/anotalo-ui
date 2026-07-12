@@ -8,15 +8,12 @@ import {
   message,
   Modal,
   Input,
-  Tabs,
 } from "antd";
 import {
   MdArrowBack,
   MdDeleteOutline,
   MdClose,
-  MdChevronRight,
-  MdShoppingCart,
-  MdAssignment,
+  MdPayment,
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { movimientoService } from "../../../services/movimientoService";
@@ -38,9 +35,6 @@ const AdminComprasPage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [busqueda, setBusqueda] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [selectedMov, setSelectedMov] = useState(null);
 
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [registerStep, setRegisterStep] = useState("proveedor");
@@ -98,16 +92,6 @@ const AdminComprasPage = () => {
 
   const handleVerMas = () => setVisibleCount((prev) => prev + PAGE_SIZE);
 
-  const openDetailModal = (mov) => {
-    setSelectedMov(mov);
-    setDetailModalOpen(true);
-  };
-
-  const closeDetailModal = () => {
-    setSelectedMov(null);
-    setDetailModalOpen(false);
-  };
-
   const openRegisterModal = () => {
     setRegisterStep("proveedor");
     setSelectedProveedor(null);
@@ -159,31 +143,56 @@ const AdminComprasPage = () => {
     }
   };
 
-  const handleEditMovImporte = (nuevoImporte) => {
-    if (!selectedMov) return;
-    movimientoService.update(selectedMov.id, { importe: Number(nuevoImporte) });
-    message.success("Importe actualizado");
-    closeDetailModal();
-  };
-
-  const handleEditFormaPago = (nuevaForma) => {
-    if (!selectedMov) return;
-    movimientoService.update(selectedMov.id, {
-      formaPago: nuevaForma,
-      formaPagos: [{ key: nuevaForma, importe: Number(selectedMov.importe) || 0 }],
-    });
-    message.success("Forma de pago actualizada");
-    closeDetailModal();
-  };
-
   const handleDeleteMov = (id) => {
     movimientoService.deleteById(id);
     message.success("Pago eliminado");
   };
 
-  const pagosTab = (
-    <div>
-      {/* Buscador */}
+  return (
+    <div
+      style={{
+        padding: "16px",
+        maxWidth: "600px",
+        margin: "0 auto",
+        minHeight: "100vh",
+        background: "#f8f9fa",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "16px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Button
+            type="text"
+            icon={<MdArrowBack size={24} />}
+            onClick={() => navigate(-1)}
+            style={{ marginRight: "12px" }}
+          />
+          <Text strong style={{ fontSize: "18px" }}>
+            Pago a Proveedores
+          </Text>
+        </div>
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<MdPayment size={22} />}
+          onClick={openRegisterModal}
+          style={{
+            background: POS_COLORS[MOVIMIENTO_TIPOS.PAGO],
+            borderColor: POS_COLORS[MOVIMIENTO_TIPOS.PAGO],
+            width: "42px",
+            height: "42px",
+          }}
+        />
+      </div>
+
+      {/* Buscador por proveedor */}
       <div style={{ marginBottom: "12px" }}>
         <Input.Search
           placeholder="Buscar por proveedor..."
@@ -196,25 +205,6 @@ const AdminComprasPage = () => {
           style={{ borderRadius: "10px" }}
         />
       </div>
-
-      {/* Botón registrar pago */}
-      <Button
-        type="primary"
-        block
-        icon={<MdShoppingCart size={18} />}
-        onClick={openRegisterModal}
-        style={{
-          borderRadius: "10px",
-          height: "44px",
-          fontSize: "14px",
-          fontWeight: 700,
-          marginBottom: "16px",
-          background: "#fa8c16",
-          borderColor: "#fa8c16",
-        }}
-      >
-        Registrar Pago
-      </Button>
 
       {/* Listado */}
       {pagosVisibles.length === 0 ? (
@@ -239,9 +229,7 @@ const AdminComprasPage = () => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "12px 14px",
-                    cursor: "pointer",
                   }}
-                  onClick={() => openDetailModal(mov)}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
@@ -298,7 +286,20 @@ const AdminComprasPage = () => {
                       -$
                       {Number(mov.importe).toLocaleString("es-AR")}
                     </Text>
-                    <MdChevronRight size={18} color="#bfbfbf" />
+                    <Popconfirm
+                      title="¿Eliminar pago?"
+                      onConfirm={() => handleDeleteMov(mov.id)}
+                      okText="Sí"
+                      cancelText="No"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<MdDeleteOutline size={16} />}
+                      />
+                    </Popconfirm>
                   </div>
                 </div>
                 {i < pagosVisibles.length - 1 && (
@@ -327,106 +328,6 @@ const AdminComprasPage = () => {
           )}
         </div>
       )}
-    </div>
-  );
-
-  const pedidosTab = (
-    <div
-      style={{
-        padding: "40px 20px",
-        textAlign: "center",
-      }}
-    >
-      <div style={{ fontSize: "48px", color: "#fa8c16", marginBottom: "16px" }}>
-        <MdAssignment />
-      </div>
-      <Text
-        strong
-        style={{
-          fontSize: "16px",
-          display: "block",
-          color: "#262626",
-          marginBottom: "8px",
-        }}
-      >
-        Pedidos
-      </Text>
-      <Text type="secondary">
-        Gestión de pedidos a proveedores, valores y pendientes de pago — próximamente
-      </Text>
-    </div>
-  );
-
-  return (
-    <div
-      style={{
-        padding: "16px",
-        maxWidth: "600px",
-        margin: "0 auto",
-        minHeight: "100vh",
-        background: "#f8f9fa",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "16px",
-        }}
-      >
-        <Button
-          type="text"
-          icon={<MdArrowBack size={24} />}
-          onClick={() => navigate(-1)}
-          style={{ marginRight: "12px" }}
-        />
-        <MdShoppingCart size={24} color="#fa8c16" style={{ marginRight: "8px" }} />
-        <Text strong style={{ fontSize: "18px" }}>
-          Gestión de Compras
-        </Text>
-      </div>
-
-      <Tabs
-        defaultActiveKey="pagos"
-        items={[
-          {
-            key: "pagos",
-            label: "Pagos",
-            children: pagosTab,
-          },
-          {
-            key: "pedidos",
-            label: "Pedidos",
-            children: pedidosTab,
-          },
-        ]}
-        style={{ background: "transparent" }}
-      />
-
-      {/* Modal detalle del pago */}
-      <Modal
-        open={detailModalOpen}
-        onCancel={closeDetailModal}
-        footer={null}
-        width={360}
-        centered
-        title="Detalle del Pago"
-        closeIcon={<MdClose size={20} />}
-      >
-        {selectedMov && (
-          <DetailContent
-            mov={selectedMov}
-            formasPago={formasPago}
-            onEditImporte={handleEditMovImporte}
-            onEditFormaPago={handleEditFormaPago}
-            onDelete={() => {
-              handleDeleteMov(selectedMov.id);
-              closeDetailModal();
-            }}
-          />
-        )}
-      </Modal>
 
       {/* Modal registrar pago — wizard */}
       <Modal
@@ -629,129 +530,6 @@ const AdminComprasPage = () => {
           </div>
         )}
       </Modal>
-    </div>
-  );
-};
-
-const DetailContent = ({ mov, formasPago, onEditImporte, onEditFormaPago, onDelete }) => {
-  const [editingFormaPago, setEditingFormaPago] = useState(false);
-  const [editImporte, setEditImporte] = useState(Number(mov.importe) || 0);
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "8px" }}>
-      {/* Proveedor */}
-      <div>
-        <Text type="secondary" style={{ fontSize: "11px" }}>Proveedor</Text>
-        <Text strong style={{ display: "block", fontSize: "16px", color: "#262626" }}>
-          {mov.entidad?.nombre || "—"}
-        </Text>
-      </div>
-
-      {/* Fecha */}
-      <div>
-        <Text type="secondary" style={{ fontSize: "11px" }}>Fecha de pago</Text>
-        <Text strong style={{ display: "block", fontSize: "14px" }}>
-          {mov.fecha} {mov.hora} hs
-        </Text>
-      </div>
-
-      {/* Importe */}
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Text type="secondary" style={{ fontSize: "11px" }}>Importe</Text>
-        </div>
-        <CalculadoraGestion
-          compact
-          value={editImporte}
-          onChange={(val) => {
-            setEditImporte(val);
-            onEditImporte(val);
-          }}
-          accentColor="#fa8c16"
-        />
-      </div>
-
-      {/* Forma de pago */}
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Text type="secondary" style={{ fontSize: "11px" }}>Forma de pago</Text>
-          {!editingFormaPago && (
-            <Button type="link" size="small" onClick={() => setEditingFormaPago(true)} style={{ padding: 0, height: "auto", fontSize: "12px" }}>
-              Editar
-            </Button>
-          )}
-        </div>
-        {editingFormaPago ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
-            {formasPago.map((fp) => (
-              <div
-                key={fp.key}
-                role="button"
-                tabIndex={0}
-                onClick={() => { onEditFormaPago(fp.key); setEditingFormaPago(false); }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onEditFormaPago(fp.key);
-                    setEditingFormaPago(false);
-                  }
-                }}
-                style={{
-                  borderRadius: "8px",
-                  border: "1px solid #f0f0f0",
-                  background: "#fff",
-                  cursor: "pointer",
-                  padding: "8px 12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  outline: "none",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = fp.color; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#f0f0f0"; }}
-              >
-                <Text style={{ fontSize: "13px", fontWeight: 600 }}>{fp.label}</Text>
-                <div style={{ fontSize: "20px", color: fp.color }}>{fp.icon}</div>
-              </div>
-            ))}
-            <Button size="small" onClick={() => setEditingFormaPago(false)} style={{ borderRadius: "8px", fontSize: "12px" }}>
-              Cancelar
-            </Button>
-          </div>
-        ) : (
-          <Text strong style={{ display: "block", fontSize: "14px" }}>
-            {mov.formaPagos ? mov.formaPagos.map(fp => `${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`).join(" + ") : mov.formaPago}
-          </Text>
-        )}
-      </div>
-
-      {/* Observación */}
-      <div>
-        <Text type="secondary" style={{ fontSize: "11px" }}>Observación</Text>
-        <Text style={{ display: "block", fontSize: "13px", color: "#595959" }}>
-          {mov.observacion || "—"}
-        </Text>
-      </div>
-
-      {/* Eliminar */}
-      <div style={{ marginTop: "8px", borderTop: "1px solid #f0f0f0", paddingTop: "12px" }}>
-        <Popconfirm
-          title="¿Eliminar este pago?"
-          onConfirm={onDelete}
-          okText="Sí"
-          cancelText="No"
-          okButtonProps={{ danger: true }}
-        >
-          <Button
-            block
-            danger
-            icon={<MdDeleteOutline size={16} />}
-            style={{ borderRadius: "10px", height: "38px", fontSize: "13px", fontWeight: 600 }}
-          >
-            Eliminar Pago
-          </Button>
-        </Popconfirm>
-      </div>
     </div>
   );
 };

@@ -4,7 +4,20 @@ import { useDevice } from "../context/DeviceContext";
 
 const { Text } = Typography;
 
-const BOTONES_TECLADO = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "\u232b", "0", "C"];
+const BOTONES_TECLADO = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "C",
+  "0",
+  "\u232b",
+];
 
 const CalculadoraGestion = ({
   value,
@@ -99,7 +112,8 @@ const CalculadoraGestion = ({
                   color: editBuffer > 0 ? "#262626" : "#bfbfbf",
                 }}
               >
-                $ {(editBuffer > 0 ? editBuffer : value).toLocaleString("es-AR")}
+                ${" "}
+                {(editBuffer > 0 ? editBuffer : value).toLocaleString("es-AR")}
               </Text>
             </div>
             <Row gutter={gutter}>

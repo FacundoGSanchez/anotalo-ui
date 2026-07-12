@@ -10,8 +10,8 @@ const AccesoBtn = ({ icon, label, color, onClick }) => (
     style={{
       textAlign: "center",
       cursor: "pointer",
-      minWidth: "75px",
-      flexShrink: 0,
+      maxWidth: "56px",
+      flex: "0 0 auto",
     }}
   >
     <div
@@ -33,7 +33,13 @@ const AccesoBtn = ({ icon, label, color, onClick }) => (
     </div>
     <Text
       strong
-      style={{ fontSize: "11px", display: "block", color: "#595959" }}
+      style={{
+        fontSize: "11px",
+        display: "block",
+        color: "#595959",
+        wordBreak: "break-word",
+        overflowWrap: "break-word",
+      }}
     >
       {label.toUpperCase()}
     </Text>
@@ -54,13 +60,11 @@ const AccesosDirectos = ({ onSelectTipo }) => {
       <div
         style={{
           display: "flex",
-          overflowX: "auto",
+          flexWrap: "wrap",
           gap: "6px",
           paddingBottom: "8px",
         }}
-        className="no-scrollbar"
       >
-        <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
         {OPCIONES_TIPO.map((opt) => (
           <AccesoBtn
             key={opt.key}

@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { Card, Typography } from "antd";
-import { MdAttachMoney, MdOutlineContactPage, MdShoppingCart } from "react-icons/md";
+import { MdAttachMoney, MdOutlineContactPage, MdPayment } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useMovimientoSession } from "../../../context/MovimientoSessionContext";
 
@@ -23,8 +23,8 @@ const GESTIONES = [
   },
   {
     key: "compras",
-    icon: <MdShoppingCart />,
-    label: "Compras",
+    icon: <MdPayment />,
+    label: "Pago Proveedor",
     route: "/compras",
     color: "#fa8c16",
   },
@@ -54,13 +54,12 @@ const AccesoReportes = () => {
       <div
         style={{
           display: "flex",
+          flexWrap: "wrap",
           gap: "12px",
-          overflowX: "auto",
           paddingBottom: "4px",
+          justifyContent: "space-around",
         }}
-        className="no-scrollbar"
       >
-        <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
         {GESTIONES.map((item) => (
           <div
             key={item.key}
@@ -68,9 +67,7 @@ const AccesoReportes = () => {
             style={{
               textAlign: "center",
               cursor: "pointer",
-              minWidth: "100px",
-              flexShrink: 0,
-              flex: 1,
+              flex: "1 0 0",
             }}
           >
             <div
@@ -91,7 +88,13 @@ const AccesoReportes = () => {
             </div>
             <Text
               strong
-              style={{ fontSize: "12px", display: "block", color: "#595959" }}
+              style={{
+                fontSize: "12px",
+                display: "block",
+                color: "#595959",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+              }}
             >
               {item.label}
             </Text>

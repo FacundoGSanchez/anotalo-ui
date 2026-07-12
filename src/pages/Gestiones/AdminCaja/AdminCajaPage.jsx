@@ -218,34 +218,52 @@ const AdminCajaPage = () => {
             Admin Caja
           </Text>
         </div>
-        <div style={{ display: "flex", gap: "4px" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
           <Button
-            type="text"
-            icon={<MdOutlineAddCircleOutline size={24} />}
-            style={{ color: "#52c41a", display: "flex", alignItems: "center", justifyContent: "center" }}
+            type="primary"
+            shape="circle"
+            icon={<MdOutlineAddCircleOutline size={22} />}
             onClick={() => {
               setMovTipoModal(MOVIMIENTO_TIPOS.INGRESO);
               setMovImporte(0);
               setMovObservacion("");
               setIsModalOpen(true);
             }}
+            style={{
+              background: "#52c41a",
+              borderColor: "#52c41a",
+              width: "42px",
+              height: "42px",
+            }}
           />
           <Button
-            type="text"
-            icon={<MdOutlineAccountBalanceWallet size={24} />}
-            style={{ color: "#546e7a", display: "flex", alignItems: "center", justifyContent: "center" }}
+            type="primary"
+            shape="circle"
+            icon={<MdOutlineAccountBalanceWallet size={22} />}
             onClick={() => {
               setMovTipoModal(MOVIMIENTO_TIPOS.RETIRO);
               setMovImporte(0);
               setMovObservacion("");
               setIsModalOpen(true);
             }}
+            style={{
+              background: "#546e7a",
+              borderColor: "#546e7a",
+              width: "42px",
+              height: "42px",
+            }}
           />
           <Button
-            type="text"
-            icon={<MdOutlineLock size={24} />}
-            style={{ color: "#faad14", display: "flex", alignItems: "center", justifyContent: "center" }}
+            type="primary"
+            shape="circle"
+            icon={<MdOutlineLock size={22} />}
             onClick={handleCierreClick}
+            style={{
+              background: "#faad14",
+              borderColor: "#faad14",
+              width: "42px",
+              height: "42px",
+            }}
           />
         </div>
       </div>

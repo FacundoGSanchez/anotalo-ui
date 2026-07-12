@@ -32,6 +32,8 @@ import CalculadoraGestion from "../../../components/CalculadoraGestion";
 
 const { Text } = Typography;
 
+const PAGE_SIZE = 15;
+
 const DetalleCtaCtePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,6 +45,7 @@ const DetalleCtaCtePage = () => {
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [configForm] = Form.useForm();
   const [modalStep, setModalStep] = useState("amount");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const formasPago = useMemo(() => {
     const orgId = authService.getCurrentOrgId();
@@ -73,10 +76,15 @@ const DetalleCtaCtePage = () => {
           m.entidad?.id === entidad.id &&
           (movimientoService.tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO),
       )
-      .sort((a, b) => b.id - a.id)
-      .slice(0, 20);
+      .sort((a, b) => b.id - a.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entidad?.id, refreshKey]);
+
+  const movsVisibles = useMemo(() => {
+    return movs.slice(0, visibleCount);
+  }, [movs, visibleCount]);
+
+  const handleVerMas = () => setVisibleCount((prev) => prev + PAGE_SIZE);
 
   const saldo = useMemo(() => {
     if (movs.length === 0) return 0;
@@ -207,63 +215,121 @@ const DetalleCtaCtePage = () => {
             onClick={() => navigate("/gestiones/ctacte")}
           />
           <Text strong style={{ fontSize: "18px" }}>
-            {entidad.nombre}
+            Detalle Cuenta
           </Text>
         </div>
 
-        <div style={{ display: "flex", gap: "4px" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
           <Button
-            type="text"
-            icon={<MdSettings size={24} />}
-            style={{ color: "#8c8c8c" }}
+            type="primary"
+            shape="circle"
+            icon={<MdSettings size={22} />}
             onClick={abrirConfigModal}
+            style={{
+              background: "#8c8c8c",
+              borderColor: "#8c8c8c",
+              width: "42px",
+              height: "42px",
+            }}
           />
           <Button
-            type="text"
-            icon={<MdPayment size={24} />}
-            style={{ color: "#52c41a" }}
+            type="primary"
+            shape="circle"
+            icon={<MdPayment size={22} />}
             onClick={() =>
               abrirModal(MOVIMIENTO_TIPOS.COBRO)
             }
+            style={{
+              background: "#52c41a",
+              borderColor: "#52c41a",
+              width: "42px",
+              height: "42px",
+            }}
           />
         </div>
       </div>
 
-      {/* Saldo card */}
+      {/* Saldo card — dos columnas */}
       <div
         style={{
-          textAlign: "center",
+          display: "flex",
           padding: "20px",
           background: "#fff",
           borderRadius: "16px",
           marginBottom: "16px",
           border: "1px solid #f0f0f0",
+          gap: "16px",
         }}
       >
-        <Text type="secondary" style={{ fontSize: "12px", display: "block" }}>
-          SALDO ACTUAL
-        </Text>
-        <Text
-          strong
+        {/* Izquierda — datos */}
+        <div
           style={{
-            fontSize: "32px",
-            color: saldo >= 0 ? "#ff4d4f" : "#52c41a",
+            flex: "0 0 auto",
+            maxWidth: "55%",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "6px",
+            borderRight: "1px solid #f0f0f0",
+            paddingRight: "16px",
           }}
         >
-          ${" "}
-          {Math.abs(saldo).toLocaleString("es-AR", {
-            minimumFractionDigits: 2,
-          })}
-        </Text>
+          <Text
+            strong
+            style={{
+              fontSize: "15px",
+              color: "#262626",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              display: "block",
+            }}
+          >
+            {entidad.nombre}
+          </Text>
+          <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
+            Tope: ${(ctaCteConfig.importeMaximo || 0).toLocaleString("es-AR")}
+          </Text>
+          <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
+            Plazo: {ctaCteConfig.plazoDias || 0} días
+          </Text>
+        </div>
 
-        {/* Leyenda nos debe / a favor */}
-        <div style={{ marginTop: "6px" }}>
+        {/* Derecha — saldo */}
+        <div
+          style={{
+            flex: 1,
+            textAlign: "right",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            minWidth: 0,
+          }}
+        >
+          <Text type="secondary" style={{ fontSize: "11px", display: "block" }}>
+            SALDO CUENTA
+          </Text>
+          <Text
+            strong
+            style={{
+              fontSize: "28px",
+              color: saldo >= 0 ? "#ff4d4f" : "#52c41a",
+              display: "block",
+            }}
+          >
+            ${" "}
+            {Math.abs(saldo).toLocaleString("es-AR", {
+              minimumFractionDigits: 2,
+            })}
+          </Text>
           <Text
             type="secondary"
             style={{
-              fontSize: "13px",
+              fontSize: "12px",
               fontWeight: 600,
               color: saldo >= 0 ? "#ff4d4f" : "#52c41a",
+              display: "block",
             }}
           >
             {saldo === 0
@@ -272,27 +338,20 @@ const DetalleCtaCtePage = () => {
                 ? `Nos debe $${Math.abs(saldo).toLocaleString("es-AR")}`
                 : `A favor $${Math.abs(saldo).toLocaleString("es-AR")}`}
           </Text>
-        </div>
-
-        {sobreLimite && (
-          <div style={{ marginTop: "6px" }}>
+          {sobreLimite && (
             <Text
               style={{
-                fontSize: "12px",
+                fontSize: "11px",
                 fontWeight: 700,
                 color: "#ff4d4f",
+                display: "block",
+                marginTop: "4px",
               }}
             >
-              Superó el límite de $
+              Superó límite de $
               {Number(ctaCteConfig.importeMaximo).toLocaleString("es-AR")}
             </Text>
-          </div>
-        )}
-
-        <div style={{ marginTop: "4px" }}>
-          <Text type="secondary" style={{ fontSize: "11px" }}>
-            Tope: ${(ctaCteConfig.importeMaximo || 0).toLocaleString("es-AR")} · Plazo: {ctaCteConfig.plazoDias || 0} días
-          </Text>
+          )}
         </div>
       </div>
 
@@ -323,7 +382,7 @@ const DetalleCtaCtePage = () => {
               overflow: "hidden",
             }}
           >
-            {movs.map((mov, i) => (
+            {movsVisibles.map((mov, i) => (
               <div key={mov.id}>
                 <div
                   style={{
@@ -426,12 +485,24 @@ const DetalleCtaCtePage = () => {
                     </Popconfirm>
                   </div>
                 </div>
-                {i < movs.length - 1 && (
+                {i < movsVisibles.length - 1 && (
                   <Divider style={{ margin: "0", borderColor: "#f0f0f0" }} />
                 )}
               </div>
             ))}
           </div>
+
+          {movs.length > visibleCount && (
+            <div style={{ textAlign: "center", marginTop: "12px" }}>
+              <Button
+                type="text"
+                onClick={handleVerMas}
+                style={{ color: "#eb2f96", fontWeight: 600, fontSize: "13px" }}
+              >
+                + Ver más ({movs.length - visibleCount} restantes)
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
