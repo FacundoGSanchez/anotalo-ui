@@ -26,6 +26,8 @@ const POSAnotaloMobile = () => {
     handleBack,
     closePos,
     resetMovement,
+    setMovimiento,
+    setCurrentStep,
   } = usePosFlow();
 
   useEffect(() => {
@@ -85,7 +87,12 @@ const POSAnotaloMobile = () => {
               onNext={(data) => handleNext(data)}
               onRemoveItem={(id) => {
                 const newItems = (movimiento.lineItems || []).filter((i) => i.id !== id);
-                handleNext({ lineItems: newItems, importe: newItems.reduce((a, i) => a + i.importe, 0) });
+                setMovimiento((prev) => ({
+                  ...prev,
+                  lineItems: newItems,
+                  importe: newItems.reduce((a, i) => a + i.importe, 0),
+                }));
+                setCurrentStep(newItems.length === 0 ? STEPS.IMPORTE : STEPS.RESUMEN);
               }}
             />
           )}
