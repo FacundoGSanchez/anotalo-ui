@@ -119,7 +119,8 @@ export const RUBROS_DEFAULT = [
 export const STEPS = {
   TIPO: 0,
   IMPORTE: 1,
-  FORMA_PAGO: 2,
-  ENTIDAD: 3,
-  CONFIRMAR: 4,
+  RESUMEN: 2,
+  FORMA_PAGO: 3,
+  ENTIDAD: 4,
+  CONFIRMAR: 5,
 };

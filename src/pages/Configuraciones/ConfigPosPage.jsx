@@ -10,7 +10,7 @@ const { Text } = Typography;
 const ConfigPosPage = () => {
   const navigate = useNavigate();
   const orgId = useCurrentOrg();
-  const [configPOS, setConfigPOS] = useState({ usaRubro: true });
+  const [configPOS, setConfigPOS] = useState({ usaRubro: false });
 
   useEffect(() => {
     setConfigPOS(orgService.getConfigPOS(orgId));

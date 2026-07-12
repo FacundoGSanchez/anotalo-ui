@@ -7,6 +7,7 @@ const { Text } = Typography;
 
 const STEP_TITLES = {
   [STEPS.IMPORTE]: "Nueva Venta",
+  [STEPS.RESUMEN]: "Resumen",
   [STEPS.FORMA_PAGO]: "Forma de Pago",
   [STEPS.ENTIDAD]: "Cliente",
   [STEPS.CONFIRMAR]: "Confirmar",

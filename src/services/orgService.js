@@ -77,7 +77,7 @@ export const orgService = {
 
   getRubros: (orgId) => {
     const config = orgService.getConfig(orgId);
-    return config.rubros && config.rubros.length > 0 ? config.rubros : RUBROS_DEFAULT;
+    return config.rubros && config.rubros.length > 0 ? config.rubros : [];
   },
 
   saveRubros: (orgId, rubros) => {
@@ -86,7 +86,7 @@ export const orgService = {
 
   getConfigPOS: (orgId) => {
     const config = orgService.getConfig(orgId);
-    return config.configPOS || { usaRubro: true };
+    return config.configPOS || { usaRubro: false };
   },
 
   saveConfigPOS: (orgId, configPOS) => {

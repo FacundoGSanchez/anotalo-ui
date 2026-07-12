@@ -27,6 +27,8 @@ export const usePosFlow = () => {
     setMovimiento(nuevoEstado);
 
     if (currentStep === STEPS.IMPORTE) {
+      setCurrentStep(STEPS.RESUMEN);
+    } else if (currentStep === STEPS.RESUMEN) {
       setCurrentStep(STEPS.FORMA_PAGO);
     } else if (currentStep === STEPS.FORMA_PAGO) {
       if (nuevoEstado.entidad) {
@@ -42,13 +44,15 @@ export const usePosFlow = () => {
   const handleBack = () => {
     if (currentStep === STEPS.IMPORTE) {
       confirmExit("/", () => closePos());
+    } else if (currentStep === STEPS.RESUMEN) {
+      setCurrentStep(STEPS.IMPORTE);
     } else if (currentStep === STEPS.CONFIRMAR) {
       if (movimiento.entidad) {
         setCurrentStep(STEPS.ENTIDAD);
-    } else if (movimiento.formaPago || movimiento.formaPagos?.length > 0) {
+      } else if (movimiento.formaPago || movimiento.formaPagos?.length > 0) {
         setCurrentStep(STEPS.FORMA_PAGO);
       } else {
-        setCurrentStep(STEPS.IMPORTE);
+        setCurrentStep(STEPS.RESUMEN);
       }
     } else {
       setCurrentStep((prev) => prev - 1);

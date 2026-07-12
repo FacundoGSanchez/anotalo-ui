@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Row, Col } from "antd";
+import { MdOutlineBackspace } from "react-icons/md";
 
 const btnStyle = {
   height: "64px",
@@ -11,9 +12,7 @@ const btnStyle = {
   transition: "all 0.1s",
 };
 
-
-
-const Calculadora = React.memo(({ onPress, onPlus, onClear, onUndo, activeColor, hasValue, height = "64px", btnTabIndex }) => {
+const Calculadora = React.memo(({ onPress, onPlus, onClear, onUndo, onBackspace, activeColor, hasValue, height = "64px", btnTabIndex }) => {
   const numeros = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
   const mergedBtnStyle = { height, ...btnStyle };
@@ -34,7 +33,7 @@ const Calculadora = React.memo(({ onPress, onPlus, onClear, onUndo, activeColor,
         </Col>
       ))}
 
-      {/* Last row: DESHACER 0 C (multi-pago) or 00 0 + (StepImporte) */}
+      {/* Last row: DESHACER 0 C (multi-pago) or <- 0 + (StepImporte) */}
       <Col span={8}>
         {onUndo ? (
           <Button
@@ -50,11 +49,18 @@ const Calculadora = React.memo(({ onPress, onPlus, onClear, onUndo, activeColor,
           <Button
             block
             tabIndex={btnTabIndex ?? 0}
-            style={mergedBtnStyle}
+            disabled={!hasValue}
+            style={{
+              ...mergedBtnStyle,
+              fontSize: "18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => onPress("00")}
+            onClick={onBackspace}
           >
-            00
+            <MdOutlineBackspace size={22} />
           </Button>
         )}
       </Col>

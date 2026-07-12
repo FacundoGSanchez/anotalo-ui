@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Button, Typography, Modal } from "antd";
-import { MdChevronRight, MdKeyboard, MdClose, MdEdit, MdOutlineBackspace } from "react-icons/md";
+import { MdKeyboard, MdCheckCircle } from "react-icons/md";
 import { VISOR_CONFIG, POS_COLORS } from "../../../../constants/posConstants";
 import { orgService } from "../../../../services/orgService";
 import { useCurrentOrg } from "../../../../hooks/useCurrentOrg";
@@ -24,12 +24,10 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
   const [currentValue, setCurrentValue] = useState(0);
   const [lineItems, setLineItems] = useState(initialLineItems);
   const [showCalc, setShowCalc] = useState(false);
-  const [activeTab, setActiveTab] = useState("calc");
   const [rubroModalOpen, setRubroModalOpen] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
   const inputRef = useRef(null);
   const rubroListRef = useRef(null);
-  const continuarRef = useRef(null);
 
   const activeColor = POS_COLORS[tipo] || POS_COLORS.DEFAULT;
 
@@ -112,20 +110,6 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
     [currentValue, agregarItemSimple, usaRubro, rubros],
   );
 
-  const eliminarItem = useCallback((id) => {
-    setLineItems((prev) => prev.filter((item) => item.id !== id));
-  }, []);
-
-  const cambiarRubroItem = useCallback((id, nuevoRubro) => {
-    setLineItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, rubro: nuevoRubro } : item,
-      ),
-    );
-    setEditItemId(null);
-    setRubroModalOpen(false);
-  }, []);
-
   const total = lineItems.reduce((acc, item) => acc + item.importe, 0);
 
   useEffect(() => {
@@ -133,12 +117,6 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
       inputRef.current?.focus();
     }
   }, [desktop]);
-
-  useEffect(() => {
-    if (desktop && activeTab === "list") {
-      continuarRef.current?.focus();
-    }
-  }, [desktop, activeTab]);
 
   useEffect(() => {
     onItemsChange?.(lineItems);
@@ -168,7 +146,13 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
       if (matched) {
         e.preventDefault();
         if (editItemId) {
-          cambiarRubroItem(editItemId, matched);
+          setLineItems((prev) =>
+            prev.map((item) =>
+              item.id === editItemId ? { ...item, rubro: matched } : item,
+            ),
+          );
+          setEditItemId(null);
+          setRubroModalOpen(false);
         } else if (currentValue > 0) {
           agregarItemConRubro(matched);
         }
@@ -177,7 +161,7 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [rubroModalOpen, rubrosOrdenados, editItemId, currentValue, agregarItemConRubro, cambiarRubroItem]);
+  }, [rubroModalOpen, rubrosOrdenados, editItemId, currentValue, agregarItemConRubro]);
 
   const renderRubroModal = () => (
     <Modal
@@ -199,7 +183,13 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
               tabIndex={0}
               onClick={() => {
                 if (editItemId) {
-                  cambiarRubroItem(editItemId, rubro);
+                  setLineItems((prev) =>
+                    prev.map((item) =>
+                      item.id === editItemId ? { ...item, rubro } : item,
+                    ),
+                  );
+                  setEditItemId(null);
+                  setRubroModalOpen(false);
                 } else {
                   agregarItemConRubro(rubro);
                 }
@@ -248,268 +238,152 @@ const StepImporte = ({ tipo, onNext, desktop, initialLineItems = [], onItemsChan
     </Modal>
   );
 
-  const tabBtn = (tab) => ({
-    flex: 1,
-    height: "48px",
-    borderRadius: "10px",
-    fontSize: "15px",
-    fontWeight: 600,
-    border: "none",
-    cursor: "pointer",
-    background: activeTab === tab ? activeColor : "transparent",
-    color: activeTab === tab ? "#fff" : "#8c8c8c",
-    transition: "all 0.2s",
-  });
-
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", animation: "fadeIn 0.3s ease" }}>
-      {renderRubroModal()}
+        {renderRubroModal()}
 
-      <div style={{ display: "flex", background: "#f0f0f0", borderRadius: "12px", padding: "3px", marginBottom: "12px" }}>
-        <button tabIndex={-1} onClick={() => setActiveTab("calc")} style={tabBtn("calc")}>Calculadora</button>
-        <button tabIndex={-1} onClick={() => setActiveTab("list")} style={tabBtn("list")}>Resumen {lineItems.length > 0 && `(${lineItems.length})`}</button>
-      </div>
-
-      {/* TAB CONTENT */}
-      {activeTab === "calc" ? (
-        <>
-          {/* VISOR — two rows */}
-          <div style={{ display: "flex", background: "#f8f9fa", borderRadius: "16px", marginBottom: "12px", height: desktop ? "90px" : "96px", overflow: "hidden", border: "1px solid #f0f0f0" }}>
-            <div style={{ width: "8px", height: "100%", backgroundColor: activeColor, transition: "background-color 0.3s ease" }} />
-            <div style={{ flex: 1, padding: "0 20px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: "24px" }}>
-                <div style={{ minWidth: 0 }}>
-                  {currentValue > 0 && (
-                    <Button
-                      tabIndex={-1}
-                      type="text"
-                      icon={<MdOutlineBackspace size={14} />}
-                      onClick={deleteDigit}
-                      style={{ color: "#ff4d4f", fontSize: "11px", height: "24px", width: "24px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
-                    />
-                  )}
-                </div>
-                {lineItems.length > 0 && (
-                  <Text style={{ fontSize: "11px", color: "#8c8c8c", fontWeight: 600, lineHeight: 1.3 }}>
-                    Total $ {fmt(total)} ({lineItems.length} {lineItems.length === 1 ? "item" : "items"})
-                  </Text>
-                )}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minWidth: 0, marginTop: "2px" }}>
-                <Text style={{ fontSize: "28px", color: activeColor, fontWeight: "600" }}>$</Text>
-                {desktop ? (
-                  <input ref={inputRef} tabIndex={1} type="text" inputMode="numeric" value={currentValue > 0 ? fmt(currentValue) : ""} onChange={handleInputChange} onKeyDown={handleInputKeyDown} placeholder="0" autoFocus={desktop} style={{ flex: 1, border: "none", background: "transparent", fontSize: getFontSize(currentValue), fontWeight: 700, textAlign: "right", color: currentValue > 0 ? "#000" : "#bfbfbf", letterSpacing: "-1px", fontFamily: "inherit", marginLeft: "12px" }} />
-                ) : (
-                  <Title level={1} style={{ margin: 0, fontSize: getFontSize(currentValue), letterSpacing: "-1.5px", color: currentValue > 0 ? "#000" : "#bfbfbf", lineHeight: 1, transition: "font-size 0.2s ease-in-out", textAlign: "right", wordBreak: "break-all" }}>
-                    {fmt(currentValue)}
-                  </Title>
-                )}
-              </div>
+        {/* VISOR */}
+        <div style={{ display: "flex", background: "#f8f9fa", borderRadius: "16px", marginBottom: "8px", height: desktop ? "90px" : "96px", overflow: "hidden", border: "1px solid #f0f0f0" }}>
+          <div style={{ width: "8px", height: "100%", backgroundColor: activeColor, transition: "background-color 0.3s ease" }} />
+          <div style={{ flex: 1, padding: "0 20px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", minHeight: "24px" }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minWidth: 0, marginTop: "2px" }}>
+              <Text style={{ fontSize: "28px", color: activeColor, fontWeight: "600" }}>$</Text>
+              {desktop ? (
+                <input ref={inputRef} tabIndex={1} type="text" inputMode="numeric" value={currentValue > 0 ? fmt(currentValue) : ""} onChange={handleInputChange} onKeyDown={handleInputKeyDown} placeholder="0" autoFocus={desktop} style={{ flex: 1, border: "none", background: "transparent", fontSize: getFontSize(currentValue), fontWeight: 700, textAlign: "right", color: currentValue > 0 ? "#000" : "#bfbfbf", letterSpacing: "-1px", fontFamily: "inherit", marginLeft: "12px" }} />
+              ) : (
+                <Title level={1} style={{ margin: 0, fontSize: getFontSize(currentValue), letterSpacing: "-1.5px", color: currentValue > 0 ? "#000" : "#bfbfbf", lineHeight: 1, transition: "font-size 0.2s ease-in-out", textAlign: "right", wordBreak: "break-all" }}>
+                  {fmt(currentValue)}
+                </Title>
+              )}
             </div>
           </div>
+        </div>
 
-          {(desktop ? showCalc : true) && (
-            <Calculadora
-              btnTabIndex={-1}
-              onPress={addDigit}
-              onPlus={handlePlus}
-              onBackspace={deleteDigit}
-              activeColor={activeColor}
-              hasValue={currentValue > 0}
-            />
-          )}
-          {desktop && !showCalc && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
-              {currentValue > 0 && (
-                <button
-                  tabIndex={2}
-                  onClick={(e) => { e.preventDefault(); handlePlus(); }}
-                  style={{
-                    height: "56px",
-                    borderRadius: "14px",
-                    fontSize: "18px",
-                    fontWeight: 700,
-                    border: "none",
-                    background: activeColor,
-                    color: "#fff",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseDown={(e) => e.preventDefault()}
-                >
-                  AGREGAR
-                </button>
-              )}
-              {lineItems.length > 0 && (
-                <button
-                  tabIndex={3}
-                  onClick={(e) => { e.preventDefault(); setActiveTab("list"); }}
-                  style={{
-                    height: "50px",
-                    borderRadius: "14px",
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    border: `2px solid ${activeColor}`,
-                    background: "#fff",
-                    color: activeColor,
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseDown={(e) => e.preventDefault()}
-                >
-                  IR A RESUMEN →
-                </button>
-              )}
-            </div>
-          )}
-          {desktop && (
-            <Button tabIndex={-1} type="text" icon={<MdKeyboard size={16} />} onClick={() => setShowCalc((c) => !c)} style={{ alignSelf: "flex-end", fontSize: "12px", color: "#8c8c8c", marginBottom: "8px" }}>
-              {showCalc ? "Ocultar teclado" : "Mostrar teclado"}
-            </Button>
-          )}
-          {!desktop && lineItems.length > 0 && (
-            <button
-              tabIndex={-1}
-              onClick={(e) => { e.preventDefault(); setActiveTab("list"); }}
-              style={{
-                width: "100%",
-                height: "50px",
-                borderRadius: "14px",
-                fontSize: "16px",
-                fontWeight: 600,
-                border: `2px solid ${activeColor}`,
-                background: "#fff",
+        {/* Calculadora */}
+        {(desktop ? showCalc : true) && (
+          <Calculadora
+            btnTabIndex={-1}
+            onPress={addDigit}
+            onPlus={handlePlus}
+            onBackspace={deleteDigit}
+            activeColor={activeColor}
+            hasValue={currentValue > 0}
+          />
+        )}
+
+        {/* Leyenda de items — siempre visible cuando hay items */}
+        {lineItems.length > 0 && (
+          <button
+            tabIndex={-1}
+            onClick={() => onNext({ importe: total, lineItems })}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              padding: "10px 16px",
+              marginTop: "10px",
+              background: `${activeColor}0d`,
+              border: `1px solid ${activeColor}20`,
+              borderRadius: "12px",
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = activeColor; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${activeColor}20`; }}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "8px",
+                background: `${activeColor}18`,
                 color: activeColor,
-                cursor: "pointer",
-                transition: "all 0.15s",
-                marginTop: "8px",
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              IR A RESUMEN →
-            </button>
-          )}
-        </>
-      ) : (
-        <>
-          {lineItems.length > 0 ? (
-            <div style={{ background: "#fafafa", borderRadius: "16px", border: "1px solid #f0f0f0", padding: "12px 16px" }}>
-              {lineItems.map((item, idx) => (
-                <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: idx < lineItems.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-                    {usaRubro ? (
-                      <div style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "52px",
-                        height: "52px",
-                        borderRadius: "14px",
-                        background: `${activeColor}12`,
-                        color: activeColor,
-                        flexShrink: 0,
-                      }}>
-                        <span style={{ fontSize: "22px", fontWeight: 800, lineHeight: 1 }}>{item.rubro?.sigla || ""}</span>
-                        <span style={{ fontSize: "9px", fontWeight: 600, lineHeight: 1, opacity: 0.8 }}>{item.rubro?.nombre || ""}</span>
-                      </div>
-                    ) : (
-                      <div style={{
-                        width: "52px",
-                        height: "52px",
-                        borderRadius: "14px",
-                        background: `${activeColor}12`,
-                        color: activeColor,
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "22px",
-                        fontWeight: 800,
-                      }}>
-                        $
-                      </div>
-                    )}
-                    <Text strong style={{ fontSize: "16px", color: "#262626" }}>$ {fmt(item.importe)}</Text>
-                  </div>
-                  <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                    {usaRubro && (
-                      <Button tabIndex={3 + lineItems.length + idx} type="text" size="small" icon={<MdEdit size={15} />} onClick={() => { setEditItemId(item.id); setRubroModalOpen(true); }} style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", color: "#8c8c8c" }} />
-                    )}
-                    <Button tabIndex={3 + idx} type="text" danger size="small" icon={<MdClose size={15} />} onClick={() => eliminarItem(item.id)} style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ textAlign: "center", padding: "40px 20px" }}>
-              <Text type="secondary" style={{ fontSize: "14px" }}>No hay items cargados</Text>
-              <br />
-              <Text type="secondary" style={{ fontSize: "12px", color: "#bfbfbf" }}>Usá la calculadora para agregar montos</Text>
-            </div>
-          )}
-
-          <div style={{ marginTop: "16px", padding: "14px 20px", background: `${activeColor}0d`, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", border: `1px solid ${activeColor}18` }}>
-            <Text strong style={{ fontSize: "14px", color: "#8c8c8c" }}>{lineItems.length} {lineItems.length === 1 ? "item" : "items"}</Text>
-            <Title level={4} style={{ margin: 0, color: activeColor, fontSize: "22px" }}>$ {fmt(total)}</Title>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
-            <button
-              ref={continuarRef}
-              tabIndex={1}
-              disabled={lineItems.length === 0}
-              onClick={() => onNext({ importe: total, lineItems })}
-              style={{
-                width: "100%",
-                height: "56px",
-                borderRadius: "14px",
-                fontSize: "18px",
-                fontWeight: 700,
-                border: "none",
-                background: lineItems.length > 0 ? activeColor : "#d9d9d9",
-                color: "#fff",
-                cursor: lineItems.length > 0 ? "pointer" : "default",
-                transition: "all 0.15s",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                lineHeight: 1.2,
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              <span>CONTINUAR</span>
-              <span style={{ fontSize: "11px", fontWeight: 500, opacity: 0.85 }}>Forma de Pago</span>
-            </button>
-            {desktop && (
+                fontSize: "13px",
+                fontWeight: 800,
+              }}>
+                {lineItems.length}
+              </div>
+              <Text strong style={{ fontSize: "13px", color: "#595959" }}>
+                {lineItems.length === 1 ? "item" : "items"}
+              </Text>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Text strong style={{ fontSize: "15px", color: activeColor }}>
+                $ {fmt(total)}
+              </Text>
+              <MdKeyboard size={14} style={{ color: activeColor, transform: "rotate(90deg)" }} />
+            </div>
+          </button>
+        )}
+
+        {/* Botón CONTINUAR */}
+        {lineItems.length > 0 && (
+          <button
+            onClick={() => onNext({ importe: total, lineItems })}
+            style={{
+              width: "100%",
+              height: "48px",
+              marginTop: "8px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: 700,
+              border: "none",
+              background: activeColor,
+              color: "#fff",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            CONTINUAR
+            <MdCheckCircle size={16} />
+          </button>
+        )}
+
+        {/* Desktop: toggle teclado + AGREGAR */}
+        {desktop && !showCalc && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
+            {currentValue > 0 && (
               <button
                 tabIndex={2}
-                onClick={() => setActiveTab("calc")}
-                onFocus={(e) => { e.currentTarget.style.borderColor = activeColor; e.currentTarget.style.color = activeColor; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = "#d9d9d9"; e.currentTarget.style.color = "#8c8c8c"; }}
+                onClick={(e) => { e.preventDefault(); handlePlus(); }}
                 style={{
-                  width: "100%",
-                  height: "50px",
+                  height: "56px",
                   borderRadius: "14px",
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  border: "2px solid #d9d9d9",
-                  background: "#fff",
-                  color: "#8c8c8c",
+                  fontSize: "18px",
+                  fontWeight: 700,
+                  border: "none",
+                  background: activeColor,
+                  color: "#fff",
                   cursor: "pointer",
                   transition: "all 0.15s",
                 }}
                 onMouseDown={(e) => e.preventDefault()}
               >
-                ← VOLVER
+                AGREGAR
               </button>
             )}
           </div>
-        </>
-      )}
-    </div>
+        )}
+        {desktop && (
+          <Button tabIndex={-1} type="text" icon={<MdKeyboard size={16} />} onClick={() => setShowCalc((c) => !c)} style={{ alignSelf: "flex-end", fontSize: "12px", color: "#8c8c8c", marginBottom: "8px" }}>
+            {showCalc ? "Ocultar teclado" : "Mostrar teclado"}
+          </Button>
+        )}
+      </div>
     </>
   );
 };

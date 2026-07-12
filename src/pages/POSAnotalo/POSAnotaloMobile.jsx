@@ -8,6 +8,7 @@ import { STEPS } from "../../constants/posConstants";
 
 import PosHeader from "./components/PosHeader";
 import StepImporte from "./components/steps/StepImporte";
+import StepResumenItem from "./components/steps/StepResumenItem";
 import StepFormaPago from "./components/steps/StepFormaPago";
 import StepEntidad from "./components/steps/StepEntidad";
 import StepConfirmar from "./components/steps/StepConfirmar";
@@ -74,6 +75,18 @@ const POSAnotaloMobile = () => {
               initialLineItems={movimiento.lineItems || []}
               onNext={({ importe, lineItems }) => handleNext({ importe, lineItems })}
               onItemsChange={(items) => updateItems(items.length)}
+            />
+          )}
+
+          {currentStep === STEPS.RESUMEN && (
+            <StepResumenItem
+              tipo={movimiento.tipo}
+              lineItems={movimiento.lineItems || []}
+              onNext={(data) => handleNext(data)}
+              onRemoveItem={(id) => {
+                const newItems = (movimiento.lineItems || []).filter((i) => i.id !== id);
+                handleNext({ lineItems: newItems, importe: newItems.reduce((a, i) => a + i.importe, 0) });
+              }}
             />
           )}
 

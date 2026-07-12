@@ -13,6 +13,7 @@ import { useCurrentSucursal } from "../../hooks/useCurrentSucursal";
 import { useMovimientoSession } from "../../context/MovimientoSessionContext";
 
 import StepImporte from "./components/steps/StepImporte";
+import StepResumenItem from "./components/steps/StepResumenItem";
 import StepFormaPago from "./components/steps/StepFormaPago";
 import StepEntidad from "./components/steps/StepEntidad";
 import StepConfirmar from "./components/steps/StepConfirmar";
@@ -88,6 +89,18 @@ const POSAnotaloDesktop = () => {
             initialLineItems={movimiento.lineItems || []}
             onNext={({ importe, lineItems }) => handleNext({ importe, lineItems })}
             onItemsChange={(items) => updateItems(items.length)}
+          />
+        );
+      case STEPS.RESUMEN:
+        return (
+          <StepResumenItem
+            tipo={movimiento.tipo}
+            lineItems={movimiento.lineItems || []}
+            onNext={(data) => handleNext(data)}
+            onRemoveItem={(id) => {
+              const newItems = (movimiento.lineItems || []).filter((i) => i.id !== id);
+              handleNext({ lineItems: newItems, importe: newItems.reduce((a, i) => a + i.importe, 0) });
+            }}
           />
         );
       case STEPS.FORMA_PAGO:
