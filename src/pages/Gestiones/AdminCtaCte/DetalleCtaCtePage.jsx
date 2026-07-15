@@ -18,6 +18,7 @@ import {
   MdPayment,
   MdClose,
   MdSettings,
+  MdEdit,
 } from "react-icons/md";
 import { movimientoService } from "../../../services/movimientoService";
 import { entidadService } from "../../../services/entidadService";
@@ -26,6 +27,7 @@ import { authService } from "../../../services/authService";
 import {
   MOVIMIENTO_TIPOS,
   POS_COLORS,
+  FORMAS_PAGO,
 } from "../../../constants/posConstants";
 import { useAuth } from "../../../context/AuthContext";
 import CalculadoraGestion from "../../../components/CalculadoraGestion";
@@ -46,6 +48,7 @@ const DetalleCtaCtePage = () => {
   const [configForm] = Form.useForm();
   const [modalStep, setModalStep] = useState("amount");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [editFpModal, setEditFpModal] = useState(null);
 
   const formasPago = useMemo(() => {
     const orgId = authService.getCurrentOrgId();
@@ -158,6 +161,24 @@ const DetalleCtaCtePage = () => {
       setConfigModalOpen(false);
       incrementRefresh();
     });
+  };
+
+  const handleChangeFormaPago = (nuevoNombre) => {
+    if (!editFpModal) return;
+    const { mov, fpIndex } = editFpModal;
+    const result = movimientoService.updateFormaPago(mov.id, fpIndex, nuevoNombre);
+    if (result.success) {
+      const antiguo = mov.formaPagos[fpIndex].nombre;
+      if (antiguo === "Cta Corriente" || nuevoNombre === "Cta Corriente") {
+        message.success(`Forma de pago actualizada. Saldo recalculado.`);
+      } else {
+        message.success(`Forma de pago cambiada a ${nuevoNombre}`);
+      }
+      setEditFpModal(null);
+      incrementRefresh();
+    } else {
+      message.error("Error al actualizar forma de pago");
+    }
   };
 
   if (!entidad) {
@@ -428,6 +449,65 @@ const DetalleCtaCtePage = () => {
                     <Text type="secondary" style={{ fontSize: "11px" }}>
                       {(() => { const { fecha, hora } = movimientoService.extraerFechaHora(mov.fechaRegistro); return `${fecha} ${hora} hs`; })()}
                     </Text>
+                    {mov.formaPagos?.length > 1 && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "2px",
+                          marginTop: "4px",
+                        }}
+                      >
+                        {mov.formaPagos.map((fp, fpIdx) => (
+                          <div
+                            key={fpIdx}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                background:
+                                  FORMAS_PAGO.find((f) => f.key === fp.nombre)
+                                    ?.color || "#8c8c8c",
+                                flexShrink: 0,
+                              }}
+                            />
+                            <Text
+                              type="secondary"
+                              style={{
+                                fontSize: "11px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {fp.nombre}: $
+                              {Number(fp.importe).toLocaleString("es-AR")}
+                            </Text>
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={<MdEdit size={10} />}
+                              onClick={() =>
+                                setEditFpModal({ mov, fpIndex: fpIdx })
+                              }
+                              style={{
+                                padding: 0,
+                                minWidth: "auto",
+                                height: "auto",
+                                color: "#8c8c8c",
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div
@@ -672,6 +752,131 @@ const DetalleCtaCtePage = () => {
               size="large" style={{ padding: "12px", borderRadius: "8px" }} suffix="días" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Edit Forma de Pago modal */}
+      <Modal
+        open={!!editFpModal}
+        onCancel={() => setEditFpModal(null)}
+        footer={null}
+        centered
+        width={340}
+        closeIcon={<MdClose size={20} />}
+        title="Cambiar forma de pago"
+      >
+        {editFpModal && (() => {
+          const { mov, fpIndex } = editFpModal;
+          const fpActual = mov.formaPagos[fpIndex];
+          const opciones = FORMAS_PAGO.filter(
+            (f) => f.key !== fpActual.nombre,
+          );
+          return (
+            <div style={{ marginTop: "8px" }}>
+              <div
+                style={{
+                  background: "#fafafa",
+                  borderRadius: "12px",
+                  padding: "12px 14px",
+                  marginBottom: "16px",
+                }}
+              >
+                <Text
+                  type="secondary"
+                  style={{ fontSize: "11px", display: "block", marginBottom: "4px" }}
+                >
+                  {mov.tipo} ·{" "}
+                  {(() => {
+                    const { fecha, hora } = movimientoService.extraerFechaHora(
+                      mov.fechaRegistro,
+                    );
+                    return `${fecha} ${hora} hs`;
+                  })()}
+                </Text>
+                <Text strong style={{ fontSize: "15px", display: "block" }}>
+                  Importe: ${Number(fpActual.importe).toLocaleString("es-AR")}
+                </Text>
+              </div>
+
+              <Text
+                type="secondary"
+                style={{
+                  fontSize: "12px",
+                  display: "block",
+                  marginBottom: "8px",
+                }}
+              >
+                Cambiar de "{fpActual.nombre}" a:
+              </Text>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
+                {opciones.map((fp) => (
+                  <div
+                    key={fp.key}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleChangeFormaPago(fp.key)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleChangeFormaPago(fp.key);
+                      }
+                    }}
+                    style={{
+                      borderRadius: "12px",
+                      border: "1px solid #f0f0f0",
+                      background: "#fff",
+                      cursor: "pointer",
+                      padding: "10px 16px",
+                      transition: "all 0.2s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      outline: "none",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = fp.color;
+                      e.currentTarget.style.boxShadow = `0 0 0 2px ${fp.color}20`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "#f0f0f0";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = fp.color;
+                      e.currentTarget.style.boxShadow = `0 0 0 2px ${fp.color}30`;
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = "#f0f0f0";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        background: fp.color,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Text
+                      strong
+                      style={{ fontSize: "14px", color: "#262626" }}
+                    >
+                      {fp.label}
+                    </Text>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
     </div>
   );

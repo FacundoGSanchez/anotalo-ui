@@ -53,31 +53,43 @@ const getCtaCteImporte = (mov) => {
   return mov.formaPago === "Cta Corriente" ? (Number(mov.importe) || 0) : 0;
 };
 
-const recalcularSaldoEntidad = (entidadId, movimiento) => {
-  const tipo = getTipoEntidadFromMovimiento(movimiento);
-  if (!tipo || !entidadId) return;
+const recalcularSaldoCadena = (entidadId) => {
+  if (!entidadId) return;
 
-  const movs = movimientoService.getAll().filter(
-    (m) =>
-      m.entidad?.id === entidadId &&
-      (tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO),
-  );
+  const todos = movimientoService.getAll();
+  const movsEntidad = todos
+    .filter(
+      (m) =>
+        m.entidad?.id === entidadId &&
+        (tieneCtaCte(m) || m.tipo === MOVIMIENTO_TIPOS.COBRO),
+    )
+    .sort((a, b) => a.id - b.id);
 
   let saldo = 0;
-  movs.forEach((m) => {
-    const importe = m.tipo === MOVIMIENTO_TIPOS.COBRO
-      ? (Number(m.importe) || 0)
-      : getCtaCteImporte(m);
+  movsEntidad.forEach((m) => {
+    const importe =
+      m.tipo === MOVIMIENTO_TIPOS.COBRO
+        ? Number(m.importe) || 0
+        : getCtaCteImporte(m);
     if (m.tipo === MOVIMIENTO_TIPOS.VENTA) {
       saldo += importe;
-    } else if (m.tipo === MOVIMIENTO_TIPOS.COBRO || m.tipo === MOVIMIENTO_TIPOS.PAGO) {
+    } else if (
+      m.tipo === MOVIMIENTO_TIPOS.COBRO ||
+      m.tipo === MOVIMIENTO_TIPOS.PAGO
+    ) {
       saldo -= importe;
     }
+    m.saldoCtaCte = saldo;
   });
 
-  const entidad = entidadService.getById(tipo, entidadId);
-  if (entidad) {
-    entidadService.update(tipo, entidadId, { ...entidad, saldo });
+  localStorage.setItem(DB_KEY, JSON.stringify(todos));
+
+  const tipoEntidad = getTipoEntidadFromMovimiento(movsEntidad[0] || {});
+  if (tipoEntidad) {
+    const entidad = entidadService.getById(tipoEntidad, entidadId);
+    if (entidad) {
+      entidadService.update(tipoEntidad, entidadId, { ...entidad, saldo });
+    }
   }
 };
 
@@ -220,7 +232,7 @@ export const movimientoService = {
       localStorage.setItem(DB_KEY, JSON.stringify(nuevoHistorial));
 
       if (esCtaCte && movimiento.entidad?.id) {
-        recalcularSaldoEntidad(movimiento.entidad.id, movimiento);
+        recalcularSaldoCadena(movimiento.entidad.id);
       }
 
       dispatchUpdate();
@@ -261,7 +273,7 @@ export const movimientoService = {
         eliminado.entidad?.id &&
         (tieneCtaCte(eliminado) || eliminado.tipo === MOVIMIENTO_TIPOS.COBRO)
       ) {
-        recalcularSaldoEntidad(eliminado.entidad.id, eliminado);
+        recalcularSaldoCadena(eliminado.entidad.id);
       }
 
       dispatchUpdate();
@@ -269,6 +281,54 @@ export const movimientoService = {
       return { success: true };
     } catch (error) {
       console.error("Error al eliminar movimiento:", error);
+      return { success: false, error };
+    }
+  },
+
+  updateFormaPago: (movimientoId, index, nuevoNombre) => {
+    try {
+      const todos = movimientoService.getAll();
+      const movIndex = todos.findIndex((m) => m.id === movimientoId);
+      if (movIndex === -1) return { success: false, error: "No encontrado" };
+
+      const mov = { ...todos[movIndex] };
+      const fp = [...(mov.formaPagos || [])];
+      if (!fp[index]) return { success: false, error: "Índice inválido" };
+
+      const antiguoNombre = fp[index].nombre;
+      if (antiguoNombre === nuevoNombre) return { success: true, data: mov };
+
+      const importeFp = Number(fp[index].importe) || 0;
+
+      const existenteIdx = fp.findIndex(
+        (f, i) => i !== index && f.nombre === nuevoNombre,
+      );
+
+      if (existenteIdx !== -1) {
+        fp[existenteIdx] = {
+          ...fp[existenteIdx],
+          importe: Number(fp[existenteIdx].importe) + importeFp,
+        };
+        fp.splice(index, 1);
+      } else {
+        fp[index] = { ...fp[index], nombre: nuevoNombre };
+      }
+
+      mov.formaPagos = fp;
+      mov.formaPago = fp[0]?.nombre || "";
+      mov.importe = fp.reduce((s, f) => s + (Number(f.importe) || 0), 0);
+
+      todos[movIndex] = mov;
+      localStorage.setItem(DB_KEY, JSON.stringify(todos));
+
+      if (mov.entidad?.id) {
+        recalcularSaldoCadena(mov.entidad.id);
+      }
+
+      dispatchUpdate();
+      return { success: true, data: mov };
+    } catch (error) {
+      console.error("Error al actualizar forma de pago:", error);
       return { success: false, error };
     }
   },

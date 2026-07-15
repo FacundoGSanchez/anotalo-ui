@@ -191,7 +191,7 @@ const ModalDetalleMovimiento = ({
             Cerrar
           </Button>,
         ]}
-        styles={{ body: { padding: "24px 16px" } }}
+        styles={{ body: { padding: "12px 16px" } }}
       >
         <div style={{ padding: "0" }}>
           {/* IMPORTE + DATOS MOVIMIENTO row */}
@@ -225,7 +225,7 @@ const ModalDetalleMovimiento = ({
               <Text
                 strong
                 style={{
-                  fontSize: "28px",
+                  fontSize: "20px",
                   color: isVenta ? "#52c41a" : "#ff4d4f",
                   lineHeight: 1.2,
                   marginTop: "2px",
