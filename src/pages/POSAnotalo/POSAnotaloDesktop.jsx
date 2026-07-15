@@ -276,10 +276,10 @@ const POSAnotaloDesktop = () => {
                 {movimiento.formaPagos?.length > 0 ? (
                   movimiento.formaPagos.map((fp, i) => (
                     <SidebarRow
-                      key={fp.key}
+                      key={fp.nombre || fp.key}
                       icon={<MdWallet size={16} color={POS_COLORS[movimiento.tipo] || "#8c8c8c"} />}
                       label={i === 0 ? "Forma de pago" : ""}
-                      value={`${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`}
+                      value={`${fp.nombre || fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`}
                       color={POS_COLORS[movimiento.tipo] || "#8c8c8c"}
                     />
                   ))
@@ -411,7 +411,7 @@ const POSAnotaloDesktop = () => {
                           type="secondary"
                           style={{ fontSize: "10px", lineHeight: "1.2" }}
                         >
-                          {(m.formaPagos ? m.formaPagos.map(fp => fp.key).join(" + ") : m.formaPago)} · {m.fecha}
+                          {(m.formaPagos ? m.formaPagos.map(fp => fp.nombre || fp.key).join(" + ") : m.formaPago)} · {(() => { const { fecha } = movimientoService.extraerFechaHora(m.fechaRegistro); return fecha; })()}
                         </Text>
                       </div>
                     </div>

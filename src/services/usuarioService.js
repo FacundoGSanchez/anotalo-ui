@@ -1,3 +1,5 @@
+import { hashPassword } from "../utils/crypto";
+
 const STORAGE_KEY = "usuarios_db";
 
 function getAll() {
@@ -17,23 +19,28 @@ function getByUsername(username) {
   return getAll().find((u) => u.username === username) || null;
 }
 
-function create({ username, password, nombre, sucursales = [] }) {
+async function create({ username, password, nombre, sucursales = [] }) {
   const lista = getAll();
   if (lista.some((u) => u.username === username)) return null;
   const maxId = lista.reduce((max, u) => Math.max(max, u.id), 0);
-  const nuevo = { id: maxId + 1, username: username.trim(), password, nombre: nombre.trim(), sucursales };
+  const hashedPassword = await hashPassword(password);
+  const nuevo = { id: maxId + 1, username: username.trim(), password: hashedPassword, nombre: nombre.trim(), sucursales };
   lista.push(nuevo);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
   return nuevo;
 }
 
-function update(id, data) {
+async function update(id, data) {
   const lista = getAll();
   const idx = lista.findIndex((u) => u.id === id);
   if (idx === -1) return null;
   const existente = lista[idx];
   if (data.username && data.username !== existente.username && lista.some((u) => u.username === data.username)) return null;
-  lista[idx] = { ...existente, ...data, id: existente.id };
+  const updatedData = { ...data };
+  if (updatedData.password) {
+    updatedData.password = await hashPassword(updatedData.password);
+  }
+  lista[idx] = { ...existente, ...updatedData, id: existente.id };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
   return lista[idx];
 }

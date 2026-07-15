@@ -51,10 +51,11 @@ const MovimientosPage = () => {
       (m) => {
         if (!tipos.includes(m.tipo)) return false;
         const pagaCon = m.formaPagos?.length > 0
-          ? m.formaPagos.some((fp) => formas.includes(fp.key))
+          ? m.formaPagos.some((fp) => formas.includes(fp.nombre || fp.key))
           : formas.includes(m.formaPago);
         if (!pagaCon) return false;
-        return dayjs(m.fecha).isAfter(fechaLimite.subtract(1, "day"));
+        const { fecha } = movimientoService.extraerFechaHora(m.fechaRegistro);
+        return dayjs(fecha).isAfter(fechaLimite.subtract(1, "day"));
       },
     );
 
@@ -64,9 +65,10 @@ const MovimientosPage = () => {
     // 3. Agrupar por fecha
     const grupos = {};
     segmentados.forEach((item) => {
-      let label = dayjs(item.fecha).locale("es").format("dddd DD [de] MMMM");
-      if (dayjs(item.fecha).isSame(dayjs(), "day")) label = "Hoy";
-      if (dayjs(item.fecha).isSame(dayjs().subtract(1, "day"), "day"))
+      const { fecha } = movimientoService.extraerFechaHora(item.fechaRegistro);
+      let label = dayjs(fecha).locale("es").format("dddd DD [de] MMMM");
+      if (dayjs(fecha).isSame(dayjs(), "day")) label = "Hoy";
+      if (dayjs(fecha).isSame(dayjs().subtract(1, "day"), "day"))
         label = "Ayer";
 
       const labelFinal = label.charAt(0).toUpperCase() + label.slice(1);

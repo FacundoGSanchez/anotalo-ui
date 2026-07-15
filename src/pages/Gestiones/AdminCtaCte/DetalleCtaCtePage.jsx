@@ -110,7 +110,7 @@ const DetalleCtaCtePage = () => {
       tipo: movTipoModal,
       importe: Number(movImporte),
       formaPago,
-      formaPagos: [{ key: formaPago, importe: Number(movImporte) }],
+      formaPagos: [{ nombre: formaPago, importe: Number(movImporte) }],
       entidad: { id: entidad.id, nombre: entidad.nombre },
     };
     const result = movimientoService.save(movimientoData, user);
@@ -426,7 +426,7 @@ const DetalleCtaCtePage = () => {
                       </Text>
                     </div>
                     <Text type="secondary" style={{ fontSize: "11px" }}>
-                      {mov.fecha} {mov.hora} hs
+                      {(() => { const { fecha, hora } = movimientoService.extraerFechaHora(mov.fechaRegistro); return `${fecha} ${hora} hs`; })()}
                     </Text>
                   </div>
 

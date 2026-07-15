@@ -117,4 +117,13 @@ export const orgService = {
 
   getFormasPagoDefault: () => FORMAS_PAGO_DEFAULT,
 
+  getFormasPagoIds: (orgId) => {
+    const config = orgService.getConfig(orgId);
+    return config.formasPagoIds || [];
+  },
+
+  saveFormasPagoIds: (orgId, ids) => {
+    return orgService.saveConfig(orgId, { formasPagoIds: ids });
+  },
+
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, Typography, Tag } from "antd";
 import { MOVIMIENTO_TIPOS, POS_COLORS } from "../../../../constants/posConstants";
+import { movimientoService } from "../../../../services/movimientoService";
 
 const { Text } = Typography;
 
@@ -101,7 +102,7 @@ const MovimientoGrupo = ({
                     type="secondary"
                     style={{ fontSize: "11px", marginLeft: "32px" }}
                   >
-                    {(mov.formaPagos ? mov.formaPagos.map(fp => fp.key).join(" + ") : mov.formaPago)} · {mov.hora || mov.fecha} hs
+                    {(mov.formaPagos ? mov.formaPagos.map(fp => fp.nombre || fp.key).join(" + ") : mov.formaPago)} · {(() => { const { hora, fecha } = movimientoService.extraerFechaHora(mov.fechaRegistro); return mov.hora || hora || fecha; })()} hs
                   </Text>
                 </div>
 

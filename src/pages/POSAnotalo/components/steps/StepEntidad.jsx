@@ -25,7 +25,7 @@ const StepEntidad = ({ tipo, formaPago, formaPagos, onNext, onBack }) => {
   const requiereEntidad = useMemo(() => {
     if (formaPagos?.length > 0) {
       return formaPagos.some((fp) => {
-        const obj = formasPago.find((f) => f.key === fp.key);
+        const obj = formasPago.find((f) => f.key === (fp.nombre || fp.key));
         return obj?.requiereEntidad || false;
       });
     }

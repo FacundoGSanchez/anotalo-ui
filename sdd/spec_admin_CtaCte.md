@@ -69,10 +69,12 @@ En el listado de Clientes (`EntidadesListado.jsx`), los clientes con Cta Cte hab
 ### 3.1 Cálculo de saldo
 
 ```
-saldo = Σ(Ventas) - Σ(Cobros/Pagos)
+saldo = Σ(Ventas: importe Cta Corriente) - Σ(Cobros/Pagos: importe total)
 ```
 
-Se filtran movimientos con `formaPago === "Cta Corriente"` y `entidad.id === clienteId`.
+- Se filtran movimientos que tienen `formaPago === "Cta Corriente"` (o `formaPagos` con key `"Cta Corriente"`) y `entidad.id === clienteId`, más los movimientos tipo `Cobro`.
+- Para **Ventas**: solo se contabiliza la porción abonada en Cta Corriente (`getCtaCteImporte`), no el total del movimiento. Esto es así porque una venta puede tener pago dividido (ej: $5,000 Efectivo + $5,000 Cta Corriente → solo los $5,000 de Cta Corriente impactan el saldo).
+- Para **Cobros**: se contabiliza el importe total del movimiento (el cobro siempre reduce el saldo de Cta Corriente).
 
 ---
 
@@ -113,7 +115,7 @@ Ruta: `/gestiones/ctacte`
 | Listado         | Clientes con movimientos Cta Corriente (con o sin config habilitada)           |
 | Orden           | Por saldo descendente (mayor deuda primero)                                    |
 | Búsqueda        | Input que filtra por nombre del cliente                                        |
-| Saldo           | Signo + verde (a favor), signo - rojo (nos debe)                               |
+| Saldo           | Solo considera la porción de Ventas pagada en Cta Corriente (no el total). Signo + verde (a favor), signo - rojo (nos debe) |
 | Alertas         | "Configurar cuenta" (rojo), "Superó límite" (amarillo), "Plazo vencido" (rojo) |
 | Click fila      | Navega a `/gestiones/ctacte/clientes/{id}` (detalle + cobro + config)          |
 

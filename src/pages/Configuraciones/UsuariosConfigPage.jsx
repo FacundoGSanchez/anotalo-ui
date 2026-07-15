@@ -46,7 +46,7 @@ const UsuariosConfigPage = () => {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formUsername.trim() || !formNombre.trim()) {
       message.warning("Completá nombre de usuario y nombre");
       return;
@@ -64,9 +64,9 @@ const UsuariosConfigPage = () => {
     if (formPassword.trim()) payload.password = formPassword.trim();
     let result;
     if (editItem) {
-      result = usuarioService.update(editItem.id, payload);
+      result = await usuarioService.update(editItem.id, payload);
     } else {
-      result = usuarioService.create({ ...payload, password: formPassword.trim() });
+      result = await usuarioService.create({ ...payload, password: formPassword.trim() });
     }
     if (result === null) {
       message.error("El nombre de usuario ya existe");

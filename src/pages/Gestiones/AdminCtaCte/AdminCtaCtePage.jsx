@@ -30,7 +30,7 @@ const calcularSaldos = () => {
     const entId = m.entidad?.id;
     if (!entId || !saldos[entId]) return;
     if (m.tipo === MOVIMIENTO_TIPOS.VENTA) {
-      saldos[entId].debe += Number(m.importe) || 0;
+      saldos[entId].debe += Number(movimientoService.getCtaCteImporte(m)) || 0;
     } else if (m.tipo === MOVIMIENTO_TIPOS.COBRO || m.tipo === MOVIMIENTO_TIPOS.PAGO) {
       saldos[entId].haber += Number(m.importe) || 0;
     }
@@ -48,7 +48,10 @@ const calcularSaldos = () => {
         if (!plazo) return false;
         const entMovs = movs.filter((m) => m.entidad?.id === s.entidad.id);
         if (entMovs.length === 0) return false;
-        const fechas = entMovs.map((m) => dayjs(m.fecha));
+        const fechas = entMovs.map((m) => {
+          const { fecha } = movimientoService.extraerFechaHora(m.fechaRegistro);
+          return dayjs(fecha);
+        });
         const masAntigua = fechas.reduce((a, b) => (a.isBefore(b) ? a : b));
         return dayjs().diff(masAntigua, "day") > plazo;
       })(),

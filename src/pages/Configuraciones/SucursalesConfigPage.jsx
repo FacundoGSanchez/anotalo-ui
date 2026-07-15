@@ -3,6 +3,7 @@ import { Typography, Button, Modal, Input, Popconfirm, message, Divider } from "
 import { MdArrowBack, MdAdd, MdChevronRight, MdClose, MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { sucursalService } from "../../services/sucursalService";
+import { usuarioService } from "../../services/usuarioService";
 
 const { Text } = Typography;
 
@@ -49,6 +50,12 @@ const SucursalesConfigPage = () => {
   };
 
   const handleDelete = (id) => {
+    const usuarios = usuarioService.getAll();
+    const asignada = usuarios.some((u) => u.sucursales?.some((s) => s.id === id));
+    if (asignada) {
+      message.error("No se puede eliminar: hay usuarios asignados a esta sucursal");
+      return;
+    }
     const ok = sucursalService.deleteById(id);
     if (!ok) {
       message.warning("No se puede eliminar la única sucursal");

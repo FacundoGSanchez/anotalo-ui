@@ -126,7 +126,7 @@ const StepFormaPago = ({ tipo, importe = 0, onNext }) => {
 
   const handleSingleSelect = useCallback(
     (key) => {
-      onNext({ formaPago: key, formaPagos: [{ key, importe }] });
+      onNext({ formaPago: key, formaPagos: [{ nombre: key, importe }] });
     },
     [importe, onNext],
   );
@@ -135,7 +135,7 @@ const StepFormaPago = ({ tipo, importe = 0, onNext }) => {
     const entries = Object.entries(selected).filter(([, v]) => Number(v) > 0);
     if (entries.length === 0) return;
     const formaPagos = entries.map(([key, importe]) => ({
-      key,
+      nombre: key,
       importe: Number(importe),
     }));
     onNext({ formaPago: entries[0][0], formaPagos });

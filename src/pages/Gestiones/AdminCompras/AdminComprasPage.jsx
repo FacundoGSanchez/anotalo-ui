@@ -75,7 +75,11 @@ const AdminComprasPage = () => {
     return movimientoService
       .getAll()
       .filter((m) => m.tipo === MOVIMIENTO_TIPOS.PAGO)
-      .sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
+      .sort((a, b) => {
+        const fA = movimientoService.extraerFechaHora(a.fechaRegistro);
+        const fB = movimientoService.extraerFechaHora(b.fechaRegistro);
+        return (fB.fecha + fB.hora).localeCompare(fA.fecha + fA.hora);
+      });
   }, [refreshKey]);
 
   const pagosFiltrados = useMemo(() => {
@@ -130,7 +134,7 @@ const AdminComprasPage = () => {
       tipo: MOVIMIENTO_TIPOS.PAGO,
       importe: Number(movImporte),
       formaPago,
-      formaPagos: [{ key: formaPago, importe: Number(movImporte) }],
+      formaPagos: [{ nombre: formaPago, importe: Number(movImporte) }],
       entidad: { id: selectedProveedor.id, nombre: selectedProveedor.nombre },
       observacion: "",
     };
@@ -265,7 +269,7 @@ const AdminComprasPage = () => {
                       </Text>
                     </div>
                     <Text type="secondary" style={{ fontSize: "11px" }}>
-                      {mov.fecha} · {(mov.formaPagos ? mov.formaPagos.map(fp => fp.key).join(" + ") : mov.formaPago)}
+                      {(() => { const { fecha } = movimientoService.extraerFechaHora(mov.fechaRegistro); return fecha; })()} · {(mov.formaPagos ? mov.formaPagos.map(fp => fp.nombre || fp.key).join(" + ") : mov.formaPago)}
                     </Text>
                   </div>
 

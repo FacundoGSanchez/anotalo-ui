@@ -3,6 +3,7 @@ import { Input, Button, Form, Typography, message } from "antd";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { hashPassword } from "../../utils/crypto";
 import "./components/style.css";
 import AnotaloLogo from "./components/Logo";
 
@@ -16,10 +17,11 @@ const Login = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await login(values.username, values.password);
+      const hashedPassword = await hashPassword(values.password);
+      await login(values.username, hashedPassword);
       navigate("/");
     } catch (err) {
-      message.error(err.message || "Credenciales incorrectas.");
+      message.error(err.message || "No se pudo iniciar sesión. Intentá de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -39,7 +41,6 @@ const Login = () => {
           className="antd-login-form"
           initialValues={{
             username: "admin",
-            password: "adminanotalo",
           }}
         >
           <Form.Item

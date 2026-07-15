@@ -3,7 +3,8 @@ const USER_KEY = "auth_user";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
-const MOCK_PASSWORD = "adminanotalo";
+const MOCK_PASSWORD_HASH = "bcb9e0e70fc92ab35b072f642153627727dc224bd4a0ddb4334ddc2195e7a6d3";
+const MOCK_PASSWORD_HASH_FALLBACK = "c2f07f20";
 
 const BASE_ORG = {
   id: 1,
@@ -33,9 +34,33 @@ const BASE_ORG = {
   TiposMovimiento: ["Venta", "Pago", "Cobro"],
 };
 
+const SECOND_ORG = {
+  id: 2,
+  nombre: "Mi Negocio",
+  sucursalDefault: 3,
+  FormasPago: {
+    Venta: [
+      { key: "Efectivo", label: "Efectivo", iconKey: "Efectivo", enabled: true, impactaCaja: true, impactaCtaCte: false },
+      { key: "Transferencia", label: "Transferencia", iconKey: "Transferencia", enabled: true, impactaCaja: false, impactaCtaCte: false },
+      { key: "QR", label: "QR", iconKey: "QR", enabled: true, impactaCaja: false, impactaCtaCte: false },
+    ],
+    Pago: [
+      { key: "Efectivo", label: "Efectivo", iconKey: "Efectivo", enabled: true, impactaCaja: true, impactaCtaCte: false },
+      { key: "Transferencia", label: "Transferencia", iconKey: "Transferencia", enabled: true, impactaCaja: false, impactaCtaCte: false },
+    ],
+    Cobro: [
+      { key: "Efectivo", label: "Efectivo", iconKey: "Efectivo", enabled: true, impactaCaja: true, impactaCtaCte: false },
+      { key: "Transferencia", label: "Transferencia", iconKey: "Transferencia", enabled: true, impactaCaja: false, impactaCtaCte: false },
+    ],
+  },
+  TiposMovimiento: ["Venta", "Pago", "Cobro"],
+};
+
 const ALL_SUCURSALES = [
   { id: 1, organizacionId: 1, nombre: "Sucursal Centro" },
   { id: 2, organizacionId: 1, nombre: "Sucursal Norte" },
+  { id: 3, organizacionId: 2, nombre: "Panadería Central" },
+  { id: 4, organizacionId: 2, nombre: "Kiosco Norte" },
 ];
 
 const ROLES_DATA = [
@@ -91,19 +116,19 @@ export const authService = {
       if (!userData) {
         const { usuarioService } = await import("./usuarioService");
         const usuario = usuarioService.login(username, password);
-        if (!usuario) throw new Error("Credenciales incorrectas.");
+        if (!usuario) throw new Error("Usuario o contraseña incorrectos.");
         userData = {
           usuario: { id: usuario.id, username: usuario.username, mail: "", nombre: usuario.nombre, rol: "Vendedor", roles: [2] },
           sucursales: (usuario.sucursales || []).map((s) => ({ ...s, organizacionId: BASE_ORG.id })),
         };
-      } else if (password !== MOCK_PASSWORD) {
-        throw new Error("Credenciales incorrectas.");
+      } else if (password !== MOCK_PASSWORD_HASH && password !== MOCK_PASSWORD_HASH_FALLBACK) {
+        throw new Error("Usuario o contraseña incorrectos.");
       }
       const sucursalDefault = userData.sucursales[0]?.id || 1;
       const session = {
         token: "mock-jwt-token-anotalo-2024",
         sessionId: generateSessionId(),
-        organizaciones: [BASE_ORG],
+        organizaciones: [BASE_ORG, SECOND_ORG],
         rolesData: ROLES_DATA,
         usuario: userData.usuario,
         sucursales: userData.sucursales,
@@ -128,7 +153,7 @@ export const authService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) throw new Error("Error de autenticación");
+    if (!res.ok) throw new Error("Error al conectar con el servidor.");
     const data = await res.json();
     localStorage.setItem(TOKEN_KEY, data.token);
     localStorage.setItem(USER_KEY, JSON.stringify(data));
@@ -149,8 +174,7 @@ export const authService = {
     localStorage.removeItem(SUCURSAL_KEY);
     const { orgService } = await import("./orgService");
     const configPayload = {};
-    const useMock = !import.meta.env.VITE_API_URL;
-    if (!useMock && org.FormasPago) configPayload.formasPago = org.FormasPago;
+    if (org.FormasPago) configPayload.formasPago = org.FormasPago;
     if (org.TiposMovimiento) configPayload.tiposMovimiento = org.TiposMovimiento;
     if (Object.keys(configPayload).length > 0) {
       orgService.initOrgConfig(orgId, configPayload);

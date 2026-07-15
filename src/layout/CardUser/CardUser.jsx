@@ -1,5 +1,5 @@
-import { Avatar, Popover, Card, Button, Divider, Typography, message } from "antd";
-import { UserOutlined, SwapOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Avatar, Popover, Card, Button, Divider, Typography, Select, message } from "antd";
+import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
 import "./index.css";
@@ -33,31 +33,19 @@ const UserCardContent = ({ user, session, onLogout, onSwitchOrg, onSwitchSucursa
           <Text style={{ fontSize: "11px", color: "#8c8c8c", fontWeight: 700, display: "block", marginBottom: "8px" }}>
             ORGANIZACIÓN ACTUAL
           </Text>
-          <Text strong style={{ fontSize: "13px", color: "#3f4a6d", display: "block", marginBottom: "8px" }}>
-            {orgActual?.nombre || "Sin organización"}
-          </Text>
-          {user?.roles?.includes(1) && organizaciones.length > 1 && organizaciones
-            .filter((o) => o.id !== orgActual?.id)
-            .map((org) => (
-                  <Button
-                    key={org.id}
-                    type="default"
-                    block
-                    icon={<SwapOutlined />}
-                    style={{
-                      borderRadius: "8px",
-                      height: "36px",
-                      fontSize: "13px",
-                      borderColor: "#1890ff",
-                      color: "#1890ff",
-                      marginBottom: "4px",
-                    }}
-                    onClick={() => onSwitchOrg(org.id)}
-                  >
-                    Cambiar a {org.nombre}
-                  </Button>
-                ))}
-            </div>
+          {user?.roles?.includes(1) && organizaciones.length > 1 ? (
+            <Select
+              value={orgActual?.id}
+              onChange={onSwitchOrg}
+              style={{ width: "100%" }}
+              options={organizaciones.map((o) => ({ value: o.id, label: o.nombre }))}
+            />
+          ) : (
+            <Text strong style={{ fontSize: "13px", color: "#3f4a6d", display: "block" }}>
+              {orgActual?.nombre || "Sin organización"}
+            </Text>
+          )}
+        </div>
 
         {sucursales.length > 1 && (
           <div style={{ width: "100%" }}>
@@ -65,30 +53,12 @@ const UserCardContent = ({ user, session, onLogout, onSwitchOrg, onSwitchSucursa
             <Text style={{ fontSize: "11px", color: "#8c8c8c", fontWeight: 700, display: "block", marginBottom: "8px" }}>
               SUCURSAL ACTUAL
             </Text>
-            <Text strong style={{ fontSize: "13px", color: "#3f4a6d", display: "block", marginBottom: "8px" }}>
-              {sucursalActual?.nombre || "Sin sucursal"}
-            </Text>
-            {sucursales
-              .filter((s) => s.id !== sucursalActual?.id)
-              .map((s) => (
-                <Button
-                  key={s.id}
-                  type="default"
-                  block
-                  icon={<SwapOutlined />}
-                  style={{
-                    borderRadius: "8px",
-                    height: "36px",
-                    fontSize: "13px",
-                    borderColor: "#3f4a6d",
-                    color: "#3f4a6d",
-                    marginBottom: "4px",
-                  }}
-                  onClick={() => onSwitchSucursal(s.id)}
-                >
-                  Cambiar a {s.nombre}
-                </Button>
-              ))}
+            <Select
+              value={sucursalActual?.id}
+              onChange={onSwitchSucursal}
+              style={{ width: "100%" }}
+              options={sucursales.map((s) => ({ value: s.id, label: s.nombre }))}
+            />
           </div>
         )}
 

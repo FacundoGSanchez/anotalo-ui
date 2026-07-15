@@ -37,7 +37,10 @@ const verificarPlazoVencido = (entidadId, plazoDias) => {
       (movimientoService.tieneCtaCte(m) || m.tipo === "Cobro"),
   );
   if (movs.length === 0) return false;
-  const fechas = movs.map((m) => dayjs(m.fecha));
+  const fechas = movs.map((m) => {
+    const { fecha } = movimientoService.extraerFechaHora(m.fechaRegistro);
+    return dayjs(fecha);
+  });
   const masAntigua = fechas.reduce((a, b) => (a.isBefore(b) ? a : b));
   const diasTranscurridos = dayjs().diff(masAntigua, "day");
   return diasTranscurridos > plazoDias;

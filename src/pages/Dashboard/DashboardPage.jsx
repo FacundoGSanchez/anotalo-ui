@@ -6,6 +6,7 @@ import "dayjs/locale/es";
 import { movimientoService } from "../../services/movimientoService";
 import { useDevice } from "../../context/DeviceContext";
 import { useCurrentSucursal } from "../../hooks/useCurrentSucursal";
+const { extraerFechaHora } = movimientoService;
 import ResumenCards from "./components/ResumenCards";
 import AccesoReportes from "./components/AccesoReportes";
 import AccesoReportesNuevo from "./components/AccesoReportesNuevo";
@@ -19,9 +20,10 @@ const DashboardPage = () => {
     try {
       const saved = movimientoService.getAll();
       const hoy = dayjs().format("YYYY-MM-DD");
-      const movimientosDeHoy = saved.filter(
-        (m) => m.fecha === hoy && (!sucursalId || m.sucursalId === sucursalId),
-      );
+      const movimientosDeHoy = saved.filter((m) => {
+        const { fecha } = extraerFechaHora(m.fechaRegistro);
+        return fecha === hoy && (!sucursalId || m.sucursalId === sucursalId);
+      });
 
       const calculo = movimientosDeHoy.reduce(
         (acc, mov) => {

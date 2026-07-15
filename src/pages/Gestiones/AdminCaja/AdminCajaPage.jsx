@@ -54,7 +54,7 @@ const AdminCajaPage = () => {
       .getAll()
       .filter((m) => {
         if (m.formaPagos?.length > 0) {
-          return m.formaPagos.some((fp) => formasImpactanCaja.includes(fp.key)) && (!sucursalId || m.sucursalId === sucursalId);
+          return m.formaPagos.some((fp) => formasImpactanCaja.includes(fp.nombre || fp.key)) && (!sucursalId || m.sucursalId === sucursalId);
         }
         return formasImpactanCaja.includes(m.formaPago) && (!sucursalId || m.sucursalId === sucursalId);
       })
@@ -158,7 +158,7 @@ const AdminCajaPage = () => {
       tipo: movTipoModal,
       importe: Number(movImporte),
       formaPago: "Efectivo",
-      formaPagos: [{ key: "Efectivo", importe: Number(movImporte) }],
+      formaPagos: [{ nombre: "Efectivo", importe: Number(movImporte) }],
       entidad: { id: 0, nombre: "Caja Interna" },
       observacion: movObservacion,
     };
@@ -179,7 +179,7 @@ const AdminCajaPage = () => {
     entries.forEach((entry) => {
       const date =
         entry.type === "mov"
-          ? entry.data.fecha
+          ? (() => { const { fecha } = movimientoService.extraerFechaHora(entry.data.fechaRegistro); return fecha; })()
           : entry.data.fecha || "Sin fecha";
       if (!groups[date]) groups[date] = [];
       groups[date].push(entry);
@@ -485,14 +485,14 @@ const AdminCajaPage = () => {
                               type="secondary"
                               style={{ fontSize: "11px" }}
                             >
-                              · {(mov.formaPagos ? mov.formaPagos.map(fp => fp.key).join(" + ") : mov.formaPago)}
+                               · {(mov.formaPagos ? mov.formaPagos.map(fp => fp.nombre || fp.key).join(" + ") : mov.formaPago)}
                             </Text>
                           </div>
                           <Text
                             type="secondary"
                             style={{ fontSize: "11px" }}
                           >
-                            {mov.fecha} {mov.hora} hs · {mov.usuario}
+                            {(() => { const { fecha, hora } = movimientoService.extraerFechaHora(mov.fechaRegistro); return `${fecha} ${hora} hs · ${mov.usuarioNombre || mov.usuario}`; })()}
                           </Text>
                         </div>
 

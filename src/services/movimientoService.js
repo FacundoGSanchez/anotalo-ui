@@ -1,8 +1,10 @@
 import { MOVIMIENTO_TIPOS } from "../constants/posConstants";
 import { entidadService } from "./entidadService";
 import { authService } from "./authService";
+import { orgService } from "./orgService";
 
 const DB_KEY = "movimientos_db";
+const TIMEZONE = "America/Argentina/Buenos_Aires";
 
 const dispatchUpdate = () => {
   window.dispatchEvent(new Event("storage"));
@@ -11,6 +13,19 @@ const dispatchUpdate = () => {
       detail: { type: "movimiento_actualizado" },
     }),
   );
+};
+
+const extraerFechaHora = (fechaRegistro) => {
+  if (!fechaRegistro) return { fecha: "", hora: "" };
+  const d = new Date(fechaRegistro);
+  const fecha = d.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+  const hora = d.toLocaleTimeString("es-AR", {
+    timeZone: TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return { fecha, hora };
 };
 
 const getTipoEntidadFromMovimiento = (movimiento) => {
@@ -25,14 +40,14 @@ const getTipoEntidadFromMovimiento = (movimiento) => {
 
 const tieneCtaCte = (mov) => {
   if (mov.formaPagos?.length > 0) {
-    return mov.formaPagos.some((p) => p.key === "Cta Corriente");
+    return mov.formaPagos.some((p) => (p.nombre || p.key) === "Cta Corriente");
   }
   return mov.formaPago === "Cta Corriente";
 };
 
 const getCtaCteImporte = (mov) => {
   if (mov.formaPagos?.length > 0) {
-    const fp = mov.formaPagos.find((p) => p.key === "Cta Corriente");
+    const fp = mov.formaPagos.find((p) => (p.nombre || p.key) === "Cta Corriente");
     return fp ? Number(fp.importe) || 0 : 0;
   }
   return mov.formaPago === "Cta Corriente" ? (Number(mov.importe) || 0) : 0;
@@ -66,7 +81,88 @@ const recalcularSaldoEntidad = (entidadId, movimiento) => {
   }
 };
 
+const toStoredFormat = (movimiento, user) => {
+  const now = new Date();
+  const fechaRegistro = now.toISOString();
+
+  const formaPagosNorm = movimiento.formaPagos?.length > 0
+    ? movimiento.formaPagos.map((fp) => ({
+      nombre: fp.nombre || fp.key,
+      importe: Number(fp.importe) || 0,
+    }))
+    : (movimiento.formaPago
+      ? [{ nombre: movimiento.formaPago, importe: Number(movimiento.importe) || 0 }]
+      : []);
+
+  const lineItemsNorm = (movimiento.lineItems || []).map((item, idx) => ({
+    id: item.id || (Date.now() + idx),
+    importe: Number(item.importe) || 0,
+    itemId: item.rubro?.id ?? item.itemId ?? 0,
+    itemDetalle: item.rubro?.nombre || item.itemDetalle || "",
+  }));
+
+  return {
+    id: Date.now(),
+    tipo: movimiento.tipo,
+    importe: Number(movimiento.importe) || 0,
+    entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
+    usuarioId: user?.id || 1,
+    usuarioNombre: user?.nombre || "Admin",
+    sucursalId: authService.getCurrentSucursalId(),
+    organizacionId: authService.getCurrentOrgId(),
+    observacion: movimiento.observacion || "",
+    lineItems: lineItemsNorm,
+    formaPagos: formaPagosNorm,
+    fechaRegistro,
+  };
+};
+
+const buildBackendParams = (movimiento, user) => {
+  const orgId = authService.getCurrentOrgId();
+  const orgConfig = orgService.getConfig(orgId);
+  const formasPagoIds = orgConfig.formasPagoIds || [];
+
+  const lineItems = (movimiento.lineItems || []).map((item) => ({
+    itemId: item.rubro?.id ?? item.itemId ?? 0,
+    itemDetalle: item.rubro?.nombre || item.itemDetalle || "",
+    importe: Number(item.importe) || 0,
+  }));
+
+  const formaPagosRaw = movimiento.formaPagos?.length > 0
+    ? movimiento.formaPagos
+    : (movimiento.formaPago
+      ? [{ nombre: movimiento.formaPago, importe: Number(movimiento.importe) || 0 }]
+      : []);
+
+  const formaPagos = formaPagosRaw.map((fp) => {
+    const nombre = fp.nombre || fp.key;
+    const match = formasPagoIds.find((f) => f.nombre === nombre);
+    return {
+      formaPagoId: match?.id || 0,
+      importe: Number(fp.importe) || 0,
+    };
+  });
+
+  return {
+    pId: movimiento.id || null,
+    pTipo: movimiento.tipo,
+    pImporteTotal: Number(movimiento.importe) || 0,
+    pEntidadId: movimiento.entidad?.id || 0,
+    pEntidadNombre: movimiento.entidad?.nombre || "Caja Interna",
+    pUsuarioId: user?.id || 1,
+    pSucursalId: authService.getCurrentSucursalId(),
+    pOrganizacionId: orgId,
+    pObservacion: movimiento.observacion || "",
+    pLineItems: lineItems,
+    pFormaPagos: formaPagos,
+  };
+};
+
 export const movimientoService = {
+  extraerFechaHora,
+
+  buildBackendParams,
+
   getAll: () => {
     try {
       const data = localStorage.getItem(DB_KEY);
@@ -79,32 +175,21 @@ export const movimientoService = {
 
   getByDate: (fecha) => {
     const todos = movimientoService.getAll();
-    return todos.filter((m) => m.fecha === fecha);
+    return todos.filter((m) => {
+      const { fecha: f } = extraerFechaHora(m.fechaRegistro);
+      return f === fecha;
+    });
   },
 
   save: (movimiento, user) => {
     try {
       const historialPrevio = movimientoService.getAll();
-
-      const now = new Date();
-      const timeZone = "America/Argentina/Buenos_Aires";
-      const fecha = now.toLocaleDateString("en-CA", { timeZone });
-      const hora = now.toLocaleTimeString("es-AR", {
-        timeZone,
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
+      const nuevoRegistro = toStoredFormat(movimiento, user);
 
       const esCtaCte =
         tieneCtaCte(movimiento) ||
         (movimiento.entidad?.id && movimiento.tipo === MOVIMIENTO_TIPOS.COBRO);
 
-      const formaPagoFinal = movimiento.formaPagos?.length > 0
-        ? movimiento.formaPagos[0].key
-        : (movimiento.formaPago || "Efectivo");
-
-      let saldoCtaCte = null;
       if (esCtaCte && movimiento.entidad?.id) {
         const movsEntidad = historialPrevio
           .filter(
@@ -119,34 +204,17 @@ export const movimientoService = {
         const saldoAnterior = ultimoConSaldo ? ultimoConSaldo.saldoCtaCte : 0;
         const importeNum = getCtaCteImporte(movimiento) || Number(movimiento.importe) || 0;
         if (movimiento.tipo === MOVIMIENTO_TIPOS.VENTA) {
-          saldoCtaCte = saldoAnterior + importeNum;
+          nuevoRegistro.saldoCtaCte = saldoAnterior + importeNum;
         } else if (movimiento.tipo === MOVIMIENTO_TIPOS.PAGO) {
-          saldoCtaCte = saldoAnterior - importeNum;
+          nuevoRegistro.saldoCtaCte = saldoAnterior - importeNum;
         } else if (movimiento.tipo === MOVIMIENTO_TIPOS.COBRO) {
-          saldoCtaCte = saldoAnterior - importeNum;
+          nuevoRegistro.saldoCtaCte = saldoAnterior - importeNum;
         } else {
-          saldoCtaCte = saldoAnterior;
+          nuevoRegistro.saldoCtaCte = saldoAnterior;
         }
+      } else {
+        nuevoRegistro.saldoCtaCte = null;
       }
-
-      const nuevoRegistro = {
-        ...movimiento,
-        formaPagos: movimiento.formaPagos?.length > 0
-          ? movimiento.formaPagos
-          : (movimiento.formaPago
-            ? [{ key: movimiento.formaPago, importe: Number(movimiento.importe) || 0 }]
-            : []),
-        id: Date.now(),
-        fecha,
-        hora,
-        usuario: user?.nombre || "Admin",
-        sucursalId: authService.getCurrentSucursalId(),
-        formaPago: formaPagoFinal,
-        entidad: movimiento.entidad || { id: 0, nombre: "Caja Interna" },
-        importe: Number(movimiento.importe) || 0,
-        observacion: movimiento.observacion || "",
-        saldoCtaCte,
-      };
 
       const nuevoHistorial = [nuevoRegistro, ...historialPrevio];
       localStorage.setItem(DB_KEY, JSON.stringify(nuevoHistorial));
@@ -215,12 +283,12 @@ export const movimientoService = {
     if (formaPagos?.length > 1) {
       const partes = formaPagos.map((fp) => {
         const fmt = Number(fp.importe).toLocaleString("es-AR");
-        return `${fp.key}: $${fmt}`;
+        return `${fp.nombre || fp.key}: $${fmt}`;
       });
       return `Pago dividido en ${formaPagos.length} formas: ${partes.join(", ")}.`;
     }
 
-    const fp = formaPagos?.[0]?.key || formaPago;
+    const fp = formaPagos?.[0]?.nombre || formaPagos?.[0]?.key || formaPago;
     const esEfectivo = fp === "Efectivo";
     const esSalida = tipo === tipos.PAGO || tipo === tipos.RETIRO || tipo === tipos.COBRO;
 

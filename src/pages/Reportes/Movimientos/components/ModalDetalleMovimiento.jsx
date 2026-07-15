@@ -24,11 +24,11 @@ import SelectorEntidadModal from "../../../POSAnotalo/components/steps/component
 const { Text } = Typography;
 
 const RUBROS_MOCK = [
-  { sigla: "V", nombre: "Varios", grupo: "General" },
-  { sigla: "K", nombre: "Kiosco", grupo: "Alimentos" },
-  { sigla: "B", nombre: "Bebidas", grupo: "Alimentos" },
-  { sigla: "F", nombre: "Fiambrería", grupo: "Alimentos" },
-  { sigla: "P", nombre: "Panadería", grupo: "Alimentos" },
+  { id: 1, sigla: "V", nombre: "Varios", grupo: "General" },
+  { id: 2, sigla: "K", nombre: "Kiosco", grupo: "Alimentos" },
+  { id: 3, sigla: "B", nombre: "Bebidas", grupo: "Alimentos" },
+  { id: 4, sigla: "F", nombre: "Fiambrería", grupo: "Alimentos" },
+  { id: 5, sigla: "P", nombre: "Panadería", grupo: "Alimentos" },
 ];
 
 const grupos = [...new Set(RUBROS_MOCK.map((r) => r.grupo))];
@@ -74,7 +74,7 @@ const ModalDetalleMovimiento = ({
   const cambiarRubroItem = (itemId, nuevoRubro) => {
     const lineItems = (movimiento.lineItems || []).map((item) =>
       (item.id || item._id) === itemId
-        ? { ...item, rubro: nuevoRubro }
+        ? { ...item, itemId: nuevoRubro.id, itemDetalle: nuevoRubro.nombre }
         : item,
     );
     const result = movimientoService.update(movimiento.id, { lineItems });
@@ -112,7 +112,7 @@ const ModalDetalleMovimiento = ({
                 const item = movimiento.lineItems?.find(
                   (i) => (i.id || i._id) === editItemId,
                 );
-                const isSelected = item?.rubro?.sigla === rubro.sigla;
+                const isSelected = item?.itemId === rubro.id;
                 return (
                   <button
                     key={rubro.sigla}
@@ -240,7 +240,7 @@ const ModalDetalleMovimiento = ({
                 type="secondary"
                 style={{ fontSize: "10px", marginTop: "4px" }}
               >
-                {dayjs(movimiento.fecha).locale("es").format("dddd, DD/MM/YYYY")} {movimiento.hora} hs
+                {(() => { const { fecha, hora } = movimientoService.extraerFechaHora(movimiento.fechaRegistro); return `${dayjs(fecha).locale("es").format("dddd, DD/MM/YYYY")} ${hora} hs`; })()}
               </Text>
             </div>
 
@@ -270,7 +270,7 @@ const ModalDetalleMovimiento = ({
                 <MdWallet size={14} color={activeColor} />
                 <div style={{ lineHeight: 1.2 }}>
                   <Text type="secondary" style={{ fontSize: "9px", display: "block" }}>Forma de pago</Text>
-                  <Text strong style={{ fontSize: "12px" }}>{movimiento.formaPagos ? movimiento.formaPagos.map(fp => `${fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`).join(" + ") : movimiento.formaPago}</Text>
+                  <Text strong style={{ fontSize: "12px" }}>{movimiento.formaPagos ? movimiento.formaPagos.map(fp => `${fp.nombre || fp.key}: $${Number(fp.importe).toLocaleString("es-AR")}`).join(" + ") : movimiento.formaPago}</Text>
                 </div>
               </div>
               {/* Entidad */}
@@ -299,7 +299,7 @@ const ModalDetalleMovimiento = ({
                 <MdPerson size={14} color={activeColor} />
                 <div style={{ lineHeight: 1.2 }}>
                   <Text type="secondary" style={{ fontSize: "9px", display: "block" }}>Usuario</Text>
-                  <Text strong style={{ fontSize: "12px" }}>{movimiento.usuario}</Text>
+                  <Text strong style={{ fontSize: "12px" }}>{movimiento.usuarioNombre || movimiento.usuario}</Text>
                 </div>
               </div>
             </div>
@@ -363,10 +363,10 @@ const ModalDetalleMovimiento = ({
                         }}
                       >
                         <span style={{ fontSize: "12px", fontWeight: 800, lineHeight: 1 }}>
-                          {item.rubro?.sigla || "V"}
+                          {(item.itemDetalle || "V").charAt(0)}
                         </span>
                         <span style={{ fontSize: "6px", fontWeight: 600, lineHeight: 1, opacity: 0.8 }}>
-                          {item.rubro?.nombre || "Varios"}
+                          {item.itemDetalle || "Varios"}
                         </span>
                       </div>
                       <Text strong style={{ fontSize: "13px", color: "#262626" }}>

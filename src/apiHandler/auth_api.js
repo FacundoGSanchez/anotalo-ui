@@ -11,7 +11,7 @@ export const auth_api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || "Error de autenticación");
+      throw new Error(err.message || "Error al conectar con el servidor.");
     }
     const data = await res.json();
     localStorage.setItem(TOKEN_KEY, data.token);
