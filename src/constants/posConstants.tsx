@@ -1,0 +1,154 @@
+import React from "react";
+import {
+  MdOutlineAddShoppingCart,
+  MdOutlineLocalShipping,
+  MdAttachMoney,
+  MdCreditCard,
+  MdCreditScore,
+  MdSyncAlt,
+  MdOutlineContactPage,
+  MdQrCode2,
+  MdOutlinePayment,
+} from "react-icons/md";
+
+export const MOVIMIENTO_TIPOS = {
+  VENTA: "Venta",
+  PAGO: "Pago",
+  RETIRO: "Retiro",
+  INGRESO: "Ingreso",
+  COBRO: "Cobro",
+} as const;
+
+export type MovimientoTipoKey = typeof MOVIMIENTO_TIPOS[keyof typeof MOVIMIENTO_TIPOS];
+
+export const ICONOS_POS: Record<string, React.ComponentType> = {
+  Efectivo: MdAttachMoney,
+  TarjetaCredito: MdCreditCard,
+  TarjetaDebito: MdCreditScore,
+  Transferencia: MdSyncAlt,
+  QR: MdQrCode2,
+  CtaCorriente: MdOutlineContactPage,
+};
+
+export const POS_COLORS: Record<string, string> = {
+  [MOVIMIENTO_TIPOS.VENTA]: "#1890ff",
+  [MOVIMIENTO_TIPOS.PAGO]: "#fa8c16",
+  [MOVIMIENTO_TIPOS.INGRESO]: "#52c41a",
+  [MOVIMIENTO_TIPOS.RETIRO]: "#546e7a",
+  [MOVIMIENTO_TIPOS.COBRO]: "#52c41a",
+  DEFAULT: "#d9d9d9",
+};
+
+export const OPCIONES_TIPO: unknown[] = [];
+
+export interface FormaPagoDef {
+  key: string;
+  label: string;
+  iconKey: string;
+  icon: React.ReactNode;
+  color: string;
+  requiereEntidad: boolean;
+  impactaCaja: boolean;
+  impactaCtaCte: boolean;
+}
+
+export const FORMAS_PAGO: FormaPagoDef[] = [
+  {
+    key: "Efectivo",
+    label: "Efectivo",
+    iconKey: "Efectivo",
+    icon: <MdAttachMoney />,
+    color: "#52c41a",
+    requiereEntidad: false,
+    impactaCaja: true,
+    impactaCtaCte: false,
+  },
+  {
+    key: "Cta Corriente",
+    label: "Cuenta Corriente",
+    iconKey: "CtaCorriente",
+    icon: <MdOutlineContactPage />,
+    color: "#eb2f96",
+    requiereEntidad: true,
+    impactaCaja: false,
+    impactaCtaCte: true,
+  },
+  {
+    key: "Tarjeta",
+    label: "Tarjeta",
+    iconKey: "TarjetaCredito",
+    icon: <MdCreditCard />,
+    color: "#1890ff",
+    requiereEntidad: false,
+    impactaCaja: false,
+    impactaCtaCte: false,
+  },
+  {
+    key: "QR",
+    label: "QR",
+    iconKey: "QR",
+    icon: <MdQrCode2 />,
+    color: "#00b4d8",
+    requiereEntidad: false,
+    impactaCaja: false,
+    impactaCtaCte: false,
+  },
+  {
+    key: "Transferencia",
+    label: "Transferencia",
+    iconKey: "Transferencia",
+    icon: <MdSyncAlt />,
+    color: "#722ed1",
+    requiereEntidad: false,
+    impactaCaja: false,
+    impactaCtaCte: false,
+  },
+];
+
+export const NOMBRES_FORMAS_PAGO: string[] = FORMAS_PAGO.map((f) => f.key);
+
+export const VISOR_CONFIG = {
+  MAX_DIGITOS: 12,
+  SIZES: { DEFAULT: "48px", MEDIUM: "36px", SMALL: "28px" },
+} as const;
+
+export interface FormaPagoDefault {
+  id: number;
+  nombre: string;
+  sigla: string;
+  requiereEntidad: boolean;
+  impactaCaja: boolean;
+  impactaCtaCte: boolean;
+}
+
+export const FORMAS_PAGO_DEFAULT: FormaPagoDefault[] = [
+  { id: 1, nombre: "Efectivo", sigla: "Efe", requiereEntidad: false, impactaCaja: true, impactaCtaCte: false },
+  { id: 2, nombre: "Cta Corriente", sigla: "CC", requiereEntidad: true, impactaCaja: false, impactaCtaCte: true },
+  { id: 3, nombre: "Tarjeta", sigla: "Tar", requiereEntidad: false, impactaCaja: false, impactaCtaCte: false },
+  { id: 4, nombre: "QR", sigla: "QR", requiereEntidad: false, impactaCaja: false, impactaCtaCte: false },
+  { id: 5, nombre: "Transferencia", sigla: "Tra", requiereEntidad: false, impactaCaja: false, impactaCtaCte: false },
+];
+
+export interface RubroDef {
+  id: number;
+  sigla: string;
+  nombre: string;
+  grupo: string;
+}
+
+export const RUBROS_DEFAULT: RubroDef[] = [
+  { id: 1, sigla: "V", nombre: "Varios", grupo: "General" },
+  { id: 2, sigla: "K", nombre: "Kiosco", grupo: "Alimentos" },
+  { id: 3, sigla: "B", nombre: "Bebidas", grupo: "Alimentos" },
+  { id: 4, sigla: "F", nombre: "Fiambrería", grupo: "Alimentos" },
+  { id: 5, sigla: "P", nombre: "Panadería", grupo: "Alimentos" },
+];
+
+export const STEPS = {
+  TIPO: 0,
+  IMPORTE: 1,
+  RESUMEN: 2,
+  FORMA_PAGO: 3,
+  ENTIDAD: 4,
+  CONFIRMAR: 5,
+} as const;

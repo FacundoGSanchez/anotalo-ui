@@ -1,0 +1,316 @@
+import { useState, useEffect, useRef } from "react";
+import { Card, Typography, Button, Divider, Tag, message } from "antd";
+import { MdSave, MdPerson, MdWallet, MdInfoOutline, MdExpandMore } from "react-icons/md";
+import { useAuth } from "../../../../context/AuthContext";
+import {
+  MOVIMIENTO_TIPOS,
+  POS_COLORS,
+} from "../../../../constants/posConstants";
+import { movimientoService } from "../../../../services/movimientoService";
+import { useArgentineDate } from "../../../../hooks/useArgentineDate";
+import type { Movimiento, MovimientoTipo, LineItem, FormaPagoNormalized, Entity } from "@/types";
+
+const { Title, Text } = Typography;
+
+interface MovimientoPos extends Omit<Movimiento, 'fechaRegistro' | 'id' | 'entidad' | 'formaPago'> {
+  id?: number;
+  fecha?: string;
+  entidad?: Entity | null;
+  formaPago?: string | null;
+}
+
+interface StepConfirmarProps {
+  movimiento: MovimientoPos;
+  onConfirm?: () => void;
+  onBack?: () => void;
+}
+
+interface InfoRowProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  color: string;
+}
+
+const InfoRow = ({ icon, label, value, color }: InfoRowProps) => (
+  <div style={{ display: "flex", alignItems: "center" }}>
+    <div
+      style={{
+        width: "36px",
+        height: "36px",
+        borderRadius: "10px",
+        background: `${color}10`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: "12px",
+      }}
+    >
+      {icon}
+    </div>
+    <div style={{ flex: 1 }}>
+      <Text type="secondary" style={{ display: "block", fontSize: "11px" }}>
+        {label}
+      </Text>
+      <Text strong style={{ fontSize: "15px" }}>
+        {value}
+      </Text>
+    </div>
+  </div>
+);
+
+const StepConfirmar = ({ movimiento, onConfirm, onBack }: StepConfirmarProps) => {
+  const { user } = useAuth();
+  const { getNowISO } = useArgentineDate();
+  const activeColor = POS_COLORS[movimiento.tipo] || POS_COLORS.DEFAULT;
+  const [expandido, setExpandido] = useState(false);
+  const registrarRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    registrarRef.current?.focus();
+  }, []);
+
+  const totalLineItems = movimiento.lineItems?.reduce((acc, item) => acc + Number(item.importe), 0) || 0;
+
+  const handleGuardar = (): void => {
+    const movimientoFinal = {
+      ...movimiento,
+      fecha: getNowISO(),
+    };
+    const resultado = movimientoService.save(movimientoFinal, user ? { id: user.id, nombre: user.nombre } : {});
+
+    if (resultado.success) {
+      message.success(`${movimiento.tipo} registrado correctamente`);
+      if (onConfirm) onConfirm();
+    } else {
+      message.error("Error al procesar el registro");
+    }
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        animation: "fadeIn 0.3s ease",
+      }}
+    >
+      <Card
+        style={{
+          borderRadius: "20px",
+          border: `1px solid ${activeColor}30`,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
+        }}
+        styles={{ body: { padding: "24px" } }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <Tag
+            color={activeColor}
+            style={{
+              padding: "2px 14px",
+              borderRadius: "8px",
+              fontWeight: "700",
+            }}
+          >
+            {movimiento.tipo}
+          </Tag>
+          <Title
+            level={1}
+            style={{ margin: "12px 0 0 0", fontSize: "44px", color: "#262626" }}
+          >
+            $ {Number(movimiento.importe).toLocaleString("es-AR")}
+          </Title>
+        </div>
+
+        {movimiento.lineItems?.length ? (
+          (movimiento.lineItems as LineItem[]).length > 0 && (
+          <div
+            style={{
+              background: "#f8f9fa",
+              borderRadius: "12px",
+              marginBottom: "16px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              onClick={() => setExpandido((prev) => !prev)}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "12px 16px",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              <Text
+                type="secondary"
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                DETALLE ({(movimiento.lineItems as LineItem[]).length} items)
+              </Text>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Text strong style={{ fontSize: "13px" }}>
+                  $ {totalLineItems.toLocaleString("es-AR")}
+                </Text>
+                <MdExpandMore
+                  size={20}
+                  style={{
+                    color: "#8c8c8c",
+                    transition: "transform 0.2s",
+                    transform: expandido ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </div>
+            </div>
+            {expandido && (
+              <div style={{ padding: "0 16px 12px" }}>
+                {(movimiento.lineItems as LineItem[]).map((item, idx) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "6px 0",
+                      borderBottom:
+                        idx < (movimiento.lineItems as LineItem[]).length - 1
+                          ? "1px solid #e8e8e8"
+                          : "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                      {item.rubro && (
+                        <div style={{
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "8px",
+                          background: `${activeColor}15`,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}>
+                          <span style={{ fontSize: "12px", fontWeight: 800, lineHeight: 1, color: activeColor }}>{item.rubro.sigla}</span>
+                        </div>
+                      )}
+                      <Text style={{ fontSize: "13px", color: "#595959" }}>
+                        {item.rubro?.nombre || `Item ${idx + 1}`}
+                      </Text>
+                    </div>
+                    <Text strong style={{ fontSize: "13px" }}>
+                      $ {Number(item.importe).toLocaleString("es-AR")}
+                    </Text>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          )
+        ) : null}
+
+        <Divider style={{ margin: "16px 0" }} />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {movimiento.formaPagos && (movimiento.formaPagos as FormaPagoNormalized[]).length > 0 ? (
+            (movimiento.formaPagos as FormaPagoNormalized[]).map((fp, i) => (
+              <InfoRow
+                key={fp.nombre}
+                icon={<MdWallet size={20} color={activeColor} />}
+                label={i === 0 ? "MEDIO DE PAGO" : ""}
+                value={`${fp.nombre}: $${Number(fp.importe).toLocaleString("es-AR")}`}
+                color={activeColor}
+              />
+            ))
+          ) : (
+            <InfoRow
+              icon={<MdWallet size={20} color={activeColor} />}
+              label="MEDIO DE PAGO"
+              value={movimiento.formaPago || "Efectivo"}
+              color={activeColor}
+            />
+          )}
+          <InfoRow
+            icon={<MdPerson size={20} color={activeColor} />}
+            label={
+              movimiento.tipo === MOVIMIENTO_TIPOS.VENTA || movimiento.tipo === MOVIMIENTO_TIPOS.COBRO ? "CLIENTE" : "ENTIDAD"
+            }
+            value={movimiento.entidad?.nombre || "Caja Interna"}
+            color={activeColor}
+          />
+        </div>
+      </Card>
+
+      <Button
+        ref={registrarRef}
+        type="primary"
+        block
+        size="large"
+        onClick={handleGuardar}
+        style={{
+          marginTop: "24px",
+          height: "64px",
+          borderRadius: "16px",
+          fontSize: "19px",
+          fontWeight: "bold",
+          background: activeColor,
+          borderColor: activeColor,
+        }}
+      >
+        <MdSave size={24} style={{ marginRight: 10 }} />
+        REGISTRAR {movimiento.tipo?.toUpperCase()}
+      </Button>
+
+      {onBack && (
+        <button
+          tabIndex={0}
+          onClick={onBack}
+          onFocus={(e) => { e.currentTarget.style.borderColor = activeColor; e.currentTarget.style.color = activeColor; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "#d9d9d9"; e.currentTarget.style.color = "#8c8c8c"; }}
+          style={{
+            marginTop: "12px",
+            height: "50px",
+            borderRadius: "14px",
+            fontSize: "16px",
+            fontWeight: 600,
+            border: "2px solid #d9d9d9",
+            background: "#fff",
+            color: "#8c8c8c",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            width: "100%",
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          ← VOLVER
+        </button>
+      )}
+
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+        }}
+      >
+        <MdInfoOutline size={18} style={{ color: activeColor }} />
+        <Text type="secondary" style={{ fontSize: "12px" }}>
+          {movimientoService.getLeyendaInformativa(
+            { ...movimiento, entidad: movimiento.entidad ?? undefined, formaPago: movimiento.formaPago ?? undefined },
+            MOVIMIENTO_TIPOS,
+          )}
+        </Text>
+      </div>
+    </div>
+  );
+};
+
+export default StepConfirmar;

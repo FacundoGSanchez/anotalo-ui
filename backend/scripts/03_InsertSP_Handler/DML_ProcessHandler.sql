@@ -65,3 +65,4 @@ INSERT INTO ProcessHandler (n_proceso, procedure_name) VALUES
 ('FORMAPAGO_REGISTRAR',      'SpFormaPagoRegistrar'),
 ('RUBRO_REGISTRAR',          'SpRubroRegistrar'),
 ('CONFIGPOS_REGISTRAR',      'SpConfigPOSRegistrar');
+ 
